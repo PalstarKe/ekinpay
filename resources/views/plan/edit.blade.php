@@ -39,28 +39,6 @@
             {{Form::number('max_customers',null,array('class'=>'form-control','required'=>'required', 'placeholder' => __('Enter Maximum Customers')))}}
             <span class="small">{{__('Note: "-1" for Unlimited')}}</span>
         </div>
-        <!-- <div class="form-group col-md-6">
-            {{Form::label('max_venders',__('Maximum Venders'),['class'=>'form-label'])}}<x-required></x-required>
-            {{Form::number('max_venders',null,array('class'=>'form-control','required'=>'required', 'placeholder' => __('Enter Maximum Vendors')))}}
-            <span class="small">{{__('Note: "-1" for Unlimited')}}</span>
-        </div> -->
-        <!-- <div class="form-group col-md-6">
-            {{Form::label('max_clients',__('Maximum Clients'),['class'=>'form-label'])}}<x-required></x-required>
-            {{Form::number('max_clients',null,array('class'=>'form-control','required'=>'required', 'placeholder' => __('Enter Maximum Clients')))}}
-            <span class="small">{{__('Note: "-1" for Unlimited')}}</span>
-        </div> -->
-        <!-- <div class="form-group col-md-6">
-            {{ Form::label('storage_limit', __('Storage limit'), ['class' => 'form-label']) }}<x-required></x-required>
-            <div class="input-group">
-                {{ Form::number('storage_limit', null,array('class'=>'form-control','required'=>'required', 'placeholder' => __('Maximum Storage Limit'))) }}
-                <div class="input-group-append">
-                <span class="input-group-text"
-                      id="basic-addon2">{{__('MB')}}</span>
-                </div>
-            </div>
-            {{-- <span class="small">{{__('Note: upload size ( In MB)')}}</span> --}}
-        </div> -->
-
 
         <div class="form-group col-md-12">
             {{ Form::label('description', __('Description'),['class'=>'form-label']) }}
@@ -84,43 +62,6 @@
             </div>
         </div>
         @endif
-        <!-- <div class="form-group col-md-3 mt-2">
-            <div class="form-check form-switch ">
-                <input type="checkbox" class="form-check-input" name="enable_crm" id="enable_crm" {{ $plan['crm'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_crm">{{__('Hotspot')}}</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3 mt-2">
-            <div class="form-check form-switch">
-                <input type="checkbox" class="form-check-input" name="enable_project" id="enable_project" {{ $plan['project'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_project">{{__('PPPoE')}}</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3 mt-2">
-            <div class="form-check form-switch">
-                <input type="checkbox" class="form-check-input" name="enable_hrm" id="enable_hrm" {{ $plan['hrm'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_hrm">{{__('HRM')}}</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3 mt-2">
-            <div class="form-check form-switch">
-                <input type="checkbox" class="form-check-input" name="enable_account" id="enable_account" {{ $plan['account'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_account">{{__('Account')}}</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3">
-            <div class="form-check form-switch">
-                <input type="checkbox" class="form-check-input" name="enable_pos" id="enable_pos" {{ $plan['pos'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_pos">{{__('POS')}}</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3">
-            <div class="form-check form-switch">
-                <input type="checkbox" class="form-check-input" name="enable_chatgpt" id="enable_chatgpt" {{ $plan['chatgpt'] == 1 ? 'checked="checked"' : '' }}>
-                <label class="custom-control-label form-label" for="enable_chatgpt">{{__('Chat GPT')}}</label>
-            </div>
-        </div> -->
-
     </div>
     </div>
 

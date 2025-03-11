@@ -2,11 +2,6 @@
 @section('page-title')
     {{__('Manage Coupon Details')}}
 @endsection
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">{{__('Dashboard')}}</a></li>
-    <li class="breadcrumb-item">{{__('Coupon Details')}}</li>
-@endsection
-
 @section('content')
     <div class="row">
         <div class="col-12">

@@ -66,35 +66,10 @@ class PlanController extends Controller
                 $validation['name']          = 'required|unique:plans';
                 $validation['price']         = 'required|numeric|min:0';
                 $validation['duration']      = 'required';
-                // $validation['max_users']     = 'required|numeric';
                 $validation['max_customers'] = 'required|numeric';
 
-                // if($request->image)
-                // {
-                //     $validation['image'] = 'required|max:20480';
-                // }
                 $request->validate($validation);
                 $post = $request->all();
-                // if(isset($request->enable_project))
-                // {
-                //     $post['project'] = 1;
-                // }
-                // if(isset($request->enable_crm))
-                // {
-                //     $post['crm'] = 1;
-                // }
-                // if(isset($request->enable_hrm))
-                // {
-                //     $post['hrm'] = 1;
-                // }
-                // if(isset($request->enable_account))
-                // {
-                //     $post['account'] = 1;
-                // }
-                // if(isset($request->enable_pos))
-                // {
-                //     $post['pos'] = 1;
-                // }
                 if(isset($request->enable_chatgpt))
                 {
                     $post['chatgpt'] = 1;
@@ -103,23 +78,6 @@ class PlanController extends Controller
                 {
                     $post['trial'] = 1;
                 }
-                // if($request->hasFile('image'))
-                // {
-                //     $filenameWithExt = $request->file('image')->getClientOriginalName();
-                //     $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-                //     $extension       = $request->file('image')->getClientOriginalExtension();
-                //     $fileNameToStore = 'plan_' . time() . '.' . $extension;
-
-                //     $dir = storage_path('uploads/plan/');
-                //     if(!file_exists($dir))
-                //     {
-                //         mkdir($dir, 0777, true);
-                //     }
-                //     $path          = $request->file('image')->storeAs('uploads/plan/', $fileNameToStore);
-                //     $post['image'] = $fileNameToStore;
-                // }
-
-
 
                 if(Plan::create($post))
                 {
@@ -194,48 +152,6 @@ class PlanController extends Controller
                     }
 
                     $post = $request->all();
-
-                    // if(array_key_exists('enable_project', $post))
-                    // {
-                    //     $post['project'] = 1;
-                    // }
-                    // else
-                    // {
-                    //     $post['project'] = 0;
-                    // }
-                    // if(array_key_exists('enable_crm', $post))
-                    // {
-                    //     $post['crm'] = 1;
-                    // }
-                    // else
-                    // {
-                    //     $post['crm'] = 0;
-                    // }
-                    // if(array_key_exists('enable_hrm', $post))
-                    // {
-                    //     $post['hrm'] = 1;
-                    // }
-                    // else
-                    // {
-                    //     $post['hrm'] = 0;
-                    // }
-                    // if(array_key_exists('enable_account', $post))
-                    // {
-                    //     $post['account'] = 1;
-                    // }
-                    // else
-                    // {
-                    //     $post['account'] = 0;
-                    // }
-
-                    // if(array_key_exists('enable_pos', $post))
-                    // {
-                    //     $post['pos'] = 1;
-                    // }
-                    // else
-                    // {
-                    //     $post['pos'] = 0;
-                    // }
                     if(array_key_exists('enable_chatgpt', $post))
                     {
                         $post['chatgpt'] = 1;
@@ -254,30 +170,7 @@ class PlanController extends Controller
                         $post['trial'] = 0;
                         $post['trial_days'] = null;
                     }
-                    // if($request->hasFile('image'))
-                    // {
-                    //     $filenameWithExt = $request->file('image')->getClientOriginalName();
-                    //     $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-                    //     $extension       = $request->file('image')->getClientOriginalExtension();
-                    //     $fileNameToStore = 'plan_' . time() . '.' . $extension;
-
-                    //     $dir = storage_path('uploads/plan/');
-                    //     if(!file_exists($dir))
-                    //     {
-                    //         mkdir($dir, 0777, true);
-                    //     }
-                    //     $image_path = $dir . '/' . $plan->image;  // Value is not URL but directory file path
-                    //     if(File::exists($image_path))
-                    //     {
-
-                    //         chmod($image_path, 0755);
-                    //         File::delete($image_path);
-                    //     }
-                    //     $path = $request->file('image')->storeAs('uploads/plan/', $fileNameToStore);
-
-                    //     $post['image'] = $fileNameToStore;
-                    // }
-
+              
                     if($plan->update($post))
                     {
                         return redirect()->back()->with('success', __('Plan successfully updated.'));

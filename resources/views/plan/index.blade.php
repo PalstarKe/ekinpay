@@ -71,7 +71,7 @@
                             <sub class="h5 pricing-currency mb-auto mt-1 text-primary">
                                 {{ isset($admin_payment_setting['currency_symbol']) ? $admin_payment_setting['currency_symbol'] : '$' }}
                             </sub>
-                            <h1 class="mb-0 text-primary">{{ number_format($plan->price) }}</h1>
+                            <h3 class="mb-0 text-primary">{{ number_format($plan->price) }}</h3>
                             <sub class="h6 pricing-duration mt-auto mb-3 fw-normal">
                                 /{{ __(\App\Models\Plan::$arrDuration[$plan->duration]) }}
                             </sub>
@@ -87,7 +87,8 @@
                         </div>
                     @endif
 
-                    @if (\Auth::user()->type == 'super admin' && $plan->price > 0)
+                    @if (\Auth::user()->type == 'super admin')
+                    {{--@if (\Auth::user()->type == 'super admin' && $plan->price > 0)--}}
                         <div class="d-flex flex-row-reverse m-0 p-0 active-tag">
                             <div class="form-check form-switch custom-switch-v1 float-end">
                                 <input type="checkbox" name="plan_disable"
@@ -102,31 +103,31 @@
 
                     <ul class="list-unstyled g-2 my-6">
                         {{--<li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-secondary me-2"></i>
                             <span>{{ $plan->max_users == -1 ? __('Unlimited') : $plan->max_users }} {{ __('Users') }}</span>
                         </li>--}}
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ __('Both PPPoE & Hotspot') }}</span>
                         </li>
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ $plan->max_customers == -1 ? __('Unlimited') : $plan->max_customers }} {{ __('Customers') }}</span>
                         </li>
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ __('Free Mikrotik Remote Access') }}</span>
                         </li>
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ __('Hotspot Mpesa StK Push') }}</span>
                         </li>
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ __('PPPoE Mpesa StK Push') }}</span>
                         </li>
                         <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i>
+                            <i class="ti ti-checks ti-18px text-primary me-2"></i>
                             <span>{{ __('Multiple Payments Gateways') }}</span>
                         </li>
                     </ul>
@@ -139,7 +140,7 @@
                             data-original-title="{{ __('Edit') }}">
                                 <i class="ti ti-edit"></i>
                             </a>
-                            @if($plan->price > 0)
+                            {{-- @if($plan->price > 0) --}}
                                 {!! Form::open([
                                     'method' => 'DELETE',
                                     'route' => ['plans.destroy', $plan->id],
@@ -150,7 +151,7 @@
                                     <i class="ti ti-trash"></i>
                                 </a>
                                 {!! Form::close() !!}
-                            @endif
+                            {{-- @endif --}}
                         </div>
                     @endif
 

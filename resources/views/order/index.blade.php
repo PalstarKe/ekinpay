@@ -43,16 +43,16 @@
                                         <td>
                                             @if ($order->payment_status == 'success' || $order->payment_status == 'Approved')
                                                 <span
-                                                    class="status_badge badge bg-primary p-2 px-3 rounded">{{ ucfirst($order->payment_status) }}</span>
+                                                    class="status_badge badge bg-label-success p-2 px-3 rounded">{{ ucfirst($order->payment_status) }}</span>
                                             @elseif($order->payment_status == 'succeeded')
                                                 <span
-                                                    class="status_badge badge bg-primary p-2 px-3 rounded">{{ __('Success') }}</span>
+                                                    class="status_badge badge bg-label-success p-2 px-3 rounded">{{ __('Success') }}</span>
                                             @elseif($order->payment_status == 'Pending')
                                                 <span
-                                                    class="status_badge badge bg-warning p-2 px-3 rounded">{{ __('Pending') }}</span>
+                                                    class="status_badge badge bg-label-warning p-2 px-3 rounded">{{ __('Pending') }}</span>
                                             @else
                                                 <span
-                                                    class="status_badge badge bg-danger p-2 px-3 rounded">{{ ucfirst($order->payment_status) }}</span>
+                                                    class="status_badge badge bg-label-danger p-2 px-3 rounded">{{ ucfirst($order->payment_status) }}</span>
                                             @endif
                                         </td>
                                         <td>{{ $order->payment_type }}</td>
@@ -62,7 +62,7 @@
                                         </td>
                                         <td class="Id">
                                             @if ($order->payment_type == 'Manually')
-                                                <p>{{ __('Manually plan upgraded by Super Admin') }}</p>
+                                                <p>{{ __('Manual plan upgrade') }}</p>
                                             @elseif($order->receipt == 'free coupon')
                                                 <p>{{ __('Used 100 % discount coupon code.') }}</p>
                                             @elseif($order->payment_type == 'STRIPE')

@@ -544,7 +544,7 @@ class UserController extends Controller
         $user = User::find($user_id);
         $assignPlan = $user->assignPlan($plan_id, $user_id);
         if ($assignPlan['is_success'] == true && !empty($plan)) {
-            $orderID = strtoupper(str_replace('.', '', uniqid('', true)));
+            $orderID = strtoupper(substr(uniqid('', true), -9));
             Order::create(
                 [
                     'order_id' => $orderID,

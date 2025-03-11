@@ -17,7 +17,7 @@
         });
 
         $(document).on('click', '#code-generate', function () {
-            var length = 10;
+            var length = 7;
             var result = '';
             var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             var charactersLength = characters.length;
@@ -75,13 +75,13 @@
                                         <td>{{ $coupon->used_coupon() }}</td>
                                         <td class="Action">
                                             <div class="d-flex align-items-center">
-                                                <a href="{{ route('coupons.show', $coupon->id) }}" class="btn btn-sm bg-warning text-white me-2" 
+                                                <a href="{{ route('coupons.show', $coupon->id) }}" class="" 
                                                     data-bs-toggle="tooltip" title="{{ __('View') }}">
                                                     <i class="ti ti-eye"></i>
                                                 </a>
 
                                                 @can('edit coupon')
-                                                    <a href="#" class="btn btn-sm bg-info text-white me-2"
+                                                    <a href="#" class=""
                                                         data-url="{{ route('coupons.edit', $coupon->id) }}" data-ajax-popup="true"
                                                         data-title="{{ __('Edit Coupon') }}" data-bs-toggle="tooltip" title="{{ __('Edit') }}">
                                                         <i class="ti ti-pencil"></i>
@@ -90,7 +90,7 @@
 
                                                 @can('delete coupon')
                                                     {!! Form::open(['method' => 'DELETE', 'route' => ['coupons.destroy', $coupon->id], 'id' => 'delete-form-' . $coupon->id, 'class' => 'd-inline']) !!}
-                                                        <a href="#" class="btn btn-sm bg-danger text-white" data-bs-toggle="tooltip" title="{{ __('Delete') }}"
+                                                        <a href="#" class="" data-bs-toggle="tooltip" title="{{ __('Delete') }}"
                                                             data-confirm="{{ __('Are You Sure?').'|'.__('This action cannot be undone. Do you want to continue?') }}"
                                                             data-confirm-yes="document.getElementById('delete-form-{{ $coupon->id }}').submit();">
                                                             <i class="ti ti-trash"></i>
