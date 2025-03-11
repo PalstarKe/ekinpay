@@ -1,0 +1,1251 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Exports\CustomerExport;
+use App\Imports\CustomerImport;
+use App\Models\Customer;
+use App\Models\CustomField;
+use App\Models\Transaction;
+use App\Models\Package;
+use App\Models\Utility;
+use Auth;
+use App\Helpers\CustomHelper;
+use App\Models\User;
+use App\Models\Plan;
+use App\Models\Invoice;
+use App\Models\InvoicePayment;
+use File;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Role;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
+
+class CustomerController extends Controller
+{
+
+    public function dashboard()
+    {
+        $data['invoiceChartData'] = \Auth::user()->invoiceChartData();
+
+        return view('customer.dashboard', $data);
+    }
+    public function index(Request $request)
+    {
+        if (\Auth::user()->can('manage customer')) {
+            $query = Customer::where('created_by', \Auth::user()->creatorId());
+
+            // Apply search filter if a search query is provided
+            if (!empty($request->search)) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'LIKE', "%{$request->search}%")
+                    ->orWhere('email', 'LIKE', "%{$request->search}%")
+                    ->orWhere('phone', 'LIKE', "%{$request->search}%");
+                });
+            }
+            // Get the filtered results
+            $customers = $query->get();
+            foreach ($customers as $customer) {
+                $customer->online = DB::connection('radius')
+                    ->table('radacct')
+                    ->whereNull('acctstoptime')
+                    ->where('username', $customer->username)
+                    ->exists(); // Returns true (Online) or false (Offline)
+            }
+
+            $pppoeCustomers =  $customers->where('service', 'PPPoE');
+            $hotspotCustomers =  $customers->where('service', 'Hotspot');
+            $actcustomers = $customers->where('is_active', 1);
+            $suscustomers = $customers->where('is_active', 0);
+            $expcustomers = $customers->where('expiry_status', 'off');
+
+            return view('customer.index', compact('customers','pppoeCustomers', 'hotspotCustomers', 'actcustomers', 'suscustomers', 'expcustomers'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+
+    public function create()
+    {
+        if(\Auth::user()->can('create customer'))
+        {
+            $customFields = CustomField::where('created_by', '=', \Auth::user()->creatorId())->where('module', '=', 'customer')->get();
+
+            $arrType = [
+                'PPPoE' => __('PPPoE'),
+            ];
+
+            $arrPackage = Package::where('created_by', \Auth::user()->creatorId())
+            ->where('type', 'PPPoE')
+            ->pluck('name_plan')
+            ->toArray();
+
+            $latest = Customer::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+
+            if (!$latest || empty($latest->account)) {
+                $customerN = Auth::user()->customerNumberFormat(1); // Start from 1 if no existing account
+            } else {
+                // Extract the numeric part of the account and increment it
+                preg_match('/\d+$/', $latest->account, $matches);
+                $nextNumber = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
+
+                $customerN = Auth::user()->customerNumberFormat($nextNumber);
+            }
+
+            return view('customer.create', compact('customFields', 'customerN', 'arrType', 'arrPackage'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function store(Request $request)
+    {
+        if (\Auth::user()->can('create customer')) 
+        {
+            // Convert 07xxxxxxxx or 01xxxxxxxx to 2547xxxxxxxx / 2541xxxxxxxx
+            if (preg_match('/^(07|01)(\d{8})$/', $request->contact, $matches)) {
+                $request->merge([
+                    'contact' => '254' . substr($matches[0], 1), // Removes the leading 0 and adds 254
+                ]);
+            }
+
+            // Ensure username is the same as account if it's null
+            $request->merge([
+                'username' => $request->username ?? $request->account,
+            ]);
+            $rules = [
+                'fullname'  => 'required|string|max:255',
+                'username'  => 'nullable|string|max:255|unique:customers,username',
+                'account'   => 'nullable|string|max:255|unique:customers,account',
+                'email'     => [
+                    'required',
+                    'email',
+                    Rule::unique('customers')->where(function ($query) {
+                        return $query->whereRaw('LOWER(email) = LOWER(?)', [request('email')])
+                                     ->where('created_by', \Auth::user()->id);
+                    })
+                ],
+                'contact'   => ['required', 'regex:/^254[17][0-9]{8}$/'],
+                'service'   => 'nullable|string|max:255',
+                'mac_address' => 'nullable|string|max:255|unique:customers,mac_address',
+                'static_ip'   => 'nullable|ip',
+                'expiry'      => 'nullable|date',
+            ];
+   
+            $validator = \Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return redirect()->route('customer.index')->with('error', $validator->errors()->first());
+            }
+
+            // Check Customer Limit
+            $user = \Auth::user();
+            $creator = User::find($user->creatorId());
+            $totalCustomers = $user->countCustomers();
+            $plan = Plan::find($creator->plan);
+            $defaultLanguage = DB::table('settings')->where('name', 'default_language')->value('value');
+
+            if ($totalCustomers < $plan->max_customers || $plan->max_customers == -1) 
+            {
+                $customer = new Customer();
+                $customer->customer_id  = $this->customerNumber();
+                $customer->fullname     = $request->fullname;
+                $customer->username     = $request->username;
+                $customer->account      = $request->account;
+                $customer->password     = $request->password;
+                $customer->email        = $request->email;
+                $customer->contact      = $request->contact;
+                // $customer->tax_number   = $request->tax_number;
+                $customer->created_by   = \Auth::user()->creatorId();
+                $customer->service      = $request->service;
+                $customer->auto_renewal = 1;
+                $customer->is_active    = 0;
+                $customer->mac_address  = $request->mac_address;
+                $customer->maclock      = 1;
+                $customer->static_ip    = $request->static_ip;
+                $customer->sms_group    = $request->sms_group;
+                $customer->charges      = $request->charges;
+                $customer->package      = $request->package;
+                $customer->apartment    = $request->apartment;
+                $customer->location     = $request->location;
+                $customer->housenumber  = $request->housenumber;
+                $customer->expiry       = $request->expiry;
+                $customer->expiry_status= $request->expiry_status;
+                $customer->lang         = !empty($defaultLanguage) ? $defaultLanguage : 'en';
+                $customer->balance      = 0.00;
+                $customer->save();
+                
+                // $id = Customer::find($customer->id);
+                DB::connection('radius')->table('radcheck')->insert([
+                    'username'  => $customer->username,
+                    'attribute' => 'Cleartext-Password',
+                    'op'        => ':=',
+                    'value'     => $request->password,
+                ]);
+
+                // Assign the Expired_Plan
+                DB::connection('radius')->table('radusergroup')->insert([
+                    'username'  => $customer->username,
+                    'groupname' => 'Expired_Plan',
+                    'priority'  => 1,
+                ]);
+
+                // Custom Field Handling
+                if ($request->has('customField')) {
+                    CustomField::saveData($customer, $request->customField);
+                }
+
+                // Notification Handling
+                $settings = Utility::settings(\Auth::user()->creatorId());
+                if (!empty($settings['twilio_customer_notification']) && $settings['twilio_customer_notification'] == 1) {
+                    Utility::send_twilio_msg($request->contact, 'new_customer', [
+                        'user_name'      => \Auth::user()->name,
+                        'customer_name'  => $customer->fullname,
+                        'customer_email' => $customer->email,
+                    ]);
+                }
+
+                return redirect()->route('customer.show', ['customer' => encrypt($customer->id)])->with('success', __('Customer successfully created.'));
+            } 
+            else 
+            {
+                return redirect()->back()->with('error', __('Your Customer limit is over. Please upgrade your plan.'));
+            }
+        } 
+        else 
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+
+    public function show($ids)
+    {
+        try {
+            $id       = Crypt::decrypt($ids);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', __('Customer Not Found.'));
+        }
+        // $id       = \Crypt::decrypt($ids);
+        $customer = Customer::find($id);
+
+        $arrType = [
+            'PPPoE' => __('PPPoE'),
+        ];
+
+        $arrPackage = Package::where('created_by', \Auth::user()->creatorId())
+        ->where('type', 'PPPoE')
+        ->pluck('name_plan')
+        ->toArray();
+
+        $expiryDate = $customer->expiry_extended ?? $customer->expiry;
+        $currentDate = Carbon::now();
+        $expiryStatus = 'No Expiry Set';
+
+        if ($expiryDate) {
+            $expiryDate = Carbon::parse($expiryDate);
+            $diff = $currentDate->diff($expiryDate);
+
+            if ($expiryDate->isFuture()) {
+                $expiryStatus = "{$diff->d} Days {$diff->h} Hrs";
+            } elseif ($expiryDate->isPast()) {
+                $expiryStatus = "Expired {$diff->d} Days";
+            } else {
+                $expiryStatus = "Expires today";
+            }
+        }
+        // If expiry_extended is used, mark it as extended
+        if ($customer->expiry_extended) {
+            $diffExtended = $currentDate->diff($expiryDate);
+            $expiryStatus = "Extended for {$diffExtended->d} Dys {$diffExtended->h} Hrs";
+        }
+
+        
+        // Lock MAC address only if it is empty (i.e., not locked yet or manually cleared)
+        // if (empty($customer->mac_address)) {
+        //     $mac = DB::connection('radius')
+        //         ->table('radacct')
+        //         ->whereNull('acctstoptime')
+        //         ->where('username', $customer->username)
+        //         ->value('callingstationid');
+
+        //     if (!empty($mac)) {
+        //         $customer->mac_address = $mac;
+        //         $customer->save();
+
+        //         // insert into radcheck when first locking
+        //         DB::connection('radius')->table('radcheck')->updateOrInsert(
+        //             ['username' => $customer->username, 'attribute' => 'Calling-Station-Id'],
+        //             ['op' => '==', 'value' => $customer->mac_address]
+        //         );
+        //     }
+        // }
+
+        CustomHelper::lockMac($customer);
+        
+        $online = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->exists();
+        $session = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->select('framedipaddress as ip', 'acctsessiontime as uptime')
+            ->first();
+
+        if ($session) {
+            $uptime = $session->uptime ?? 0;
+            $downtime = 0; 
+        } else {
+            $lastSession = DB::connection('radius')->table('radacct')->where('username', $customer->username)->whereNotNull('acctstoptime')->orderBy('acctstoptime', 'desc')->first();
+
+            $uptime = 0; 
+            $downtime = $lastSession ? Carbon::now()->diffInSeconds(Carbon::parse($lastSession->acctstoptime)) : 0;
+        }
+
+        $dataUsage = DB::connection('radius')->table('radacct')
+            ->where('username', $customer->username)
+            ->selectRaw('COALESCE(SUM(acctoutputoctets), 0) as download, COALESCE(SUM(acctinputoctets), 0) as upload')
+            ->first();
+
+        $activeUsage = DB::connection('radius')->table('radacct')
+            ->where('username', $customer->username)
+            ->whereNull('acctstoptime')
+            ->selectRaw('COALESCE(SUM(acctoutputoctets), 0) as download, COALESCE(SUM(acctinputoctets), 0) as upload')
+            ->first();
+
+        $downloadMB = round($activeUsage->download / 1048576, 2);
+        $uploadMB = round($activeUsage->upload / 1048576, 2);
+
+
+        $transactions = Transaction::where('user_id', $id)->where('user_type', 'Customer')->get();
+        $invoices = Invoice::where('customer_id', $id)->get();
+
+        $authLogs = DB::connection('radius')->table('radacct')
+        ->where('username', $customer->username)
+        ->orderBy('acctstarttime', 'desc')
+        ->get();
+
+        $deviceVendor = $customer->mac_address ? CustomHelper::getMacVendor($customer->mac_address) : 'N/A';
+    
+        return view('customer.show', compact('customer', 'expiryStatus', 'online', 'session','downtime','arrType', 'arrPackage', 'dataUsage', 'downloadMB', 'uploadMB', 'transactions', 'invoices', 'authLogs', 'deviceVendor'));
+    }
+    // public function getMacVendor($mac)
+    // {
+    //     $mac = strtoupper($mac);
+    //     $apiUrl = "https://api.macvendors.com/{$mac}";
+
+    //     try {
+    //         $response = Http::get($apiUrl);
+
+    //         if ($response->successful()) {
+    //             return $response->body(); // Vendor name
+    //         }
+
+    //         return "Unknown Device";
+    //     } catch (\Exception $e) {
+    //         return "Unknown Device"; // In case of failure
+    //     }
+    // }
+
+    public function edit($id)
+    {
+        if(\Auth::user()->can('edit customer'))
+        {
+            $customer              = Customer::find($id);
+            $customer->customField = CustomField::getData($customer, 'customer');
+
+            $customFields = CustomField::where('created_by', '=', \Auth::user()->creatorId())->where('module', '=', 'customer')->get();
+
+            return view('customer.edit', compact('customer', 'customFields'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function update(Request $request, Customer $customer)
+    {
+
+        if(\Auth::user()->can('edit customer'))
+        {
+            // Convert 07xxxxxxxx or 01xxxxxxxx to 2547xxxxxxxx / 2541xxxxxxxx
+            if (preg_match('/^(07|01)(\d{8})$/', $request->contact, $matches)) {
+                $request->merge([
+                    'contact' => '254' . substr($matches[0], 1), // Removes the leading 0 and adds 254
+                ]);
+            }
+
+            // Ensure username is the same as account if it's null
+            $request->merge([
+                'username' => $request->username ?? $request->account,
+            ]);
+            $rules = [
+                'fullname'  => 'required|string|max:255',
+                'username'  => 'nullable|string|max:255',
+                'account'   => 'nullable|string|max:255',
+                'email'     => [
+                    'required',
+                    'email',
+                    Rule::unique('customers')->where(function ($query) {
+                        return $query->whereRaw('LOWER(email) = LOWER(?)', [request('email')])
+                                     ->where('created_by', \Auth::user()->id);
+                    })
+                ],
+                'contact'   => ['required', 'regex:/^254[17][0-9]{8}$/'],
+                'service'   => 'nullable|string|max:255',
+                'mac_address' => 'nullable|string|max:255|unique:customers,mac_address',
+                'static_ip'   => 'nullable|ip',
+                'expiry'      => 'nullable|date',
+            ];
+
+            $validator = \Validator::make($request->all(), $rules);
+            if($validator->fails())
+            {
+                $messages = $validator->getMessageBag();
+
+                return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('error', $messages->first());
+            }
+
+            $customer->fullname     = $request->fullname;
+            $customer->username     = $request->username;
+            $customer->account      = $request->account;
+            $customer->password     = $request->password;
+            $customer->email        = $request->email;
+            $customer->contact      = $request->contact;
+            // $customer->tax_number   = $request->tax_number;
+            $customer->created_by   = \Auth::user()->creatorId();
+            $customer->service      = $request->service;
+            $customer->mac_address  = $request->mac_address;
+            $customer->static_ip    = $request->static_ip;
+            $customer->sms_group    = $request->sms_group;
+            $customer->charges      = $request->charges;
+            $customer->package      = $request->package;
+            $customer->apartment    = $request->apartment;
+            $customer->location     = $request->location;
+            $customer->housenumber  = $request->housenumber;
+            $customer->save();
+
+            CustomField::saveData($customer, $request->customField);
+
+            return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Customer successfully updated.'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+
+    public function updateExpiry(Request $request, $id)
+    {
+        $request->validate([
+            'expiry' => 'required|date',
+        ]);
+    
+        $customer = Customer::findOrFail($id);
+        $customer->expiry = Carbon::parse($request->expiry);
+        $customer->save();
+        
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Expiry date updated successfully.'));
+    }
+
+    public function updateExtend(Request $request, $id)
+    {
+        $request->validate([
+            'expiry_extended' => 'required|date',
+        ]);
+
+        $customer = Customer::findOrFail($id);
+        $customer->expiry_extended = Carbon::parse($request->expiry_extended);
+        $customer->expiry_status = 'on';
+        $customer->save();
+
+        // If customer was in expired plan, move them back to their package
+        // $this->assignCustomerPackage($customer->id);
+        CustomHelper::assignCustomerPackage($customer->id);
+
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Expiry extended successfully.'));
+    }
+
+    public function depositCash(Request $request, $id)
+    {
+        $request->validate([
+            'balance' => 'required|numeric', // Ensure balance is a number
+        ]);
+
+        $customer = Customer::findOrFail($id);
+        // $package = Package::where('name_plan', $customer->package)->firstOrFail();
+        // $customer->expiry_status = 'on';
+        $customer->balance += $request->balance;
+
+        // If balance was 0 and status was OFF, reactivate customer
+        if ($customer->expiry_status == 'off') {
+            $customer->expiry_status = 'on';
+            $customer->save();
+
+            // Assign package to customer in RADIUS
+            // $this->assignCustomerPackage($customer->id);
+            CustomHelper::assignCustomerPackage($customer->id);
+        } else {
+            $customer->save();
+        }
+
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Balance updated successfully.'));
+    }
+    
+    public function refreshAccount(Request $request, $id)
+    {
+        $customer = Customer::findOrFail($id);
+        $result = CustomHelper::refreshCustomerInRadius($customer);
+
+        if ($result['status'] === 'success') {
+            return redirect()->route('customer.show', ['customer' => encrypt($id)])
+                ->with('success', __($result['message']));
+        } else {
+            return redirect()->route('customer.show', ['customer' => encrypt($id)])
+                ->with('error', __($result['message']));
+        }
+    }
+
+    public function changePlan(Request $request, $id)
+    {
+        $request->validate([
+            'package' => 'required|exists:packages,name_plan',
+        ]);
+    
+        $customer = Customer::findOrFail($id);
+        $newPackage = Package::where('name_plan', $request->package)->firstOrFail();
+    
+        if ($customer->package === $newPackage->name_plan) {
+            return redirect()->back()->with('error', __('Customer is already on this package.'));
+        }
+    
+        $customer->package = $newPackage->name_plan;
+        $customer->save();
+        // $this->updatePlan($customer);
+        CustomHelper::updatePlan($customer);
+    
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Package updated successfully.'));
+    }
+    
+    // public function updatePlan($customer)
+    // {
+    //     $package = Package::where('name_plan', $customer->package)->firstOrFail();
+    //     $group_name = 'package_' . $package->id;
+
+    //     if (!empty($group_name)) {
+    //         DB::transaction(function () use ($customer, $group_name) {
+    //             //Remove old Package
+    //             DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
+
+    //             // Insert new group assignment
+    //             DB::connection('radius')->table('radusergroup')->insert([ 'username'  => $customer->username, 'groupname' => $group_name, 'priority'  => 1, ]);
+    //         });
+    //         //Check if client is active
+    //         $active = DB::connection('radius')->table('radacct')->where('username', $customer->username)->whereNull('acctstoptime')->orderBy('acctstarttime', 'desc')->first();
+    //         //If client is already active send a CoA Request to update client Automatically
+    //         if (!empty($active)) {
+    //             $nasObj = DB::connection('radius')->table('nas')->where('nasname', $active->nasipaddress)->first();
+
+    //             if ($nasObj) {
+    //                 $attributes = [
+    //                     'acctSessionID' => $active->acctsessionid,
+    //                     'framedIPAddress' => $active->framedipaddress,
+    //                 ];
+
+    //                 $downm = $package->bandwidth->rate_down . $package->bandwidth->rate_down_unit;
+    //                 $upm = $package->bandwidth->rate_up . $package->bandwidth->rate_up_unit;
+    //                 $CoAData = $downm . "/" . $upm;
+
+    //                 $this->sendCoA($nasObj, $customer, $attributes, $CoAData);
+    //             } else {
+    //                 Log::error("NAS not found for active session: " . json_encode($active));
+    //             }
+    //         }
+    //     }
+    // }
+
+    // public function sendCoA($nasObj, $userData, array $attributes, $CoAData)
+    // {
+    //     if (!isset($attributes['acctSessionID'], $attributes['framedIPAddress'])) {
+    //         Log::error("Missing required attributes for CoA: " . json_encode($attributes));
+    //         return false;
+    //     }
+
+    //     $username = $userData->username;
+    //     $nasname = $nasObj->nasname;
+    //     $nasport = $nasObj->incoming_port ?? 3799;
+    //     $nassecret = $nasObj->secret;
+
+    //     $acctSessionID = escapeshellarg($attributes['acctSessionID']);
+    //     $framedIPAddress = escapeshellarg($attributes['framedIPAddress']);
+    //     $rateLimit = escapeshellarg($CoAData);
+
+    //     $command = "echo \"User-Name=$username, Acct-Session-Id=$acctSessionID, Framed-IP-Address=$framedIPAddress, Mikrotik-Rate-Limit=$rateLimit\" | radclient -x $nasname:$nasport coa $nassecret";
+
+    //     $response = shell_exec($command);
+
+    //     Log::info("CoA Response for $username: " . $response);
+
+    //     return strpos($response, 'Received CoA-ACK') !== false;
+    // }
+
+    public function deactivate(Request $request, $id)
+    {
+        $customer = Customer::findOrFail($id);
+
+        // Toggle activation status
+        $customer->is_active = !$customer->is_active;
+        $customer->save();
+
+        if (!$customer->is_active) {
+            // User is deactivated -> Disconnect & Expire
+            // $this->handleDeactivation($customer);
+            CustomHelper::handleDeactivation($customer);
+            $message = __('Customer deactivated and moved to expired plan.');
+        } else {
+            // User is activated -> Restore their plan
+            // $this->updatePlan($customer);
+            CustomHelper::updatePlan($customer);
+            $message = __('Customer activated successfully.');
+        }
+
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])
+            ->with('success', $message);
+    }
+
+    // public function handleDeactivation($customer)
+    // {
+    //     $activeSession = DB::connection('radius')->table('radacct')
+    //         ->where('username', $customer->username)
+    //         ->whereNull('acctstoptime')
+    //         ->orderBy('acctstarttime', 'desc')
+    //         ->first();
+
+    //     if ($activeSession) {
+    //         $nasObj = DB::connection('radius')->table('nas')->where('nasname', $activeSession->nasipaddress)->first();
+    //         $attributes = [
+    //             'acctSessionID' => $activeSession->acctsessionid,
+    //             'framedIPAddress' => $activeSession->framedipaddress,
+    //         ];
+
+    //         $this->kickOutUsersByRadius($nasObj, $customer, $attributes);
+    //     }
+
+    //     DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
+    //     DB::connection('radius')->table('radusergroup')->insert([
+    //         'username'  => $customer->username,
+    //         'groupname' => 'expired_users',
+    //         'priority'  => 1,
+    //     ]);
+    // }
+    // public function kickOutUsersByRadius($nasObj, $userData, array $attributes)
+    // {
+    //     $username = $userData->username;
+    //     $nasport = $nasObj->incoming_port ?? 3799;
+    //     $nassecret = $nasObj->secret;
+    //     $nasname = $nasObj->nasname;
+    //     $command = 'disconnect';
+
+    //     if (!isset($attributes['acctSessionID'], $attributes['framedIPAddress'])) {
+    //         Log::error("Missing required attributes for Disconnect: " . json_encode($attributes));
+    //         return false;
+    //     }
+
+    //     $args = escapeshellarg("$nasname:$nasport") . ' ' . escapeshellarg($command) . ' ' . escapeshellarg($nassecret);
+    //     $query = 'User-Name=' . escapeshellarg($username) . 
+    //             ',Acct-Session-Id=' . escapeshellarg($attributes['acctSessionID']) . 
+    //             ',Framed-IP-Address=' . escapeshellarg($attributes['framedIPAddress']);
+
+    //     $cmd = 'echo ' . escapeshellarg($query) . ' | radclient -xr 1 ' . $args . ' 2>&1';
+
+    //     $res = shell_exec($cmd);
+    //     Log::info("Disconnect response for $username: " . $res);
+
+    //     return (strpos($res, 'Received Disconnect-ACK') !== false);
+    // }
+
+    public function clearMac(Request $request, $id)
+    {
+        $customer = Customer::findOrFail($id);
+
+        // Clear MAC address
+        $customer->mac_address = null;
+        $customer->save();
+
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])
+            ->with('success', __('MAC address cleared successfully.'));
+    }
+
+    // public function assignCustomerPackage($customer_id)
+    // {
+    //     $customer = Customer::findOrFail($customer_id);
+    //     $package = Package::where('name_plan', $customer->package)->firstOrFail(); 
+    //     $group_name = 'package_' . $package->id;
+    
+    //     // Check if customer is already assigned to a package
+    //     $existingAssignment = DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->exists();
+    
+    //     if (!$existingAssignment) {
+    //         // Link Customer to the package group
+    //         DB::connection('radius')->table('radusergroup')->insert([
+    //             'username' => $customer->username,
+    //             'groupname' => $group_name,
+    //             'priority' => 0
+    //         ]);
+    //     } else {
+    //         // Update existing package assignment in case it was expired
+    //         DB::connection('radius')->table('radusergroup')
+    //             ->where('username', $customer->username)
+    //             ->update(['groupname' => $group_name]);
+    //     }
+    
+    //     // Ensure expiration value is not null
+    //     $expirationValue = $customer->expiry_extended ? $customer->expiry_extended->format('Y-m-d H:i:s') : Carbon::now()->addDays(30)->format('Y-m-d H:i:s');
+    
+    //     // Check if expiration exists in radcheck
+    //     $expirationExists = DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->exists();
+    
+    //     if (!$expirationExists) {
+    //         // Add Expiration to RADIUS
+    //         DB::connection('radius')->table('radcheck')->insert([
+    //             'username' => $customer->username,
+    //             'attribute' => 'Expiration',
+    //             'op' => ':=',
+    //             'value' => $expirationValue
+    //         ]);
+    //     } else {
+    //         // Update Expiration
+    //         DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->update(['value' => $expirationValue]);
+    //     }
+    // }
+    
+
+    public function destroy(Customer $customer)
+    {
+        if(\Auth::user()->can('delete customer'))
+        {
+            if($customer->created_by == \Auth::user()->creatorId())
+            {
+                $customer->delete();
+
+                return redirect()->route('customer.index')->with('success', __('Customer successfully deleted.'));
+            }
+            else
+            {
+                return redirect()->back()->with('error', __('Permission denied.'));
+            }
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    function customerNumber()
+    {
+        $latest = Customer::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+        if(!$latest)
+        {
+            return 1;
+        }
+        return $latest->customer_id + 1;
+    }
+
+    public function customerLogout(Request $request)
+    {
+        \Auth::guard('customer')->logout();
+
+        $request->session()->invalidate();
+
+        return redirect()->route('customer.login');
+    }
+
+    public function payment(Request $request)
+    {
+
+        if(\Auth::user()->can('manage customer payment'))
+        {
+            $category = [
+                'Invoice' => 'Invoice',
+                'Deposit' => 'Deposit',
+                'Sales' => 'Sales',
+            ];
+
+            $query = Transaction::where('user_id', \Auth::user()->id)->where('user_type', 'Customer')->where('type', 'Payment');
+            if(!empty($request->date))
+            {
+                $date_range = explode(' - ', $request->date);
+                $query->whereBetween('date', $date_range);
+            }
+
+            if(!empty($request->category))
+            {
+                $query->where('category', '=', $request->category);
+            }
+            $payments = $query->get();
+
+            return view('customer.payment', compact('payments', 'category'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function transaction(Request $request)
+    {
+        if(\Auth::user()->can('manage customer payment'))
+        {
+            $category = [
+                'Invoice' => 'Invoice',
+                'Deposit' => 'Deposit',
+                'Sales' => 'Sales',
+            ];
+
+            $query = Transaction::where('user_id', \Auth::user()->id)->where('user_type', 'Customer');
+
+            if(!empty($request->date))
+            {
+                $date_range = explode(' - ', $request->date);
+                $query->whereBetween('date', $date_range);
+            }
+
+            if(!empty($request->category))
+            {
+                $query->where('category', '=', $request->category);
+            }
+            $transactions = $query->get();
+
+            return view('customer.transaction', compact('transactions', 'category'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function profile()
+    {
+        $userDetail              = \Auth::user();
+        $userDetail->customField = CustomField::getData($userDetail, 'customer');
+        $customFields            = CustomField::where('created_by', '=', \Auth::user()->creatorId())->where('module', '=', 'customer')->get();
+
+        return view('customer.profile', compact('userDetail', 'customFields'));
+    }
+
+    public function editprofile(Request $request)
+    {
+        $userDetail = \Auth::user();
+        $user       = Customer::findOrFail($userDetail['id']);
+
+        $this->validate(
+            $request, [
+                        'name' => 'required|max:120',
+                        'contact' => 'required',
+                        'email' => 'required|email|unique:users,email,' . $userDetail['id'],
+                    ]
+        );
+
+        if($request->hasFile('profile'))
+        {
+            $filenameWithExt = $request->file('profile')->getClientOriginalName();
+            $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension       = $request->file('profile')->getClientOriginalExtension();
+            $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+
+            $dir        = storage_path('uploads/avatar/');
+            $image_path = $dir . $userDetail['avatar'];
+
+            if(File::exists($image_path))
+            {
+                File::delete($image_path);
+            }
+
+            if(!file_exists($dir))
+            {
+                mkdir($dir, 0777, true);
+            }
+
+            $path = $request->file('profile')->storeAs('uploads/avatar/', $fileNameToStore);
+
+        }
+
+        if(!empty($request->profile))
+        {
+            $user['avatar'] = $fileNameToStore;
+        }
+        $user['name']    = $request['name'];
+        $user['email']   = $request['email'];
+        $user['contact'] = $request['contact'];
+        $user->save();
+        CustomField::saveData($user, $request->customField);
+
+        return redirect()->back()->with(
+            'success', 'Profile successfully updated.'
+        );
+    }
+
+
+    public function export()
+    {
+        $name = 'customer_' . date('Y-m-d i:h:s');
+        $data = Excel::download(new CustomerExport(), $name . '.xlsx'); ob_end_clean();
+
+        return $data;
+    }
+
+    public function importFile()
+    {
+        return view('customer.import');
+    }
+
+    public function customerImportdata(Request $request)
+    {
+        session_start();
+        $html = '<h3 class="text-danger text-center">Below data is not inserted</h3></br>';
+        $flag = 0;
+        $html .= '<table class="table table-bordered"><tr>';
+        
+        try {
+            $request = $request->data;
+            $file_data = $_SESSION['file_data'];
+            unset($_SESSION['file_data']);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'html' => true,
+                'response' => '<h3 class="text-danger text-center">Something went wrong, Please try again</h3></br>',
+            ]);
+        }
+
+        foreach ($file_data as $key => $row) {
+            $customerByEmail = Customer::where('email', $row[$request['email']])->first();
+            
+            if (empty($customerByEmail)) {
+                try {
+                    $customerData = new Customer();
+                    $customerData->customer_id      = $this->customerNumber();
+                    $customerData->fullname         = $row[$request['fullname']] ?? null;
+                    $customerData->username         = $row[$request['username']] ?? null;
+                    $customerData->account          = $row[$request['account']] ?? null;
+                    $customerData->email            = $row[$request['email']] ?? null;
+                    $customerData->tax_number       = $row[$request['tax_number']] ?? null;
+                    $customerData->contact          = $row[$request['contact']] ?? null;
+                    $customerData->avatar           = $row[$request['avatar']] ?? '';
+                    $customerData->created_by       = \Auth::user()->creatorId();
+                    $customerData->is_active        = 1;
+                    $customerData->service          = $row[$request['service']] ?? null;
+                    $customerData->auto_renewal     = $row[$request['auto_renewal']] ?? 1;
+                    $customerData->mac_address      = $row[$request['mac_address']] ?? null;
+                    $customerData->static_ip        = $row[$request['static_ip']] ?? null;
+                    $customerData->sms_group        = $row[$request['sms_group']] ?? null;
+                    $customerData->charges          = $row[$request['charges']] ?? null;
+                    $customerData->package          = $row[$request['package']] ?? null;
+                    $customerData->apartment        = $row[$request['apartment']] ?? null;
+                    $customerData->location         = $row[$request['location']] ?? null;
+                    $customerData->housenumber      = $row[$request['housenumber']] ?? null;
+                    $customerData->expiry           = $row[$request['expiry']] ?? null;
+                    $customerData->expiry_status    = $row[$request['expiry_status']] ?? null;
+                    $customerData->lang             = $row[$request['lang']] ?? 'en';
+                    $customerData->balance          = $row[$request['balance']] ?? '0.00';
+                    $customerData->save();
+                } catch (\Exception $e) {
+                    $flag = 1;
+                    $html .= '<tr>';
+                    foreach ($row as $column) {
+                        $html .= '<td>' . ($column ?? '-') . '</td>';
+                    }
+                    $html .= '</tr>';
+                }
+            } else {
+                $flag = 1;
+                $html .= '<tr>';
+                foreach ($row as $column) {
+                    $html .= '<td>' . ($column ?? '-') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+
+        $html .= '</table><br />';
+
+        return response()->json([
+            'html' => $flag === 1,
+            'response' => $flag === 1 ? $html : 'Data Imported Successfully',
+        ]);
+    }
+
+
+    public function searchCustomers(Request $request)
+    {
+        if (\Illuminate\Support\Facades\Auth::user()->can('manage customer')) {
+            $customers = [];
+            $search    = $request->search;
+            if ($request->ajax() && isset($search) && !empty($search)) {
+                $customers = Customer::select('id as value', 'name as label', 'email')->where('is_active', '=', 1)->where('created_by', '=', Auth::user()->getCreatedBy())->Where('name', 'LIKE', '%' . $search . '%')->orWhere('email', 'LIKE', '%' . $search . '%')->get();
+
+                return json_encode($customers);
+            }
+
+            return $customers;
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function getLiveUsage($username)
+    {
+        // Fetch the last two records for the user
+        $records = DB::connection('radius')
+            ->table('radacct')
+            ->where('username', $username)
+            ->whereNull('acctstoptime') // Ensure active session
+            ->orderByDesc('acctupdatetime') // Sort by last update time
+            ->limit(2)
+            ->get();
+    
+        if ($records->count() < 2) {
+            return response()->json([
+                'download' => 0,
+                'upload' => 0,
+                'timestamp' => now()->format('H:i:s')
+            ]);
+        }
+    
+        // Get the two most recent records
+        $latest = $records[0];
+        $previous = $records[1];
+    
+        // Ensure timestamps exist
+        if (!$latest->acctupdatetime || !$previous->acctupdatetime) {
+            return response()->json([
+                'download' => 0,
+                'upload' => 0,
+                'timestamp' => now()->format('H:i:s')
+            ]);
+        }
+    
+        // Calculate time difference in seconds
+        $timeDiff = strtotime($latest->acctupdatetime) - strtotime($previous->acctupdatetime);
+        if ($timeDiff <= 0) {
+            return response()->json([
+                'download' => 0,
+                'upload' => 0,
+                'timestamp' => now()->format('H:i:s')
+            ]);
+        }
+    
+        // Ensure octets are greater than previous (handle resets)
+        $downloadOctets = max(0, $latest->acctoutputoctets - $previous->acctoutputoctets);
+        $uploadOctets = max(0, $latest->acctinputoctets - $previous->acctinputoctets);
+    
+        // Convert to Mbps: (Bytes * 8) / (Seconds * 1024 * 1024)
+        $downloadSpeed = ($downloadOctets * 8) / ($timeDiff * 1024 * 1024);
+        $uploadSpeed = ($uploadOctets * 8) / ($timeDiff * 1024 * 1024);
+    
+        return response()->json([
+            'download' => round($downloadSpeed, 2), // Mbps
+            'upload' => round($uploadSpeed, 2), // Mbps
+            'timestamp' => now()->format('H:i:s')
+        ]);
+    }
+    
+
+    public function handle()
+    {
+        $expiredUsers = RadiusUser::where('expiration_date', '<', now())->get();
+        
+        foreach ($expiredUsers as $user) {
+            $user->status = 'expired';
+            $user->save();
+        }
+        
+        $this->info('Expired users updated successfully.');
+    }
+    // public function invoiceNumber()
+    // {
+    //     $latest = Invoice::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+    //     if (!$latest) {
+    //         return 1;
+    //     }
+
+    //     return $latest->invoice_id + 1;
+    // }
+    // public function useBalance(Request $request, $customerId)
+    // {
+    //     $request->validate([
+    //         'amount' => 'required|numeric|min:1',
+    //         'type' => 'required|in:installation,package',
+    //     ]);
+
+    //     $customer = Customer::findOrFail($customerId);
+    //     if ($customer->balance < $request->amount) {
+    //         return back()->with('error', 'Insufficient balance');
+    //     }
+    //     $invoice = Invoice::where('customer_id', $customer->id)
+    //                     ->where('category', $request->type)
+    //                     ->where('status', 'Unpaid')
+    //                     ->first();
+
+    //     if (!$invoice) {
+    //         $invoice = Invoice::create([
+    //             'invoice_id' => $this->invoiceNumber(),
+    //             'customer_id' => $customer->id,
+    //             'issue_date' => now(),
+    //             'due_date' => now(),
+    //             'ref_number' => \Auth::user()->invoiceNumberFormat($this->invoiceNumber()),
+    //             'status' => 'Unpaid',
+    //             'category' => $request->type,
+    //             'created_by' => auth()->id(),
+    //         ]);
+
+    //     }
+
+    //     $customer->balance -= $request->amount;
+    //     $customer->save();
+
+    //     // Record payment in InvoicePayment table
+    //     InvoicePayment::create([
+    //         'customer_id' => $customer->id,
+    //         'invoice_id' => $invoice->id,
+    //         'amount' => $request->amount,
+    //         'payment_method' => 'Balance',
+    //         'date' => now(),
+    //         'created_by' => auth()->id(),
+    //     ]);
+
+    //     // Update invoice status if fully paid
+    //     if ($invoice->getDue() <= 0) {
+    //         $invoice->status = 'Paid';
+    //         $invoice->save();
+    //     }
+
+    //     return back()->with('success', 'Balance applied successfully!');
+    // }
+    // public function useBalance(Request $request, $customerId)
+    // {
+    //     $request->validate([
+    //         'amount' => 'required|numeric|min:1',
+    //         'type' => 'required|in:installation,package',
+    //     ]);
+
+    //     $customer = Customer::findOrFail($customerId);
+
+    //     if ($customer->balance < $request->amount) {
+    //         return back()->with('error', 'Insufficient balance');
+    //     }
+
+    //     // Always create a new invoice
+    //     $invoice = Invoice::create([
+    //         'invoice_id' => $this->invoiceNumber(),
+    //         'customer_id' => $customer->id,
+    //         'issue_date' => now(),
+    //         'due_date' => now(),
+    //         'send_date' => now(),
+    //         'ref_number' => \Auth::user()->invoiceNumberFormat($this->invoiceNumber()),
+    //         'status' => 'Unpaid',
+    //         'category' => $request->type,
+    //         'created_by' => auth()->id(),
+    //     ]);
+
+    //     // Deduct customer balance
+    //     $customer->balance -= $request->amount;
+    //     $customer->save();
+
+    //     // Record the payment
+    //     $invoicePayment = InvoicePayment::create([
+    //         'customer_id' => $customer->id,
+    //         'invoice_id' => $invoice->id,
+    //         'amount' => $request->amount,
+    //         'payment_method' => 'Balance',
+    //         'date' => now(),
+    //         'created_by' => auth()->id(),
+    //     ]);
+
+    //     // Update invoice status if fully paid
+    //     if ($invoice->getDue() <= 0) {
+    //         $invoice->status = 'Paid';
+    //         $invoice->save();
+    //     }
+
+    //     // Create a financial transaction
+    //     $invoicePayment->user_id = $invoice->customer_id;
+    //     $invoicePayment->user_type = 'Customer';
+    //     $invoicePayment->type = 'Partial';
+    //     $invoicePayment->created_by = auth()->id();
+    //     $invoicePayment->payment_id = $invoicePayment->id;
+    //     $invoicePayment->category = 'Invoice';
+
+    //     Transaction::addTransaction($invoicePayment);
+
+    //     // Update user balance tracking
+    //     Utility::updateUserBalance('customer', $invoice->customer_id, $request->amount, 'credit');
+
+    //     // Record bank account transaction
+    //     Utility::bankAccountBalance(auth()->id(), $request->amount, 'credit');
+
+    //     // Send notifications if enabled
+    //     $settings = Utility::settings();
+    //     if ($settings['new_invoice_payment'] == 1) {
+    //         $customer = Customer::where('id', $invoice->customer_id)->first();
+    //         $invoicePaymentArr = [
+    //             'invoice_payment_name' => $customer->name,
+    //             'invoice_payment_amount' => $request->amount,
+    //             'invoice_payment_date' => now()->format('Y-m-d'),
+    //             'payment_dueAmount' => $invoice->getDue(),
+    //             'invoice_number' => \Auth::user()->invoiceNumberFormat($invoice->invoice_id),
+    //             'invoice_payment_method' => 'Balance',
+    //         ];
+
+    //         Utility::sendEmailTemplate('new_invoice_payment', [$customer->id => $customer->email], $invoicePaymentArr);
+    //     }
+
+    //     return back()->with('success', 'Transaction completed successfully!');
+    // }
+    public function useBalance(Request $request, $customerId)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'type' => 'required|in:installation,package',
+        ]);
+
+        $customer = Customer::findOrFail($customerId);
+
+        if ($customer->balance < $request->amount) {
+            return back()->with('error', 'Insufficient balance');
+        }
+
+        // Create a new invoice
+        $invoice = CustomHelper::generateInvoice($customer, $request->type, $request->amount);
+
+        // Deduct customer balance
+        $customer->balance -= $request->amount;
+        $customer->save();
+
+        // Record the payment
+        $invoicePayment = CustomHelper::recordInvoicePayment($customer, $invoice, $request->amount);
+
+        // Update invoice status
+        CustomHelper::updateInvoiceStatus($invoice);
+
+        $invoicePayment->refresh();
+        // Process transaction
+        CustomHelper::processTransaction($invoicePayment, $invoice->customer_id);
+
+        // Update user balance
+        Utility::updateUserBalance('customer', $invoice->customer_id, $request->amount, 'credit');
+
+        // Record bank transaction
+        Utility::bankAccountBalance(auth()->id(), $request->amount, 'credit');
+
+        // Send notification
+        CustomHelper::sendInvoiceNotification($customer, $invoice, $request->amount);
+
+        return back()->with('success', 'Transaction completed successfully!');
+    }
+}

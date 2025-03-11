@@ -1,0 +1,150 @@
+{
+  "menu": [
+    {
+      "url": "/",
+      "name": "Dasboard",
+      "icon": "menu-icon tf-icons ti ti-smart-home",
+      "slug": "dashboard"
+    },
+    {
+      "name": "CRM",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": "users",
+      "submenu": [
+        {
+          "url": "/",
+          "name": "Customers",
+          "slug": "customers"
+        },
+        {
+          "url": "vouchers",
+          "name": "Vouchers",
+          "slug": "vouchers"
+        },
+        {
+          "url": "leads",
+          "name": "Leads",
+          "slug": "leads"
+        },
+        {
+          "url": "tickets",
+          "name": "Tickets",
+          "slug": "tickets"
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "icon": "menu-icon tf-icons ti ti-message",
+      "slug": "sms",
+      "submenu": [
+        {
+          "url": "/",
+          "name": "Send-Email",
+          "slug": "email"
+        },
+        {
+          "url": "bulk-send",
+          "name": "Bulk-SMS",
+          "slug": "bulk"
+        },
+        {
+          "url": "sent-SMS",
+          "name": "Sent-Messages",
+          "slug": "messages"
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "icon": "menu-icon tf-icons ti ti-report",
+      "slug": "reports",
+      "submenu": [
+        {
+          "url": "/",
+          "name": "Daily Transactions",
+          "slug": "daily-reports"
+        },
+        {
+          "url": "period",
+          "name": "Period Transactions",
+          "slug": "period"
+        },
+        {
+          "url": "invoices",
+          "name": "Invoices",
+          "slug": "invoices-sent"
+        },
+        {
+          "url": "payments",
+          "name": "Payments",
+          "slug": "paymentsall"
+        },
+        {
+          "url": "expenses",
+          "name": "Expenses",
+          "slug": "expenses"
+        }
+      ]
+    },
+    {
+      "menuHeader": "NETWORK"
+    },
+    {
+      "url": "packages",
+      "name": "Packages",
+      "icon": "menu-icon tf-icons ti ti-package",
+      "slug": "packages"
+    },
+    {
+      "url": "fup",
+      "name": "FUP",
+      "icon": "menu-icon tf-icons ti ti-brand-speedtest",
+      "slug": "fup"
+    },
+    {
+      "url": "sites",
+      "name": "Sites",
+      "icon": "menu-icon tf-icons ti ti-server",
+      "slug": "sites"
+    },
+    {
+      "url": "tr069",
+      "name": "TR069",
+      "icon": "menu-icon tf-icons ti ti-database",
+      "slug": "tr069"
+    },
+    {
+      "menuHeader": "Settings & Logs"
+    },
+    {
+      "url": "settings",
+      "name": "Settings",
+      "icon": "menu-icon tf-icons ti ti-settings",
+      "slug": "settings"
+    },
+    {
+      "url": "users",
+      "name": "Users",
+      "icon": "menu-icon tf-icons ti ti-user-cog",
+      "slug": "users"
+    },
+    {
+      "name": "Logs",
+      "icon": "menu-icon tf-icons ti ti-logs",
+      "slug": "reports",
+      "submenu": [
+        {
+          "url": "/",
+          "name": "System Logs",
+          "slug": "logs"
+        },
+        {
+          "url": "radius",
+          "name": "Radius Logs",
+          "slug": "radius"
+        }
+      ]
+    }
+  ]
+}
