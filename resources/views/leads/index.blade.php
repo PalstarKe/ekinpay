@@ -72,16 +72,16 @@
 @endpush
 
 @section('content')
-    <div class="row">
+    <div class="row  g-3">
         <div class="float-end mb-3">
-            {{ Form::open(array('route' => 'deals.change.pipeline','id'=>'change-pipeline','class'=>'btn btn-sm')) }}
-            {{ Form::select('default_pipeline_id', $pipelines,$pipeline->id, array('class' => 'form-control select me-2','id'=>'default_pipeline_id')) }}
+            {{--{{ Form::open(array('route' => 'deals.change.pipeline','id'=>'change-pipeline','class'=>'btn btn-sm')) }}--}}
+            {{ Form::select('default_pipeline_id', $pipelines,$pipeline->id, array('class' => 'form-control select me-2 mb-3','id'=>'default_pipeline_id')) }}
             {{ Form::close() }}
 
-            <a href="{{ route('leads.list') }}" data-size="lg" data-bs-toggle="tooltip" title="{{__('List View')}}" class="btn btn-sm bg-light-blue-subtitle me-1">
+            <a href="{{ route('leads.list') }}" data-size="lg" data-bs-toggle="tooltip" title="{{__('List View')}}" class="btn btn-sm bg-info text-white me-1">
                 <i class="ti ti-list"></i> {{__('List View')}}
             </a>
-            <a href="#" data-size="md"  data-bs-toggle="tooltip" title="{{__('Import')}}" data-url="{{ route('leads.import') }}" data-ajax-popup="true" data-title="{{__('Import Lead CSV file')}}" class="btn btn-sm bg-brown-subtitle me-1">
+            <a href="#" data-size="md"  data-bs-toggle="tooltip" title="{{__('Import')}}" data-url="{{ route('leads.import') }}" data-ajax-popup="true" data-title="{{__('Import Lead CSV file')}}" class="btn btn-sm btn-secondary me-1">
                 <i class="ti ti-file-import"></i> {{__('Import Lead CSV file')}}
             </a>
             <a href="{{route('leads.export')}}" data-bs-toggle="tooltip" title="{{__('Export')}}" class="btn btn-sm btn-secondary me-1">
