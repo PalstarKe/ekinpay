@@ -391,7 +391,7 @@ class NasController extends Controller
                 if (!$planCheckExists) {
                     DB::connection('radius')->table('radgroupcheck')->insert([
                         ['groupname' => 'Expired_Plan', 'attribute' => 'Auth-Type', 'op' => ':=', 'value' => 'Accept'],
-                        ['groupname' => 'Expired_Plan', 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => '300'] // 5 min idle timeout
+                        // ['groupname' => 'Expired_Plan', 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => '300'] // 5 min idle timeout
                     ]);
                 }
 
@@ -410,9 +410,9 @@ class NasController extends Controller
                     $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'WISPr-Bandwidth-Max-Up', 'op' => ':=', 'value' => $up];
                 }
 
-                if (!empty($timeout)) {
-                    $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => $timeout];
-                }
+                // if (!empty($timeout)) {
+                //     $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => $timeout];
+                // }
 
                 // Acct-Interim-Interval is always added
                 $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Acct-Interim-Interval', 'op' => ':=', 'value' => '60'];

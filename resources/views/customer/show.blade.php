@@ -684,7 +684,7 @@
                                 <span class="text-heading">Uptime</span>
                                 <div class="d-flex align-items-center my-1">
                                 <h6 class="mb-0 me-2">
-                                    @if(isset($session) && $session->uptime)
+                                    @if($session->uptime)
                                         Uptime: {{ gmdate('H:i:s', $session->uptime) }}
                                     @else
                                         Downtime: {{ gmdate('H:i:s', $downtime) }}
