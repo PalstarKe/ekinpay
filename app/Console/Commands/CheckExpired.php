@@ -54,26 +54,26 @@ class CheckExpired extends Command
                     );
 
                 $this->info("Customer {$customer->username} renewed until {$newExpiry}");
-            } elseif ($balance > 0) {
-                // Partial renewal based on available balance
-                $daysCovered = floor(($balance / $packagePrice) * 30);
-                $newExpiry = Carbon::now()->addDays($daysCovered);
+            // } elseif ($balance > 0) {
+            //     // Partial renewal based on available balance
+            //     $daysCovered = floor(($balance / $packagePrice) * 30);
+            //     $newExpiry = Carbon::now()->addDays($daysCovered);
 
-                Customer::where('id', $customer->id)->update([
-                    'expiry' => $newExpiry,
-                    'expiry_status' => 'on',
-                    'balance' => 0
-                ]);
+            //     Customer::where('id', $customer->id)->update([
+            //         'expiry' => $newExpiry,
+            //         'expiry_status' => 'on',
+            //         'balance' => 0
+            //     ]);
 
-                // Update FreeRADIUS with partial expiry
-                DB::connection('radius')->table('radcheck')
-                    ->updateOrInsert(
-                        ['username' => $customer->username, 'attribute' => 'Expiration'],
-                        ['op' => ':=', 'value' => $newExpiry->format('d M Y')]
-                    );
+            //     // Update FreeRADIUS with partial expiry
+            //     DB::connection('radius')->table('radcheck')
+            //         ->updateOrInsert(
+            //             ['username' => $customer->username, 'attribute' => 'Expiration'],
+            //             ['op' => ':=', 'value' => $newExpiry->format('d M Y')]
+            //         );
 
-                $this->info("Customer {$customer->username} extended for {$daysCovered} days until {$newExpiry}");
-                Log::info("Updated customer ID: {$customer->id}, New Expiry: {$customer->expiry}, New Status: {$customer->expiry_status}, New Balance: {$customer->balance}");
+            //     $this->info("Customer {$customer->username} extended for {$daysCovered} days until {$newExpiry}");
+            //     Log::info("Updated customer ID: {$customer->id}, New Expiry: {$customer->expiry}, New Status: {$customer->expiry_status}, New Balance: {$customer->balance}");
             } else {
                 // Move to expired pool in FreeRADIUS
                 DB::connection('radius')->table('radusergroup')
