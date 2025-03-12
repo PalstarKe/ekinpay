@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomField;
-use App\Models\Employee;
-use App\Models\ExperienceCertificate;
-use App\Models\GenerateOfferLetter;
-use App\Models\JoiningLetter;
+// use App\Models\Employee;
+// use App\Models\ExperienceCertificate;
+// use App\Models\GenerateOfferLetter;
+// use App\Models\JoiningLetter;
 use App\Models\LoginDetail;
 use App\Models\NOC;
 use App\Models\Order;
@@ -138,10 +138,10 @@ class UserController extends Controller
                 Utility::labels($user->id);
                 Utility::sources($user->id);
                 Utility::jobStage($user->id);
-                GenerateOfferLetter::defaultOfferLetterRegister($user->id);
-                ExperienceCertificate::defaultExpCertificatRegister($user->id);
-                JoiningLetter::defaultJoiningLetterRegister($user->id);
-                NOC::defaultNocCertificateRegister($user->id);
+                // GenerateOfferLetter::defaultOfferLetterRegister($user->id);
+                // ExperienceCertificate::defaultExpCertificatRegister($user->id);
+                // JoiningLetter::defaultJoiningLetterRegister($user->id);
+                // NOC::defaultNocCertificateRegister($user->id);
             } else {
                 $validator = \Validator::make(
                     $request->all(), [
@@ -185,9 +185,9 @@ class UserController extends Controller
 
                     $user = User::create($request->all());
                     $user->assignRole($role_r);
-                    if ($request['type'] != 'client') {
-                        \App\Models\Utility::employeeDetails($user->id, \Auth::user()->creatorId());
-                    }
+                    // if ($request['type'] != 'client') {
+                    //     \App\Models\Utility::employeeDetails($user->id, \Auth::user()->creatorId());
+                    // }
 
                 } else {
                     return redirect()->back()->with('error', __('Your user limit is over, Please upgrade plan.'));
@@ -297,7 +297,7 @@ class UserController extends Controller
                 $input = $request->all();
                 $input['type'] = $role->name;
                 $user->fill($input)->save();
-                Utility::employeeDetailsUpdate($user->id, \Auth::user()->creatorId());
+                // Utility::employeeDetailsUpdate($user->id, \Auth::user()->creatorId());
                 CustomField::saveData($user, $request->customField);
 
                 $roles[] = $request->role;
@@ -331,7 +331,7 @@ class UserController extends Controller
                     $transaction = ReferralTransaction::where('company_id' , $id)->delete();
 
                     $users = User::where('created_by', $id)->delete();
-                    $employee = Employee::where('created_by', $id)->delete();
+                    // $employee = Employee::where('created_by', $id)->delete();
 
                     $user->delete();
 
@@ -342,10 +342,10 @@ class UserController extends Controller
 
                     $delete_user = User::where(['id' => $user->id])->get();
                     if ($delete_user) {
-                        $employee = Employee::where(['user_id' => $user->id])->delete();
+                        // $employee = Employee::where(['user_id' => $user->id])->delete();
                         $delete_user->delete();
 
-                        if ($delete_user || $employee) {
+                        if ($delete_user ) {
                             return redirect()->route('users.index')->with('success', __('User successfully deleted .'));
                         } else {
                             return redirect()->back()->with('error', __('Something is wrong.'));

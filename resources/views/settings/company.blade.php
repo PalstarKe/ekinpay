@@ -328,27 +328,27 @@
                             <a href="#slack-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('Slack Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
-                            </a>--}}
+                            </a>
                             <a href="#telegram-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('Telegram Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
-                            </a>
+                            </a>--}}
                             <a href="#twilio-settings"
-                                class="list-group-item list-group-item-action border-0">{{ __('Twilio Settings') }}
+                                class="list-group-item list-group-item-action border-0">{{ __('SMS Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
                             <a href="#email-notification-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('Email Notification Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
-                            <a href="#noc-settings"
+                            {{--<a href="#noc-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('NOC Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
                             <a href="#google-calender"
                                 class="list-group-item list-group-item-action border-0">{{ __('Google Calendar Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
-                            </a>
+                            </a>--}}
                             <a href="#webhook-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('Webhook Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
@@ -828,7 +828,7 @@
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                {{--<div class="form-group col-md-4">
                                     {{ Form::label('company_start_time', __('Company Start Time'), ['class' => 'form-label']) }}
                                     {{ Form::time('company_start_time', null, ['class' => 'form-control']) }}
                                     @error('company_start_time')
@@ -855,7 +855,7 @@
                                             data-onstyle="btn-primary" name="ip_restrict" id="ip_restrict"
                                             {{ isset($setting['ip_restrict']) && $setting['ip_restrict'] == 'on' ? 'checked' : '' }}>
                                     </div>
-                                </div>
+                                </div>--}}
 
                                 <div class="form-group col-md-12 mt-2">
                                     {{ Form::label('timezone', __('Timezone'), ['class' => 'form-label']) }}

@@ -269,27 +269,6 @@ class CustomerController extends Controller
             $expiryStatus = "Extended for {$diffExtended->d} Dys {$diffExtended->h} Hrs";
         }
 
-        
-        // Lock MAC address only if it is empty (i.e., not locked yet or manually cleared)
-        // if (empty($customer->mac_address)) {
-        //     $mac = DB::connection('radius')
-        //         ->table('radacct')
-        //         ->whereNull('acctstoptime')
-        //         ->where('username', $customer->username)
-        //         ->value('callingstationid');
-
-        //     if (!empty($mac)) {
-        //         $customer->mac_address = $mac;
-        //         $customer->save();
-
-        //         // insert into radcheck when first locking
-        //         DB::connection('radius')->table('radcheck')->updateOrInsert(
-        //             ['username' => $customer->username, 'attribute' => 'Calling-Station-Id'],
-        //             ['op' => '==', 'value' => $customer->mac_address]
-        //         );
-        //     }
-        // }
-
         CustomHelper::lockMac($customer);
         
         $online = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->exists();
@@ -333,23 +312,6 @@ class CustomerController extends Controller
     
         return view('customer.show', compact('customer', 'expiryStatus', 'online', 'session','downtime','arrType', 'arrPackage', 'dataUsage', 'downloadMB', 'uploadMB', 'transactions', 'invoices', 'authLogs', 'deviceVendor'));
     }
-    // public function getMacVendor($mac)
-    // {
-    //     $mac = strtoupper($mac);
-    //     $apiUrl = "https://api.macvendors.com/{$mac}";
-
-    //     try {
-    //         $response = Http::get($apiUrl);
-
-    //         if ($response->successful()) {
-    //             return $response->body(); // Vendor name
-    //         }
-
-    //         return "Unknown Device";
-    //     } catch (\Exception $e) {
-    //         return "Unknown Device"; // In case of failure
-    //     }
-    // }
 
     public function edit($id)
     {
@@ -533,68 +495,6 @@ class CustomerController extends Controller
         return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Package updated successfully.'));
     }
     
-    // public function updatePlan($customer)
-    // {
-    //     $package = Package::where('name_plan', $customer->package)->firstOrFail();
-    //     $group_name = 'package_' . $package->id;
-
-    //     if (!empty($group_name)) {
-    //         DB::transaction(function () use ($customer, $group_name) {
-    //             //Remove old Package
-    //             DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
-
-    //             // Insert new group assignment
-    //             DB::connection('radius')->table('radusergroup')->insert([ 'username'  => $customer->username, 'groupname' => $group_name, 'priority'  => 1, ]);
-    //         });
-    //         //Check if client is active
-    //         $active = DB::connection('radius')->table('radacct')->where('username', $customer->username)->whereNull('acctstoptime')->orderBy('acctstarttime', 'desc')->first();
-    //         //If client is already active send a CoA Request to update client Automatically
-    //         if (!empty($active)) {
-    //             $nasObj = DB::connection('radius')->table('nas')->where('nasname', $active->nasipaddress)->first();
-
-    //             if ($nasObj) {
-    //                 $attributes = [
-    //                     'acctSessionID' => $active->acctsessionid,
-    //                     'framedIPAddress' => $active->framedipaddress,
-    //                 ];
-
-    //                 $downm = $package->bandwidth->rate_down . $package->bandwidth->rate_down_unit;
-    //                 $upm = $package->bandwidth->rate_up . $package->bandwidth->rate_up_unit;
-    //                 $CoAData = $downm . "/" . $upm;
-
-    //                 $this->sendCoA($nasObj, $customer, $attributes, $CoAData);
-    //             } else {
-    //                 Log::error("NAS not found for active session: " . json_encode($active));
-    //             }
-    //         }
-    //     }
-    // }
-
-    // public function sendCoA($nasObj, $userData, array $attributes, $CoAData)
-    // {
-    //     if (!isset($attributes['acctSessionID'], $attributes['framedIPAddress'])) {
-    //         Log::error("Missing required attributes for CoA: " . json_encode($attributes));
-    //         return false;
-    //     }
-
-    //     $username = $userData->username;
-    //     $nasname = $nasObj->nasname;
-    //     $nasport = $nasObj->incoming_port ?? 3799;
-    //     $nassecret = $nasObj->secret;
-
-    //     $acctSessionID = escapeshellarg($attributes['acctSessionID']);
-    //     $framedIPAddress = escapeshellarg($attributes['framedIPAddress']);
-    //     $rateLimit = escapeshellarg($CoAData);
-
-    //     $command = "echo \"User-Name=$username, Acct-Session-Id=$acctSessionID, Framed-IP-Address=$framedIPAddress, Mikrotik-Rate-Limit=$rateLimit\" | radclient -x $nasname:$nasport coa $nassecret";
-
-    //     $response = shell_exec($command);
-
-    //     Log::info("CoA Response for $username: " . $response);
-
-    //     return strpos($response, 'Received CoA-ACK') !== false;
-    // }
-
     public function deactivate(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
@@ -619,57 +519,6 @@ class CustomerController extends Controller
             ->with('success', $message);
     }
 
-    // public function handleDeactivation($customer)
-    // {
-    //     $activeSession = DB::connection('radius')->table('radacct')
-    //         ->where('username', $customer->username)
-    //         ->whereNull('acctstoptime')
-    //         ->orderBy('acctstarttime', 'desc')
-    //         ->first();
-
-    //     if ($activeSession) {
-    //         $nasObj = DB::connection('radius')->table('nas')->where('nasname', $activeSession->nasipaddress)->first();
-    //         $attributes = [
-    //             'acctSessionID' => $activeSession->acctsessionid,
-    //             'framedIPAddress' => $activeSession->framedipaddress,
-    //         ];
-
-    //         $this->kickOutUsersByRadius($nasObj, $customer, $attributes);
-    //     }
-
-    //     DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
-    //     DB::connection('radius')->table('radusergroup')->insert([
-    //         'username'  => $customer->username,
-    //         'groupname' => 'expired_users',
-    //         'priority'  => 1,
-    //     ]);
-    // }
-    // public function kickOutUsersByRadius($nasObj, $userData, array $attributes)
-    // {
-    //     $username = $userData->username;
-    //     $nasport = $nasObj->incoming_port ?? 3799;
-    //     $nassecret = $nasObj->secret;
-    //     $nasname = $nasObj->nasname;
-    //     $command = 'disconnect';
-
-    //     if (!isset($attributes['acctSessionID'], $attributes['framedIPAddress'])) {
-    //         Log::error("Missing required attributes for Disconnect: " . json_encode($attributes));
-    //         return false;
-    //     }
-
-    //     $args = escapeshellarg("$nasname:$nasport") . ' ' . escapeshellarg($command) . ' ' . escapeshellarg($nassecret);
-    //     $query = 'User-Name=' . escapeshellarg($username) . 
-    //             ',Acct-Session-Id=' . escapeshellarg($attributes['acctSessionID']) . 
-    //             ',Framed-IP-Address=' . escapeshellarg($attributes['framedIPAddress']);
-
-    //     $cmd = 'echo ' . escapeshellarg($query) . ' | radclient -xr 1 ' . $args . ' 2>&1';
-
-    //     $res = shell_exec($cmd);
-    //     Log::info("Disconnect response for $username: " . $res);
-
-    //     return (strpos($res, 'Received Disconnect-ACK') !== false);
-    // }
-
     public function clearMac(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
@@ -681,50 +530,6 @@ class CustomerController extends Controller
         return redirect()->route('customer.show', ['customer' => encrypt($id)])
             ->with('success', __('MAC address cleared successfully.'));
     }
-
-    // public function assignCustomerPackage($customer_id)
-    // {
-    //     $customer = Customer::findOrFail($customer_id);
-    //     $package = Package::where('name_plan', $customer->package)->firstOrFail(); 
-    //     $group_name = 'package_' . $package->id;
-    
-    //     // Check if customer is already assigned to a package
-    //     $existingAssignment = DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->exists();
-    
-    //     if (!$existingAssignment) {
-    //         // Link Customer to the package group
-    //         DB::connection('radius')->table('radusergroup')->insert([
-    //             'username' => $customer->username,
-    //             'groupname' => $group_name,
-    //             'priority' => 0
-    //         ]);
-    //     } else {
-    //         // Update existing package assignment in case it was expired
-    //         DB::connection('radius')->table('radusergroup')
-    //             ->where('username', $customer->username)
-    //             ->update(['groupname' => $group_name]);
-    //     }
-    
-    //     // Ensure expiration value is not null
-    //     $expirationValue = $customer->expiry_extended ? $customer->expiry_extended->format('Y-m-d H:i:s') : Carbon::now()->addDays(30)->format('Y-m-d H:i:s');
-    
-    //     // Check if expiration exists in radcheck
-    //     $expirationExists = DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->exists();
-    
-    //     if (!$expirationExists) {
-    //         // Add Expiration to RADIUS
-    //         DB::connection('radius')->table('radcheck')->insert([
-    //             'username' => $customer->username,
-    //             'attribute' => 'Expiration',
-    //             'op' => ':=',
-    //             'value' => $expirationValue
-    //         ]);
-    //     } else {
-    //         // Update Expiration
-    //         DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->update(['value' => $expirationValue]);
-    //     }
-    // }
-    
 
     public function destroy(Customer $customer)
     {
