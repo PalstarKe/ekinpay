@@ -87,7 +87,7 @@ class Utility extends Model
             "site_currency_symbol_position" => "pre",
             "site_date_format" => "M j, Y",
             "site_time_format" => "g:i A",
-            "timezone" => '',
+            "timezone" => 'Africa/Nairobi',
             "company_name" => "",
             "company_address" => "",
             "company_city" => "",
@@ -95,7 +95,7 @@ class Utility extends Model
             "company_zipcode" => "",
             "company_country" => "",
             "company_telephone" => "",
-            "invoice_prefix" => "#INVO",
+            "invoice_prefix" => "#INV",
             "journal_prefix" => "#JUR",
             "invoice_color" => "ffffff",
             "proposal_prefix" => "#PROP",
@@ -271,9 +271,9 @@ class Utility extends Model
 
             'currency_space'=>'withspace',
             'decimal_separator'=>'dot',
-            'thousand_separator'=>'dot',
+            'thousand_separator'=>'comma',
             'currency_symbol' => 'withcurrencysymbol',
-            'float_number' => 'comma',
+            'float_number' => 'dot',
 
             'zkteco_api_url' => '',
             'username' => '',
@@ -303,8 +303,8 @@ class Utility extends Model
         $data = Utility::getSettingById($user_id);
 
         $settings = [
-            "site_currency" => "USD",
-            "site_currency_symbol" => "$",
+            "site_currency" => "KES",
+            "site_currency_symbol" => "Ksh",
             "site_currency_symbol_position" => "pre",
             "site_date_format" => "M j, Y",
             "site_time_format" => "g:i A",
@@ -315,7 +315,7 @@ class Utility extends Model
             "company_zipcode" => "",
             "company_country" => "",
             "company_telephone" => "",
-            "invoice_prefix" => "#INVO",
+            "invoice_prefix" => "#INV",
             "invoice_color" => "ffffff",
             "proposal_prefix" => "#PROP",
             "proposal_color" => "ffffff",
@@ -351,7 +351,7 @@ class Utility extends Model
             "employee_prefix" => "#EMP00",
             'leave_status' => '1',
             "bug_prefix" => "#ISSUE",
-            'title_text' => 'ErpGo Saas',
+            'title_text' => 'The Future Billing',
             'footer_text' => '',
             "company_start_time" => "09:00",
             "company_end_time" => "18:00",
@@ -481,7 +481,7 @@ class Utility extends Model
 
             'currency_space'=>'withspace',
             'decimal_separator'=>'dot',
-            'thousand_separator'=>'dot',
+            'thousand_separator'=>'comma',
             'currency_symbol' => 'withcurrencysymbol',
         ];
 

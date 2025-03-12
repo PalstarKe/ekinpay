@@ -217,7 +217,7 @@ class User extends Authenticatable implements MustVerifyEmail
             $users = User::where('created_by', '=', $user_id)->where('type', '!=', 'super admin')->where('type', '!=', 'company')->where('type', '!=', 'client')->get();
             $clients = User::where('created_by', '=', $user_id)->where('type', 'client')->get();
             $customers = Customer::where('created_by', '=', $user_id)->get();
-            $venders = Vender::where('created_by', '=', $user_id)->get();
+            // $venders = Vender::where('created_by', '=', $user_id)->get();
 
             if ($plan->max_users == -1) {
                 foreach ($users as $user) {
@@ -276,24 +276,24 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             }
 
-            if ($plan->max_venders == -1) {
-                foreach ($venders as $vender) {
-                    $vender->is_active = 1;
-                    $vender->save();
-                }
-            } else {
-                $venderCount = 0;
-                foreach ($venders as $vender) {
-                    $venderCount++;
-                    if ($venderCount <= $plan->max_venders) {
-                        $vender->is_active = 1;
-                        $vender->save();
-                    } else {
-                        $vender->is_active = 0;
-                        $vender->save();
-                    }
-                }
-            }
+            // if ($plan->max_venders == -1) {
+            //     foreach ($venders as $vender) {
+            //         $vender->is_active = 1;
+            //         $vender->save();
+            //     }
+            // } else {
+            //     $venderCount = 0;
+            //     foreach ($venders as $vender) {
+            //         $venderCount++;
+            //         if ($venderCount <= $plan->max_venders) {
+            //             $vender->is_active = 1;
+            //             $vender->save();
+            //         } else {
+            //             $vender->is_active = 0;
+            //             $vender->save();
+            //         }
+            //     }
+            // }
 
             return ['is_success' => true];
         } else {

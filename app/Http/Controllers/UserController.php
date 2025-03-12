@@ -563,9 +563,13 @@ class UserController extends Controller
                 ]
             );
 
-            return redirect()->back()->with('success', 'Plan successfully upgraded.');
+        //     return redirect()->back()->with('success', 'Plan successfully upgraded.');
+        // } else {
+        //     return redirect()->back()->with('error', 'Plan fail to upgrade.');
+        // }
+            return redirect()->route('users.index')->with('success', 'Plan successfully upgraded.');
         } else {
-            return redirect()->back()->with('error', 'Plan fail to upgrade.');
+            return redirect()->route('users.index')->with('error', 'Plan failed to upgrade.');
         }
 
     }

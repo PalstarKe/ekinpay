@@ -195,7 +195,7 @@ $admin_payment_setting = Utility::getAdminPaymentSetting();
 					<div class="avatar me-4">
 						<span class="avatar-initial rounded bg-label-info"><i class='ti ti-clock ti-28px'></i></span>
 					</div>
-					<h6 class="mb-0">{{isset($admin_payment_setting['currency_symbol']) ? $admin_payment_setting['currency_symbol'] : '$'}} {{$user['total_orders_price']}}</h6>
+					<h6 class="mb-0">{{isset($admin_payment_setting['currency_symbol']) ? $admin_payment_setting['currency_symbol'] : '$'}} {{number_format($user['total_orders_price'])}}</h6>
 				</div>
 				<p class="mb-1">Total Amount</p>
 			</div>
