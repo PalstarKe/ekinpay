@@ -134,12 +134,12 @@ $configData = Helper::appClasses();
                                     
                             @endif
                             @if ( Gate::check('manage payment') )
-                                <li class="menu-item {{ Request::route()->getName() == 'expense.index' || Request::route()->getName() == 'expense.create' || Request::route()->getName() == 'expense.edit' || Request::route()->getName() == 'expense.show' ? ' active' : '' }}">
+                                {{--<li class="menu-item {{ Request::route()->getName() == 'expense.index' || Request::route()->getName() == 'expense.create' || Request::route()->getName() == 'expense.edit' || Request::route()->getName() == 'expense.show' ? ' active' : '' }}">
                                     <a class="menu-link" href="{{ route('expense.index') }}">{{ __('Expense') }}</a>
                                 </li>
                                 <li class="menu-item {{ Request::route()->getName() == 'payment.index' || Request::route()->getName() == 'payment.create' || Request::route()->getName() == 'payment.edit' ? ' active' : '' }}">
                                     <a class="menu-link" href="{{ route('payment.index') }}">{{ __('Payment') }}</a>
-                                </li>
+                                </li>--}}
                             @endif
                             
                             @if (Gate::check('manage constant tax') ||

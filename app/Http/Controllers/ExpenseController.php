@@ -84,34 +84,34 @@ class ExpenseController extends Controller
 
         if (\Auth::user()->can('manage bill')) {
 
-            $vender = Vender::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $vender->prepend('Select Vendor', '');
+            // $vender = Vender::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            // $vender->prepend('Select Vendor', '');
 
-            $category = ProductServiceCategory::where('created_by', \Auth::user()->creatorId())
-                ->whereNotIn('type', ['product & service', 'income'])
-                ->get()->pluck('name', 'id');
-            $category->prepend('Select Category', '');
+            // $category = ProductServiceCategory::where('created_by', \Auth::user()->creatorId())
+            //     ->whereNotIn('type', ['product & service', 'income'])
+            //     ->get()->pluck('name', 'id');
+            // $category->prepend('Select Category', '');
 
-            $status = Bill::$statues;
+            // $status = Bill::$statues;
 
-            $query = Bill::where('type', '=', 'Expense')
-                ->where('created_by', '=', \Auth::user()->creatorId());
-            if (!empty($request->vender)) {
-                $query->where('vender_id', '=', $request->vender);
-            }
-            if (count(explode('to', $request->bill_date)) > 1) {
-                $date_range = explode(' to ', $request->bill_date);
-                $query->whereBetween('bill_date', $date_range);
-            } elseif (!empty($request->bill_date)) {
-                $date_range = [$request->date, $request->bill_date];
-                $query->whereBetween('bill_date', $date_range);
-            }
+            // $query = Bill::where('type', '=', 'Expense')
+            //     ->where('created_by', '=', \Auth::user()->creatorId());
+            // if (!empty($request->vender)) {
+            //     $query->where('vender_id', '=', $request->vender);
+            // }
+            // if (count(explode('to', $request->bill_date)) > 1) {
+            //     $date_range = explode(' to ', $request->bill_date);
+            //     $query->whereBetween('bill_date', $date_range);
+            // } elseif (!empty($request->bill_date)) {
+            //     $date_range = [$request->date, $request->bill_date];
+            //     $query->whereBetween('bill_date', $date_range);
+            // }
 
-            if (!empty($request->category)) {
-                $query->where('category_id', '=', $request->category);
-            }
+            // if (!empty($request->category)) {
+            //     $query->where('category_id', '=', $request->category);
+            // }
 
-            $expenses = $query->with(['category'])->get();
+            // $expenses = $query->with(['category'])->get();
 
             return view('expense.index', compact('expenses', 'vender', 'status', 'category'));
         } else {
