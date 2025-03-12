@@ -2,10 +2,7 @@
 @section('page-title')
     {{ $notification_template->name }}
 @endsection
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ __('Notification Template') }}</li>
-@endsection
+
 @push('pre-purpose-css-page')
     <link rel="stylesheet" href="{{asset('css/summernote/summernote-bs4.css')}}">
 @endpush
@@ -74,7 +71,7 @@
 @endsection
 @section('content')
 <div class="row">
-<div class="text-end mb-3">
+        {{--<div class="text-end mb-3">
             <div class="text-end">
                 <div class="d-flex justify-content-end drp-languages">
                     <ul class="list-unstyled mb-0 m-2 me-0">
@@ -131,7 +128,7 @@
 
                 </div>
             </div>
-        </div>
+        </div>--}}
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header card-body table-border-style">
