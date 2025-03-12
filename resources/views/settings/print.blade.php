@@ -2,10 +2,7 @@
 @section('page-title')
     {{ __('Settings') }}
 @endsection
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Print-Settings') }}</li>
-@endsection
+
 @php
     $logo = \App\Models\Utility::get_file('uploads/logo');
     $company_logo = Utility::getValByName('company_logo');

@@ -17,13 +17,14 @@ class Invoice extends Model
         'created_by',
     ];
 
-    public static $statuses = [
+    public static $statues = [
         'Draft',
         'Sent',
         'Unpaid',
-        'Partially Paid',
+        'Partialy Paid',
         'Paid',
     ];
+
 
     public function tax()
     {

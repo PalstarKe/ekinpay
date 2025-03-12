@@ -338,7 +338,7 @@
                 <th>{{__('Price')}} <small>after tax & discount</small></th>
             </tr>
             </thead>
-            <tbody>
+            {{--<tbody>
             @if(isset($invoice->itemData) && count($invoice->itemData) > 0)
                 @foreach($invoice->itemData as $key => $item)
                 <tr>
@@ -375,7 +375,7 @@
                 @endforeach
             @else
             @endif
-            </tbody>
+            </tbody>--}}
             <tfoot>
             <tr>
                 <td>{{__('Total')}}</td>
@@ -410,14 +410,14 @@
                             <td>{{__('Total')}}:</td>
                             <td>{{Utility::priceFormat($settings,$invoice->getSubTotal()-$invoice->getTotalDiscount()+$invoice->getTotalTax())}}</td>
                         </tr>
-                        <tr>
+                       {{-- <tr>
                             <td>{{__('Paid')}}:</td>
                             <td>{{Utility::priceFormat($settings,($invoice->getTotal()-$invoice->getDue())-($invoice->invoiceTotalCreditNote()))}}</td>
                         </tr>
                         <tr>
                             <td>{{__('Credit Note')}}:</td>
                             <td>{{Utility::priceFormat($settings,($invoice->invoiceTotalCreditNote()))}}</td>
-                        </tr>
+                        </tr>--}}
                         <tr>
                             <td>{{__('Due Amount')}}:</td>
                             <td>{{Utility::priceFormat($settings,$invoice->getDue())}}</td>
