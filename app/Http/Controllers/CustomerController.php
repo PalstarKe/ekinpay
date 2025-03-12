@@ -274,15 +274,30 @@ class CustomerController extends Controller
         $online = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->exists();
         $session = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->select('framedipaddress as ip', 'acctsessiontime as uptime')
             ->first();
-
-        if ($session) {
-            $uptime = $session->uptime ?? 0;
-            $downtime = 0; 
+        $uptime = DB::connection('radius')
+            ->table('radacct')
+            ->whereNull('acctstoptime')
+            ->where('username', $customer->username)
+            ->select('acctsessiontime as uptime')
+            ->first();
+        
+        if ($uptime) {
+            $displayUptime = gmdate('H:i:s', $uptime->uptime);
         } else {
-            $lastSession = DB::connection('radius')->table('radacct')->where('username', $customer->username)->whereNotNull('acctstoptime')->orderBy('acctstoptime', 'desc')->first();
+            $lastSession = DB::connection('radius')
+                ->table('radacct')
+                ->whereNotNull('acctstoptime')
+                ->where('username', $customer->username)
+                ->orderByDesc('acctstoptime')
+                ->select('acctstoptime')
+                ->first();
 
-            $uptime = 0; 
-            $downtime = $lastSession ? Carbon::now()->diffInSeconds(Carbon::parse($lastSession->acctstoptime)) : 0;
+            if ($lastSession) {
+                $offlineSeconds = Carbon::parse($lastSession->acctstoptime)->diffInSeconds(Carbon::now());
+                $displayUptime = "Offline for " . gmdate('H:i:s', $offlineSeconds);
+            } else {
+                $displayUptime = "No session history";
+            }
         }
 
         $dataUsage = DB::connection('radius')->table('radacct')
@@ -310,7 +325,7 @@ class CustomerController extends Controller
 
         $deviceVendor = $customer->mac_address ? CustomHelper::getMacVendor($customer->mac_address) : 'N/A';
     
-        return view('customer.show', compact('customer', 'expiryStatus', 'online', 'session','downtime','arrType', 'arrPackage', 'dataUsage', 'downloadMB', 'uploadMB', 'transactions', 'invoices', 'authLogs', 'deviceVendor'));
+        return view('customer.show', compact('customer', 'expiryStatus', 'online', 'session','arrType', 'displayUptime', 'arrPackage', 'dataUsage', 'downloadMB', 'uploadMB', 'transactions', 'invoices', 'authLogs', 'deviceVendor'));
     }
 
     public function edit($id)

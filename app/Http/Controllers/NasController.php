@@ -226,7 +226,7 @@ class NasController extends Controller
         $nas->status = $this->isNasOnline($nas->nasname) ? 'Online' : 'Offline';
 
         // Fetch all available packages (for assignment)
-        $packages = Package::all();
+        $packages = Package::where('created_by', \Auth::user()->creatorId())->get();;
 
         return view('nas.show', compact('nas', 'packages'));
     }
