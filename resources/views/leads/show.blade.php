@@ -148,12 +148,9 @@
     </script>
 
 @endpush
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">{{__('Dashboard')}}</a></li>
-    <li class="breadcrumb-item"><a href="{{route('leads.index')}}">{{__('Lead')}}</a></li>
-    <li class="breadcrumb-item"> {{$lead->name}}</li>
-@endsection
-@section('action-btn')
+
+@section('content')
+    <div class="row">
     <div class="float-end">
         @can('convert lead to deal')
             @if(!empty($deal))
@@ -174,10 +171,6 @@
             <i class="ti ti-pencil"></i>
         </a>
     </div>
-@endsection
-
-@section('content')
-    <div class="row">
         <div class="col-sm-12">
             <div class="row">
                 <div class="col-xl-3">
