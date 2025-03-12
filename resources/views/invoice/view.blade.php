@@ -2,11 +2,6 @@
 @section('page-title')
     {{ __('Invoice Detail') }}
 @endsection
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('invoice.index') }}">{{ __('Invoice') }}</a></li>
-    <li class="breadcrumb-item">{{ AUth::user()->invoiceNumberFormat($invoice->invoice_id) }}</li>
-@endsection
 @php
     $settings = Utility::settings();
 @endphp

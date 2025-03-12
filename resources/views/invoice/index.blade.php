@@ -19,13 +19,6 @@
     </script>
 @endpush
 
-
-@section('action-btn')
-
-@endsection
-
-
-
 @section('content')
     <div class="row">
         <div class="float-end d-flex">

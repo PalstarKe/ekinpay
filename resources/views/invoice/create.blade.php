@@ -1,13 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts/layoutMaster')
 @section('page-title')
     {{__('Invoice Create')}}
 @endsection
 
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">{{__('Dashboard')}}</a></li>
-    <li class="breadcrumb-item"><a href="{{route('invoice.index')}}">{{__('Invoice')}}</a></li>
-    <li class="breadcrumb-item">{{__('Invoice Create')}}</li>
-@endsection
 @push('script-page')
     <script src="{{asset('js/jquery-ui.min.js')}}"></script>
     <script src="{{asset('js/jquery.repeater.min.js')}}"></script>
@@ -472,33 +467,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                {{--<div class="col-md-6">
                                     <div class="form-group">
                                         {{ Form::label('category_id', __('Category'),['class'=>'form-label']) }}<x-required></x-required>
                                         {{ Form::select('category_id', $category,null, array('class' => 'form-control select','required'=>'required')) }}
                                     </div>
-                                </div>
+                                </div>--}}
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         {{ Form::label('ref_number', __('Ref Number'),['class'=>'form-label']) }}
-                                        <div class="form-icon-user">
-                                            <span><i class="ti ti-joint"></i></span>
+                                        <!-- <div class="form-icon-user">
+                                            <span><i class="ti ti-joint"></i></span> -->
                                             {{ Form::text('ref_number', '', array('class' => 'form-control' , 'placeholder'=>__('Enter Ref NUmber'))) }}
-                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                 </div>
-{{--                                <div class="col-md-6">--}}
-{{--                                    <div class="form-check custom-checkbox mt-4">--}}
-{{--                                        <input class="form-check-input" type="checkbox" name="discount_apply" id="discount_apply">--}}
-{{--                                        <label class="form-check-label " for="discount_apply">{{__('Discount Apply')}}</label>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-md-6">--}}
-{{--                                    <div class="form-group">--}}
-{{--                                        {{Form::label('sku',__('SKU')) }}--}}
-{{--                                        {!!Form::text('sku', null,array('class' => 'form-control','required'=>'required')) !!}--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
                                 @if(!$customFields->isEmpty())
                                     {{-- <div class="col-md-6"> --}}
                                         {{-- <div class="tab-pane fade show" id="tab-2" role="tabpanel"> --}}
@@ -513,8 +496,8 @@
             </div>
         </div>
         <div class="col-12">
-            <h5 class=" d-inline-block mb-4">{{__('Product & Services')}}</h5>
-            <div class="card repeater">
+            {{--<h5 class=" d-inline-block mb-4">{{__('Product & Services')}}</h5>--}}
+            <div class="card repeater mt-4">
                 <div class="item-section py-2">
                     <div class="row justify-content-between align-items-center">
                         <div class="col-md-12 d-flex align-items-center justify-content-between justify-content-md-end">
@@ -544,9 +527,9 @@
                             <tbody class="ui-sortable" data-repeater-item>
                             <tr>
 
-                                <td width="25%" class="form-group pt-0">
+                                {{--<td width="25%" class="form-group pt-0">
                                     {{ Form::select('item', $product_services,'', array('class' => 'form-control select2 item','data-url'=>route('invoice.product'),'required'=>'required')) }}
-                                </td>
+                                </td>--}}
                                 <td>
                                     <div class="form-group price-input input-group search-form">
                                         {{ Form::text('quantity','', array('class' => 'form-control quantity','required'=>'required','placeholder'=>__('Qty'),'required'=>'required')) }}
@@ -640,9 +623,9 @@
                 </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <input type="button" value="{{__('Cancel')}}" onclick="location.href = '{{route("invoice.index")}}';" class="btn btn-secondary me-2">
-            <input type="submit" value="{{__('Create')}}" class="btn btn-primary">
+        <div class="modal-footer mt-4">
+            <button type="button" onclick="location.href = '{{route("invoice.index")}}';" class="btn btn-secondary me-2">{{__('Cancel')}}</button>
+            <button type="submit" class="btn btn-primary">{{__('Create')}} </button>
         </div>
         {{ Form::close() }}
 
