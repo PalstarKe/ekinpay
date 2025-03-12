@@ -99,7 +99,7 @@
                     $json[] = 'task-list-'.$lead_stage->id;
                 }
             @endphp
-            <div class="row kanban-wrapper horizontal-scroll-cards" data-containers='{!! json_encode($json) !!}' data-plugin="dragula">
+            <div class="row kanban-wrapper horizontal-scroll-cards g-3" data-containers='{!! json_encode($json) !!}' data-plugin="dragula">
                 @foreach($lead_stages as $lead_stage)
                     @php($leads = $lead_stage->lead())
                     <div class="col">
