@@ -3,7 +3,7 @@
     $dir = asset(Storage::url('uploads/plan'));
 @endphp
 @section('page-title')
-    {{ __('Manage Plan') }}
+    {{ __('Manage fup') }}
 @endsection
 @push('css-page')
 <style>
@@ -57,7 +57,7 @@
             <a href="#" data-size="lg" data-url="{{ route('plans.create') }}" data-ajax-popup="true"
                 data-bs-toggle="tooltip" title="{{ __('Create') }}" data-title="{{ __('Create New Plan') }}"
                 class="btn btn-sm btn-primary">
-                <i class="ti ti-plus"></i> {{ __('Create New Plan') }}
+                <i class="ti ti-plus"></i> {{ __('Create New Fup Policy') }}
             </a>
         @endcan
     </div>
