@@ -172,8 +172,8 @@ $configData = Helper::appClasses();
                     <div data-i18n="Packages">{{ __('Packages') }}</div>
                 </a>
             </li>
-            <li class="menu-item {{ Request::segment(1) == 'support' ? 'active' : '' }}">
-                <a href="{{ route('support.index') }}" class="menu-link">
+            <li class="menu-item {{ Request::segment(1) == 'fup' ? 'active' : '' }}">
+                <a href="{{ route('fup.index') }}" class="menu-link">
                     <i class="menu-icon ti ti-brand-speedtest"></i>
                     <div data-i18n="FUP">{{ __('FUP') }}</div>
                 </a>
@@ -184,8 +184,8 @@ $configData = Helper::appClasses();
                     <div data-i18n="Sites">{{ __('Sites') }}</div>
                 </a>
             </li>
-            <li class="menu-item {{ Request::segment(1) == 'support' ? 'active' : '' }}">
-                <a href="{{ route('support.index') }}" class="menu-link">
+            <li class="menu-item {{ Request::segment(1) == 'tr069' ? 'active' : '' }}">
+                <a href="{{ route('tr069.index') }}" class="menu-link">
                     <i class="menu-icon ti ti-brand-databricks"></i>
                     <div data-i18n="TR069">{{ __('TR069') }}</div>
                 </a>
