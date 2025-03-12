@@ -20,11 +20,6 @@
 
 @endphp
 
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Settings') }}</li>
-@endsection
-
 @push('css-page')
     <link rel="stylesheet" href="{{ asset('css/summernote/summernote-bs4.css') }}">
 @endpush
@@ -4563,10 +4558,10 @@
                                             </a>
                                             <div class="dropdown-menu dash-h-dropdown dropdown-menu-end"
                                                 aria-labelledby="dropdownLanguage1">
-                                                @foreach ($currantLang as $code => $noclangs)
+                                                {{-- @foreach ($currantLang as $code => $noclangs)
                                                     <a href="{{ route('get.noc.language', ['noclangs' => $code, 'explangs' => $explang, 'offerlangs' => $offerlang, 'joininglangs' => $joininglang]) }}"
                                                         class="dropdown-item {{ $noclangs == $code ? 'text-primary' : '' }}">{{ ucfirst($noclangs) }}</a>
-                                                @endforeach
+                                                @endforeach --}}
                                             </div>
                                         </li>
 

@@ -547,17 +547,17 @@ class SystemController extends Controller
             $ips = IpRestrict::where('created_by', \Auth::user()->creatorId())->get();
             // $languages = Utility::languages();
 
-            //offer letter
-            $Offerletter = GenerateOfferLetter::all();
-            $currOfferletterLang = GenerateOfferLetter::where('created_by', \Auth::user()->id)->where('lang', $offerlang)->first();
+            // //offer letter
+            // $Offerletter = GenerateOfferLetter::all();
+            // $currOfferletterLang = GenerateOfferLetter::where('created_by', \Auth::user()->id)->where('lang', $offerlang)->first();
 
-            //joining letter
-            $Joiningletter = JoiningLetter::all();
-            $currjoiningletterLang = JoiningLetter::where('created_by', \Auth::user()->id)->where('lang', $joininglang)->first();
+            // //joining letter
+            // $Joiningletter = JoiningLetter::all();
+            // $currjoiningletterLang = JoiningLetter::where('created_by', \Auth::user()->id)->where('lang', $joininglang)->first();
 
-            //Experience Certificate
-            $experience_certificate = ExperienceCertificate::all();
-            $curr_exp_cetificate_Lang = ExperienceCertificate::where('created_by', \Auth::user()->id)->where('lang', $explang)->first();
+            // //Experience Certificate
+            // $experience_certificate = ExperienceCertificate::all();
+            // $curr_exp_cetificate_Lang = ExperienceCertificate::where('created_by', \Auth::user()->id)->where('lang', $explang)->first();
 
             //NOC
             $noc_certificate = NOC::all();
@@ -573,14 +573,14 @@ class SystemController extends Controller
                 'timezones',
                 'ips',
                 'EmailTemplates',
-                'currOfferletterLang',
-                'Offerletter',
-                'offerlang',
-                'Joiningletter',
-                'currjoiningletterLang',
-                'joininglang',
-                'experience_certificate',
-                'curr_exp_cetificate_Lang',
+                // 'currOfferletterLang',
+                // 'Offerletter',
+                // 'offerlang',
+                // 'Joiningletter',
+                // 'currjoiningletterLang',
+                // 'joininglang',
+                // 'experience_certificate',
+                // 'curr_exp_cetificate_Lang',
                 'explang',
                 'noc_certificate',
                 'currnocLang',
