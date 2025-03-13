@@ -183,7 +183,7 @@ class NasController extends Controller
                     // Append new NAS entry
                     $config = "\n\n##############################################\n";
                     $config .= "client $staticIp {\n";
-                    $config .= "\tipaddr = $staticIp\n\tsecret = $nasSecret\n\tcoa_server = yes\n}\n";
+                    $config .= "\tipaddr = $staticIp\n\tsecret = $nasSecret\n}\n";
                     $config .= "##############################################\n";
 
                     $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$config' >> /etc/freeradius/clients.conf\"");

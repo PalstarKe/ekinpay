@@ -124,8 +124,8 @@ class CustomerController extends Controller
             ]);
             $rules = [
                 'fullname'  => 'required|string|max:255',
-                'username'  => 'nullable|string|max:255|unique:customers,username',
-                'account'   => 'nullable|string|max:255|unique:customers,account',
+                'username'  => 'nullable|string|max:255',
+                'account'   => 'nullable|string|max:255',
                 'email'     => [
                     'required',
                     'email',
@@ -724,60 +724,124 @@ class CustomerController extends Controller
     {
         return view('customer.import');
     }
-
+    
     public function customerImportdata(Request $request)
     {
         session_start();
+    
+        if (!$request->hasFile('csv_file')) {
+            return response()->json([
+                'html' => true,
+                'response' => '<h3 class="text-danger text-center">No file uploaded</h3></br>',
+            ]);
+        }
+    
+        $file = $request->file('csv_file');
+    
+        $file_data = [];
+        if (($handle = fopen($file->getPathname(), 'r')) !== false) {
+            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                $file_data[] = $row;
+            }
+            fclose($handle);
+        }
+    
+        if (empty($file_data) || count($file_data) < 2) {
+            return response()->json([
+                'html' => true,
+                'response' => '<h3 class="text-danger text-center">File is empty or only contains headers</h3></br>',
+            ]);
+        }
+    
+        $headers = array_map('strtolower', $file_data[0]); 
+        unset($file_data[0]); 
+    
         $html = '<h3 class="text-danger text-center">Below data is not inserted</h3></br>';
         $flag = 0;
         $html .= '<table class="table table-bordered"><tr>';
-        
-        try {
-            $request = $request->data;
-            $file_data = $_SESSION['file_data'];
-            unset($_SESSION['file_data']);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'html' => true,
-                'response' => '<h3 class="text-danger text-center">Something went wrong, Please try again</h3></br>',
-            ]);
-        }
-
-        foreach ($file_data as $key => $row) {
-            $customerByEmail = Customer::where('email', $row[$request['email']])->first();
-            
+    
+        foreach ($file_data as $row) {
+            $rowData = array_combine($headers, $row);
+            if (!$rowData) continue;
+    
+            $customerByEmail = Customer::where('email', $rowData['email'] ?? null)->first();
+    
             if (empty($customerByEmail)) {
                 try {
+                    if (empty($rowData['account'])) {
+                        $latest = Customer::where('created_by', \Auth::user()->creatorId())->latest()->first();
+    
+                        if (!$latest || empty($latest->account)) {
+                            $customerN = Auth::user()->customerNumberFormat(1);
+                        } else {
+                            preg_match('/\d+$/', $latest->account, $matches);
+                            $nextNumber = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
+                            $customerN = Auth::user()->customerNumberFormat($nextNumber);
+                        }
+                        $rowData['account'] = $customerN;
+                    }
+    
                     $customerData = new Customer();
                     $customerData->customer_id      = $this->customerNumber();
-                    $customerData->fullname         = $row[$request['fullname']] ?? null;
-                    $customerData->username         = $row[$request['username']] ?? null;
-                    $customerData->account          = $row[$request['account']] ?? null;
-                    $customerData->email            = $row[$request['email']] ?? null;
-                    $customerData->tax_number       = $row[$request['tax_number']] ?? null;
-                    $customerData->contact          = $row[$request['contact']] ?? null;
-                    $customerData->avatar           = $row[$request['avatar']] ?? '';
+                    $customerData->fullname         = $rowData['fullname'] ?? null;
+                    $customerData->username         = $rowData['username'] ?? null;
+                    $customerData->account          = $rowData['account'];
+                    $customerData->email            = $rowData['email'] ?? null;
+                    $customerData->expiry_extended  = $rowData['expiry_extended'] ?? null;
+                    $customerData->contact          = $rowData['contact'] ?? null;
+                    $customerData->avatar           = $rowData['avatar'] ?? '';
                     $customerData->created_by       = \Auth::user()->creatorId();
                     $customerData->is_active        = 1;
-                    $customerData->service          = $row[$request['service']] ?? null;
-                    $customerData->auto_renewal     = $row[$request['auto_renewal']] ?? 1;
-                    $customerData->mac_address      = $row[$request['mac_address']] ?? null;
-                    $customerData->static_ip        = $row[$request['static_ip']] ?? null;
-                    $customerData->sms_group        = $row[$request['sms_group']] ?? null;
-                    $customerData->charges          = $row[$request['charges']] ?? null;
-                    $customerData->package          = $row[$request['package']] ?? null;
-                    $customerData->apartment        = $row[$request['apartment']] ?? null;
-                    $customerData->location         = $row[$request['location']] ?? null;
-                    $customerData->housenumber      = $row[$request['housenumber']] ?? null;
-                    $customerData->expiry           = $row[$request['expiry']] ?? null;
-                    $customerData->expiry_status    = $row[$request['expiry_status']] ?? null;
-                    $customerData->lang             = $row[$request['lang']] ?? 'en';
-                    $customerData->balance          = $row[$request['balance']] ?? '0.00';
+                    $customerData->service          = $rowData['service'] ?? null;
+                    $customerData->auto_renewal     = $rowData['auto_renewal'] ?? 1;
+                    $customerData->mac_address      = $rowData['mac_address'] ?? null;
+                    $customerData->static_ip        = $rowData['static_ip'] ?? null;
+                    $customerData->sms_group        = $rowData['sms_group'] ?? null;
+                    $customerData->charges          = $rowData['charges'] ?? null;
+                    $customerData->package          = $rowData['package'] ?? null;
+                    $customerData->apartment        = $rowData['apartment'] ?? null;
+                    $customerData->location         = $rowData['location'] ?? null;
+                    $customerData->housenumber      = $rowData['housenumber'] ?? null;
+                    $customerData->expiry           = $rowData['expiry'] ?? null;
+                    $customerData->expiry_status    = $rowData['expiry_status'] ?? null;
+                    $customerData->lang             = $rowData['lang'] ?? 'en';
+                    $customerData->balance          = $rowData['balance'] ?? '0.00';
                     $customerData->save();
+    
+                    $radiusUsername = $rowData['username'] ?? $rowData['account'];
+                    $radiusPassword = $rowData['password'] ?? 'defaultpass';
+                    $expiryDate = $rowData['expiry'] ?? null;
+                    $importPackage = $rowData['package'] ?? null;
+                    $uploadDate = now();
+                    $createdBy = \Auth::user()->creatorId();
+    
+                    $package = Package::where('name_plan', $importPackage)->first();
+                    $group_name = $package ? 'package_' . $package->id : 'Expired_Plan';
+    
+                    if ($expiryDate && strtotime($expiryDate) < strtotime($uploadDate)) {
+                        $group_name = 'Expired_Plan';
+                    }
+    
+                    \DB::connection('radius')->table('radcheck')->insert([
+                        'username' => $radiusUsername,
+                        'attribute' => 'Cleartext-Password',
+                        'op' => ':=',
+                        'value' => $radiusPassword,
+                        'created_by' => $createdBy,
+                    ]);
+    
+                    \DB::connection('radius')->table('radusergroup')->insert([
+                        'username' => $radiusUsername,
+                        'groupname' => $group_name,
+                        'priority' => 1,
+                        'created_by' => $createdBy,
+                    ]);
+    
                 } catch (\Exception $e) {
+                    \Log::error("Customer import error: " . $e->getMessage());
                     $flag = 1;
                     $html .= '<tr>';
-                    foreach ($row as $column) {
+                    foreach ($rowData as $column) {
                         $html .= '<td>' . ($column ?? '-') . '</td>';
                     }
                     $html .= '</tr>';
@@ -785,22 +849,21 @@ class CustomerController extends Controller
             } else {
                 $flag = 1;
                 $html .= '<tr>';
-                foreach ($row as $column) {
+                foreach ($rowData as $column) {
                     $html .= '<td>' . ($column ?? '-') . '</td>';
                 }
                 $html .= '</tr>';
             }
         }
-
+    
         $html .= '</table><br />';
-
+    
         return response()->json([
             'html' => $flag === 1,
             'response' => $flag === 1 ? $html : 'Data Imported Successfully',
         ]);
     }
-
-
+    
     public function searchCustomers(Request $request)
     {
         if (\Illuminate\Support\Facades\Auth::user()->can('manage customer')) {
