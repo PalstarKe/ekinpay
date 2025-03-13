@@ -887,146 +887,7 @@ class CustomerController extends Controller
         
         $this->info('Expired users updated successfully.');
     }
-    // public function invoiceNumber()
-    // {
-    //     $latest = Invoice::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
-    //     if (!$latest) {
-    //         return 1;
-    //     }
-
-    //     return $latest->invoice_id + 1;
-    // }
-    // public function useBalance(Request $request, $customerId)
-    // {
-    //     $request->validate([
-    //         'amount' => 'required|numeric|min:1',
-    //         'type' => 'required|in:installation,package',
-    //     ]);
-
-    //     $customer = Customer::findOrFail($customerId);
-    //     if ($customer->balance < $request->amount) {
-    //         return back()->with('error', 'Insufficient balance');
-    //     }
-    //     $invoice = Invoice::where('customer_id', $customer->id)
-    //                     ->where('category', $request->type)
-    //                     ->where('status', 'Unpaid')
-    //                     ->first();
-
-    //     if (!$invoice) {
-    //         $invoice = Invoice::create([
-    //             'invoice_id' => $this->invoiceNumber(),
-    //             'customer_id' => $customer->id,
-    //             'issue_date' => now(),
-    //             'due_date' => now(),
-    //             'ref_number' => \Auth::user()->invoiceNumberFormat($this->invoiceNumber()),
-    //             'status' => 'Unpaid',
-    //             'category' => $request->type,
-    //             'created_by' => auth()->id(),
-    //         ]);
-
-    //     }
-
-    //     $customer->balance -= $request->amount;
-    //     $customer->save();
-
-    //     // Record payment in InvoicePayment table
-    //     InvoicePayment::create([
-    //         'customer_id' => $customer->id,
-    //         'invoice_id' => $invoice->id,
-    //         'amount' => $request->amount,
-    //         'payment_method' => 'Balance',
-    //         'date' => now(),
-    //         'created_by' => auth()->id(),
-    //     ]);
-
-    //     // Update invoice status if fully paid
-    //     if ($invoice->getDue() <= 0) {
-    //         $invoice->status = 'Paid';
-    //         $invoice->save();
-    //     }
-
-    //     return back()->with('success', 'Balance applied successfully!');
-    // }
-    // public function useBalance(Request $request, $customerId)
-    // {
-    //     $request->validate([
-    //         'amount' => 'required|numeric|min:1',
-    //         'type' => 'required|in:installation,package',
-    //     ]);
-
-    //     $customer = Customer::findOrFail($customerId);
-
-    //     if ($customer->balance < $request->amount) {
-    //         return back()->with('error', 'Insufficient balance');
-    //     }
-
-    //     // Always create a new invoice
-    //     $invoice = Invoice::create([
-    //         'invoice_id' => $this->invoiceNumber(),
-    //         'customer_id' => $customer->id,
-    //         'issue_date' => now(),
-    //         'due_date' => now(),
-    //         'send_date' => now(),
-    //         'ref_number' => \Auth::user()->invoiceNumberFormat($this->invoiceNumber()),
-    //         'status' => 'Unpaid',
-    //         'category' => $request->type,
-    //         'created_by' => auth()->id(),
-    //     ]);
-
-    //     // Deduct customer balance
-    //     $customer->balance -= $request->amount;
-    //     $customer->save();
-
-    //     // Record the payment
-    //     $invoicePayment = InvoicePayment::create([
-    //         'customer_id' => $customer->id,
-    //         'invoice_id' => $invoice->id,
-    //         'amount' => $request->amount,
-    //         'payment_method' => 'Balance',
-    //         'date' => now(),
-    //         'created_by' => auth()->id(),
-    //     ]);
-
-    //     // Update invoice status if fully paid
-    //     if ($invoice->getDue() <= 0) {
-    //         $invoice->status = 'Paid';
-    //         $invoice->save();
-    //     }
-
-    //     // Create a financial transaction
-    //     $invoicePayment->user_id = $invoice->customer_id;
-    //     $invoicePayment->user_type = 'Customer';
-    //     $invoicePayment->type = 'Partial';
-    //     $invoicePayment->created_by = auth()->id();
-    //     $invoicePayment->payment_id = $invoicePayment->id;
-    //     $invoicePayment->category = 'Invoice';
-
-    //     Transaction::addTransaction($invoicePayment);
-
-    //     // Update user balance tracking
-    //     Utility::updateUserBalance('customer', $invoice->customer_id, $request->amount, 'credit');
-
-    //     // Record bank account transaction
-    //     Utility::bankAccountBalance(auth()->id(), $request->amount, 'credit');
-
-    //     // Send notifications if enabled
-    //     $settings = Utility::settings();
-    //     if ($settings['new_invoice_payment'] == 1) {
-    //         $customer = Customer::where('id', $invoice->customer_id)->first();
-    //         $invoicePaymentArr = [
-    //             'invoice_payment_name' => $customer->name,
-    //             'invoice_payment_amount' => $request->amount,
-    //             'invoice_payment_date' => now()->format('Y-m-d'),
-    //             'payment_dueAmount' => $invoice->getDue(),
-    //             'invoice_number' => \Auth::user()->invoiceNumberFormat($invoice->invoice_id),
-    //             'invoice_payment_method' => 'Balance',
-    //         ];
-
-    //         Utility::sendEmailTemplate('new_invoice_payment', [$customer->id => $customer->email], $invoicePaymentArr);
-    //     }
-
-    //     return back()->with('success', 'Transaction completed successfully!');
-    // }
+   
     public function useBalance(Request $request, $customerId)
     {
         $request->validate([
@@ -1044,8 +905,8 @@ class CustomerController extends Controller
         $invoice = CustomHelper::generateInvoice($customer, $request->type, $request->amount);
 
         // Deduct customer balance
-        $customer->balance -= $request->amount;
-        $customer->save();
+        // $customer->balance -= $request->amount;
+        // $customer->save();
 
         // Record the payment
         $invoicePayment = CustomHelper::recordInvoicePayment($customer, $invoice, $request->amount);

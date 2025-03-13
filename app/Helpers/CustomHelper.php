@@ -30,7 +30,6 @@ class CustomHelper
                 $customer->mac_address = $mac;
                 $customer->save();
 
-                // Only insert into radcheck when first locking
                 DB::connection('radius')->table('radcheck')->updateOrInsert(
                     ['username' => $customer->username, 'attribute' => 'Calling-Station-Id'],
                     ['op' => '==', 'value' => $customer->mac_address]
@@ -38,6 +37,7 @@ class CustomHelper
             }
         }
     }
+    
     public static function updatePlan($customer)
     {
         $package = Package::where('name_plan', $customer->package)->firstOrFail();
