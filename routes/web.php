@@ -89,8 +89,6 @@ Route::get('/customer/paystack/{pay_id}/{invoice_id}', [PaystackPaymentControlle
 Route::post('/customer-pay-with-flaterwave', [FlutterwavePaymentController::class, 'customerPayWithFlutterwave'])->name('customer.pay.with.flaterwave');
 Route::get('/customer/flaterwave/{txref}/{invoice_id}', [FlutterwavePaymentController::class, 'getInvoicePaymentStatus'])->name('customer.flaterwave');
 
-// Route::post('/customer-pay-with-razorpay', [RazorpayPaymentController::class, 'customerPayWithRazorpay'])->name('customer.pay.with.razorpay');
-// Route::get('/customer/razorpay/{txref}/{invoice_id}', [RazorpayPaymentController::class, 'getInvoicePaymentStatus'])->name('customer.razorpay');
 /***********************************************************************************************************************************************/
 
 // Invoice Payment Gateways
@@ -222,7 +220,7 @@ Route::group(['middleware' => ['verified']], function () {
         ],
         function () {
             Route::resource('customer', CustomerController::class);
-            Route::post('customer/{id}/update-expiry', [CustomerController::class, 'updateExpiry'])->name('customer.updateExpiry')->middleware(['auth']);
+            Route::post('customer/{id}/update-expiry', [CustomerController::class, 'updateExpiry'])->name('customer.updateExpiry');
             Route::get('customer/{id}/update-extend', [CustomerController::class, 'updateExtend'])->name('customer.updateExtend');
             Route::post('customer/{id}/update-balance', [CustomerController::class, 'depositCash'])->name('customer.depositCash');
             Route::post('customer/{id}/use-balance', [CustomerController::class, 'useBalance'])->name('customer.useBalance');
@@ -417,7 +415,6 @@ Route::group(['middleware' => ['verified']], function () {
     Route::get('import/leads/modal', [LeadController::class, 'fileImportModal'])->name('leads.import.modal');
     Route::post('import/leads', [LeadController::class, 'leadImportdata'])->name('leads.import.data');
 
-
     // Lead Calls
     Route::get('/leads/{id}/call', [LeadController::class, 'callCreate'])->name('leads.calls.create')->middleware(['auth']);
     Route::post('/leads/{id}/call', [LeadController::class, 'callStore'])->name('leads.calls.store')->middleware(['auth']);
@@ -545,18 +542,11 @@ Route::group(['middleware' => ['verified']], function () {
     Route::post('/plan-pay-with-flaterwave', [FlutterwavePaymentController::class, 'planPayWithFlutterwave'])->name('plan.pay.with.flaterwave')->middleware(['auth']);
     Route::get('/plan/flaterwave/{txref}/{plan_id}', [FlutterwavePaymentController::class, 'getPaymentStatus'])->name('plan.flaterwave');
 
-    // Route::post('/plan-pay-with-razorpay', [RazorpayPaymentController::class, 'planPayWithRazorpay'])->name('plan.pay.with.razorpay')->middleware(['auth']);
-    // Route::get('/plan/razorpay/{txref}/{plan_id}', [RazorpayPaymentController::class, 'getPaymentStatus'])->name('plan.razorpay');
-
     // ---------------------********************************-----------------------
     //plan-order
     Route::post('order/{id}/changeaction', [BankTransferPaymentController::class, 'changeStatus'])->name('order.changestatus');
     Route::delete('order/{id}', [BankTransferPaymentController::class, 'orderDestroy'])->name('order.destroy');
     Route::get('order/{id}/action', [BankTransferPaymentController::class, 'action'])->name('order.action');
-
-
-    //    Route::post('plan-pay-with-paypal', [PaypalController::class, 'planPayWithPaypal'])->name('plan.pay.with.paypal')->middleware(['auth']);
-    //    Route::get('{id}/plan-get-payment-status', [PaypalController::class, 'planGetPaymentStatus'])->name('plan.get.payment.status')->middleware(['auth']);
 
     Route::group(
         [
@@ -584,6 +574,9 @@ Route::group(['middleware' => ['verified']], function () {
     Route::get('export/customer', [CustomerController::class, 'export'])->name('customer.export');
     Route::get('import/customer/file', [CustomerController::class, 'importFile'])->name('customer.file.import');
     Route::post('import/customer', [CustomerController::class, 'customerImportdata'])->name('customer.import.data');
+    Route::post('csv/import', [ImportController::class, 'fileImport'])->name('csv.import');
+    Route::post('/customer/import', [CustomerController::class, 'directCustomerImport'])->name('customer.import');
+    Route::get('import/csv/modal/', [ImportController::class, 'fileImportModal'])->name('csv.import.modal');
     // Route::post('import/customer', [CustomerController::class, 'import'])->name('customer.import');
 
     //Storage Setting
@@ -592,6 +585,7 @@ Route::group(['middleware' => ['verified']], function () {
 
 
     //NOC
+ 
 
     Route::post('setting/noc/{lang?}', [SystemController::class, 'NOCupdate'])->name('noc.update');
     Route::get('setting/noc', [SystemController::class, 'companyIndex'])->name('get.noc.language');

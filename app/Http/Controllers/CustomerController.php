@@ -26,6 +26,8 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
 
 class CustomerController extends Controller
 {
@@ -724,144 +726,275 @@ class CustomerController extends Controller
     {
         return view('customer.import');
     }
+
+    // public function customerImportdata(Request $request)
+    // {
+    //     // session_start();
+    // Log::info('Session Data:', ['file_data' => $_SESSION['file_data'] ?? 'No session data']);
+
+    // if (!isset($_SESSION['file_data'])) {
+    //     return response()->json(['error' => 'No session data found!'], 400);
+    // }
+
+    // $html = '<h3 class="text-danger text-center">Below data is not inserted</h3></br>';
+    // $flag = 0;
+    // $html .= '<table class="table table-bordered"><tr>';
+
+    // Log::info('Session Data:', ['file_data' => session()->get('file_data')]);
+
+    // try {
+    //     // ✅ Ensure $requestData is set before usage
+    //     $requestData = $request->data ?? [];
+        
+    //     $file_data = session()->get('file_data', []);
+    //     session()->forget('file_data');
+    // } catch (\Throwable $th) {
+    //     $html = '<h3 class="text-danger text-center">Something went wrong, Please try again</h3></br>';
+    //     return response()->json([
+    //         'html' => true,
+    //         'response' => $html,
+    //     ]);
+    // }
+    //     // Log::info('customerImportdata function started.');
+
+    //     // // Retrieve session data
+    //     // $file_data = session('file_data', []);
     
-    public function customerImportdata(Request $request)
+    //     // if (empty($file_data)) {
+    //     //     Log::error('No file data found in session.');
+    //     //     return response()->json(['error' => 'No file data found in session.'], 400);
+    //     // }
+    
+    //     // Log::info('File data retrieved from session.', ['rows' => count($file_data)]);
+    
+    //     foreach ($file_data as $key => $row) {
+    //         Log::info('Processing row:', ['row' => $row]);
+
+
+    //         $customerByUsername = Customer::where('username', $row[$requestData['username']] ?? null)->first();
+    //         $expiryDate = $row[$requestData['expiry']] ?? now()->addDays(7)->toDateString();
+
+    //         if (!$customerByUsername) {
+    //             try {
+    //                 if (empty($row[$requestData['account']])) {
+    //                     $latest = Customer::where('created_by', \Auth::user()->creatorId())->latest()->first();
+    //                     $nextNumber = ($latest && preg_match('/\d+$/', $latest->account, $matches))
+    //                         ? ((int)$matches[0] + 1)
+    //                         : 1;
+    //                     $row[$requestData['account']] = Auth::user()->customerNumberFormat($nextNumber);
+    //                 }
+    //                 $customerData = new Customer();
+    //                 $customerData->customer_id = $this->customerNumber();
+    //                 $customerData->fullname = $row[$requestData['fullname']] ?? null;
+    //                 $customerData->username = $row[$requestData['username']] ?? null;
+    //                 $customerData->account = $row[$requestData['account']];
+    //                 $customerData->email = $row[$requestData['email']] ?? null;
+    //                 $customerData->expiry_extended = $row[$requestData['expiry_extended']] ?? null;
+    //                 $customerData->contact = $row[$requestData['contact']] ?? null;
+    //                 $customerData->avatar = $row[$requestData['avatar']] ?? '';
+    //                 $customerData->created_by = \Auth::user()->creatorId();
+    //                 $customerData->is_active = 1;
+    //                 $customerData->service = $row[$requestData['service']] ?? null;
+    //                 $customerData->auto_renewal = $row[$requestData['auto_renewal']] ?? 1;
+    //                 $customerData->mac_address = $row[$requestData['mac_address']] ?? null;
+    //                 $customerData->static_ip = $row[$requestData['static_ip']] ?? null;
+    //                 $customerData->sms_group = $row[$requestData['sms_group']] ?? null;
+    //                 $customerData->charges = $row[$requestData['charges']] ?? null;
+    //                 $customerData->package = $row[$requestData['package']] ?? null;
+    //                 $customerData->apartment = $row[$requestData['apartment']] ?? null;
+    //                 $customerData->location = $row[$requestData['location']] ?? null;
+    //                 $customerData->housenumber = $row[$requestData['housenumber']] ?? null;
+    //                 $customerData->expiry = $expiryDate;
+    //                 $customerData->expiry_status = 'on';
+    //                 $customerData->lang = $row[$requestData['lang']] ?? 'en';
+    //                 $customerData->balance = $row[$requestData['balance']] ?? '0.00';
+    //                 $customerData->save();
+
+    //                 Log::info('Customer Added:', ['username' => $customerData->username]);
+
+
+    //                 $radiusUsername = $row[$requestData['username']] ?? $row[$requestData['account']];
+    //                 $radiusPassword = $row[$requestData['password']] ?? 'defaultpass';
+    //                 $importPackage = $row[$requestData['package']] ?? null;
+    //                 $createdBy = \Auth::user()->creatorId();
+    //                 $radiusGroup = 'Expired_Plan';
+
+    //                 if ($importPackage) {
+    //                     $package = Package::where('name_plan', $importPackage)->first();
+    //                     if ($package) {
+    //                         $radiusGroup = 'package_' . $package->id;
+    //                     }
+    //                 }
+
+    //                 if (strtotime($expiryDate) < strtotime(now())) {
+    //                     $radiusGroup = 'Expired_Plan';
+    //                 }
+
+    //                 \DB::connection('radius')->table('radcheck')->insert([
+    //                     'username' => $radiusUsername,
+    //                     'attribute' => 'Cleartext-Password',
+    //                     'op' => ':=',
+    //                     'value' => $radiusPassword,
+    //                     'created_by' => $createdBy,
+    //                 ]);
+
+    //                 \DB::connection('radius')->table('radusergroup')->insert([
+    //                     'username' => $radiusUsername,
+    //                     'groupname' => $radiusGroup,
+    //                     'priority' => 1,
+    //                     'created_by' => $createdBy,
+    //                 ]);
+    //                 Log::info('FreeRADIUS Added:', ['username' => $radiusUsername, 'group' => $radiusGroup]);
+
+
+    //             } catch (\Exception $e) {
+    //                 Log::error("Customer import error: " . $e->getMessage());
+    //                 $flag = 1;
+    //                 $html .= '<tr>';
+    //                 foreach ($requestData as $column) {
+    //                     $html .= '<td>' . ($row[$column] ?? '-') . '</td>';
+    //                 }
+    //                 $html .= '</tr>';
+    //             }
+    //         } else {
+    //             $flag = 1;
+    //             $html .= '<tr>';
+    //             foreach ($requestData as $column) {
+    //                 $html .= '<td>' . ($row[$column] ?? '-') . '</td>';
+    //             }
+    //             $html .= '</tr>';
+    //         }
+    //     }
+
+    //     $html .= '</table><br />';
+
+    //     return response()->json([
+    //         'html' => $flag === 1,
+    //         'response' => $flag === 1 ? $html : 'Data Imported Successfully',
+    //     ]);
+    // }
+    // // public function customerImportdata(Request $request)
+    // // {
+    // //     return response()->json(['message' => 'Function called!']);
+    // // }
+    
+    public function directCustomerImport(Request $request)
     {
-        session_start();
-    
-        if (!$request->hasFile('csv_file')) {
-            return response()->json([
-                'html' => true,
-                'response' => '<h3 class="text-danger text-center">No file uploaded</h3></br>',
+        try {
+            $request->validate([
+                'file' => 'required|mimes:csv,txt|max:2048'
             ]);
-        }
-    
-        $file = $request->file('csv_file');
-    
-        $file_data = [];
-        if (($handle = fopen($file->getPathname(), 'r')) !== false) {
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                $file_data[] = $row;
+
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+
+            $handle = fopen($filePath, "r");
+            if (!$handle) {
+                return response()->json(['error' => 'Unable to open CSV file'], 400);
+            }
+
+            $headers = fgetcsv($handle);
+            if (!$headers) {
+                return response()->json(['error' => 'CSV file is empty or missing headers'], 400);
+            }
+
+            $rows = [];
+            while (($row = fgetcsv($handle)) !== false) {
+                if (count($row) == count($headers)) {
+                    $rows[] = array_combine($headers, $row);
+                }
             }
             fclose($handle);
-        }
-    
-        if (empty($file_data) || count($file_data) < 2) {
-            return response()->json([
-                'html' => true,
-                'response' => '<h3 class="text-danger text-center">File is empty or only contains headers</h3></br>',
-            ]);
-        }
-    
-        $headers = array_map('strtolower', $file_data[0]); 
-        unset($file_data[0]); 
-    
-        $html = '<h3 class="text-danger text-center">Below data is not inserted</h3></br>';
-        $flag = 0;
-        $html .= '<table class="table table-bordered"><tr>';
-    
-        foreach ($file_data as $row) {
-            $rowData = array_combine($headers, $row);
-            if (!$rowData) continue;
-    
-            $customerByEmail = Customer::where('email', $rowData['email'] ?? null)->first();
-    
-            if (empty($customerByEmail)) {
-                try {
-                    if (empty($rowData['account'])) {
-                        $latest = Customer::where('created_by', \Auth::user()->creatorId())->latest()->first();
-    
-                        if (!$latest || empty($latest->account)) {
-                            $customerN = Auth::user()->customerNumberFormat(1);
-                        } else {
-                            preg_match('/\d+$/', $latest->account, $matches);
-                            $nextNumber = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
-                            $customerN = Auth::user()->customerNumberFormat($nextNumber);
-                        }
-                        $rowData['account'] = $customerN;
-                    }
-    
-                    $customerData = new Customer();
-                    $customerData->customer_id      = $this->customerNumber();
-                    $customerData->fullname         = $rowData['fullname'] ?? null;
-                    $customerData->username         = $rowData['username'] ?? null;
-                    $customerData->account          = $rowData['account'];
-                    $customerData->email            = $rowData['email'] ?? null;
-                    $customerData->expiry_extended  = $rowData['expiry_extended'] ?? null;
-                    $customerData->contact          = $rowData['contact'] ?? null;
-                    $customerData->avatar           = $rowData['avatar'] ?? '';
-                    $customerData->created_by       = \Auth::user()->creatorId();
-                    $customerData->is_active        = 1;
-                    $customerData->service          = $rowData['service'] ?? null;
-                    $customerData->auto_renewal     = $rowData['auto_renewal'] ?? 1;
-                    $customerData->mac_address      = $rowData['mac_address'] ?? null;
-                    $customerData->static_ip        = $rowData['static_ip'] ?? null;
-                    $customerData->sms_group        = $rowData['sms_group'] ?? null;
-                    $customerData->charges          = $rowData['charges'] ?? null;
-                    $customerData->package          = $rowData['package'] ?? null;
-                    $customerData->apartment        = $rowData['apartment'] ?? null;
-                    $customerData->location         = $rowData['location'] ?? null;
-                    $customerData->housenumber      = $rowData['housenumber'] ?? null;
-                    $customerData->expiry           = $rowData['expiry'] ?? null;
-                    $customerData->expiry_status    = $rowData['expiry_status'] ?? null;
-                    $customerData->lang             = $rowData['lang'] ?? 'en';
-                    $customerData->balance          = $rowData['balance'] ?? '0.00';
-                    $customerData->save();
-    
-                    $radiusUsername = $rowData['username'] ?? $rowData['account'];
-                    $radiusPassword = $rowData['password'] ?? 'defaultpass';
-                    $expiryDate = $rowData['expiry'] ?? null;
-                    $importPackage = $rowData['package'] ?? null;
-                    $uploadDate = now();
-                    $createdBy = \Auth::user()->creatorId();
-    
-                    $package = Package::where('name_plan', $importPackage)->first();
-                    $group_name = $package ? 'package_' . $package->id : 'Expired_Plan';
-    
-                    if ($expiryDate && strtotime($expiryDate) < strtotime($uploadDate)) {
-                        $group_name = 'Expired_Plan';
-                    }
-    
-                    \DB::connection('radius')->table('radcheck')->insert([
-                        'username' => $radiusUsername,
-                        'attribute' => 'Cleartext-Password',
-                        'op' => ':=',
-                        'value' => $radiusPassword,
-                        'created_by' => $createdBy,
-                    ]);
-    
-                    \DB::connection('radius')->table('radusergroup')->insert([
-                        'username' => $radiusUsername,
-                        'groupname' => $group_name,
-                        'priority' => 1,
-                        'created_by' => $createdBy,
-                    ]);
-    
-                } catch (\Exception $e) {
-                    \Log::error("Customer import error: " . $e->getMessage());
-                    $flag = 1;
-                    $html .= '<tr>';
-                    foreach ($rowData as $column) {
-                        $html .= '<td>' . ($column ?? '-') . '</td>';
-                    }
-                    $html .= '</tr>';
+
+            foreach ($rows as $data) {
+                $email = isset($data['username']) ? strtolower($data['username']) . '@isp.net' : null;
+
+                $latest = Customer::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+
+                if (!$latest || empty($latest->account)) {
+                    $customerN = Auth::user()->customerNumberFormat(1); // Start from 1 if no existing account
+                } else {
+                    // Extract the numeric part of the account and increment it
+                    preg_match('/\d+$/', $latest->account, $matches);
+                    $nextNumber = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
+
+                    $customerN = Auth::user()->customerNumberFormat($nextNumber);
                 }
-            } else {
-                $flag = 1;
-                $html .= '<tr>';
-                foreach ($rowData as $column) {
-                    $html .= '<td>' . ($column ?? '-') . '</td>';
-                }
-                $html .= '</tr>';
+
+                // Set expiry date (default: 7 days from now)
+                $expiryDate = now()->addDays(7)->toDateString();
+
+                $customer = new Customer();
+                $customer->customer_id = $this->customerNumber();
+                $customer->fullname = $data['fullname'] ?? null;
+                $customer->password = $data['password'] ?? null;
+                $customer->username = $data['username'] ?? null;
+                $customer->account = $customerN;
+                $customer->email = $email;
+                $customer->contact = $data['contact'] ?? null;
+                $customer->service = $data['service'] ?? null;
+                $customer->package = $data['package'] ?? null;
+                $customer->apartment = $data['apartment'] ?? null;
+                $customer->location = $data['location'] ?? null;
+                $customer->housenumber = $data['housenumber'] ?? null;
+                $customer->expiry = $expiryDate;
+                $customer->expiry_status = 'on';
+                $customer->lang = $data['lang'] ?? 'en';
+                $customer->balance = $data['balance'] ?? '0.00';
+                $customer->mac_address = $data['mac_address'] ?? null;
+                $customer->static_ip = $data['static_ip'] ?? null;
+                $customer->sms_group = $data['sms_group'] ?? null;
+                $customer->charges = $data['charges'] ?? null;
+                $customer->avatar = $data['avatar'] ?? '';
+                $customer->auto_renewal = $data['auto_renewal'] ?? 1;
+                $customer->created_by = Auth::user()->creatorId();
+                $customer->is_active = 1;
+                $customer->save();
+
+                Log::info("Customer added successfully: " . $customer->username);
+
+                // // --- Add Customer to FreeRADIUS ---
+                // $radiusUsername = $customer->username ?? $customer->account;
+                // $radiusPassword = $customer->password;
+                // $importPackage = $customer->package;
+                // $createdBy = Auth::user()->creatorId();
+                // $radiusGroup = 'Expired_Plan';
+
+                // if ($importPackage) {
+                //     $package = Package::where('name_plan', $importPackage)->first();
+                //     if ($package) {
+                //         $radiusGroup = 'package_' . $package->id;
+                //     }
+                // }
+
+                // if (strtotime($expiryDate) < strtotime(now())) {
+                //     $radiusGroup = 'Expired_Plan';
+                // }
+
+                // DB::connection('radius')->table('radcheck')->insert([
+                //     'username' => $radiusUsername,
+                //     'attribute' => 'Cleartext-Password',
+                //     'op' => ':=',
+                //     'value' => $radiusPassword,
+                //     'created_by' => $createdBy,
+                // ]);
+
+                // DB::connection('radius')->table('radusergroup')->insert([
+                //     'username' => $radiusUsername,
+                //     'groupname' => $radiusGroup,
+                //     'priority' => 1,
+                //     'created_by' => $createdBy,
+                // ]);
+
+                // Log::info("FreeRADIUS user added: " . $radiusUsername);
             }
+
+            return redirect()->back()->with('success', __('Customers imported successfully'));
+
+        } catch (\Exception $e) {
+            Log::error("Error in directCustomerImport: " . $e->getMessage());
+            return redirect()->back()->with('error', __('Something went wrong. Check logs.'));
         }
-    
-        $html .= '</table><br />';
-    
-        return response()->json([
-            'html' => $flag === 1,
-            'response' => $flag === 1 ? $html : 'Data Imported Successfully',
-        ]);
     }
     
     public function searchCustomers(Request $request)

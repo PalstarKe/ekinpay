@@ -128,13 +128,6 @@ class Customer extends Authenticatable
         return $settings["invoice_prefix"] . sprintf("%05d", $number);
     }
 
-    // public function proposalNumberFormat($number)
-    // {
-    //     $settings = Utility::settings();
-
-    //     return $settings["proposal_prefix"] . sprintf("%05d", $number);
-    // }
-
     public function invoiceChartData()
     {
         $month[]       = __('January');
@@ -244,13 +237,6 @@ class Customer extends Authenticatable
         $invoices  = Invoice:: where('customer_id', $customerId)->orderBy('issue_date', 'desc')->get();
 
         return $invoices;
-    }
-
-    public function customerProposal($customerId)
-    {
-        $proposals = Proposal:: where('customer_id', $customerId)->orderBy('issue_date', 'desc')->get();
-
-        return $proposals;
     }
 
     public function customerOverdue($customerId)
