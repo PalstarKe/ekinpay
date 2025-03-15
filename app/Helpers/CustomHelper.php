@@ -332,5 +332,49 @@ class CustomHelper
 
         return $latest->invoice_id + 1;
     }
+
+    public static function sendTelegram($txt)
+    {
+        $bot = config('services.telegram.bot');
+        $chatId = config('services.telegram.target_id');
+
+        if (!empty($bot) && !empty($chatId)) {
+            return Http::get("https://api.telegram.org/bot{$bot}/sendMessage", [
+                'query' => [
+                    'chat_id' => $chatId,
+                    'text' => $txt
+                ]
+            ]);
+        }
+    }
+
+    public static function sendWhatsapp($phone, $txt)
+    {
+        if (empty($txt)) {
+            return "";
+        }
+
+        $waUrl = config('services.whatsapp.url');
+
+        if (!empty($waUrl)) {
+            $waUrl = str_replace(['[number]', '[text]'], [urlencode($phone), urlencode($txt)], $waUrl);
+            return Http::get($waUrl);
+        }
+    }
+    
+    public static function sendSMS($phone, $txt)
+    {
+        if (empty($txt)) {
+            return "";
+        }
+
+        $smsUrl = config('services.sms.url');
+
+        if (!empty($smsUrl)) {
+                $smsUrl = str_replace(['[number]', '[text]'], [urlencode($phone), urlencode($txt)], $smsUrl);
+                return Http::get($smsUrl);
+        }
+        
+    }
 }
     

@@ -163,10 +163,10 @@ class SmsController extends Controller
     
     
 
-    // public function sendBulkSms()
-	// {
-	// 	$fail = [];
-	// 	$success = [];
-    // }
+    public function sendBulkSms()
+	{
+		$fail = [];
+		$success = [];
+    }
 
 }
