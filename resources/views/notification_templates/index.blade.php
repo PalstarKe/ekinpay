@@ -71,67 +71,29 @@
 @endsection
 @section('content')
 <div class="row">
-        {{--<div class="text-end mb-3">
-            <div class="text-end">
-                <div class="d-flex justify-content-end drp-languages">
-                    <ul class="list-unstyled mb-0 m-2 me-0">
-                        <li class="dropdown dash-h-item drp-language">
-                            <a class="email-color dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown"
-                               href="#" role="button" aria-haspopup="false" aria-expanded="false"
-                               id="dropdownLanguage">
-                            <span
-                                class="drp-text hide-mob text-primary me-2">{{ucfirst($LangName->full_name)}}</span>
-                                <i class="ti ti-chevron-down drp-arrow nocolor"></i>
-                            </a>
-                            <div class="dropdown-menu dash-h-dropdown dropdown-menu-end" aria-labelledby="dropdownLanguage">
-                                @foreach ($languages as $code => $language)
-                                    <a href="{{ route('notification_templates.index', [$notification_template->id, $code]) }}"
-                                       class="dropdown-item {{ $curr_noti_tempLang->lang == $code ? 'text-primary' : '' }}">
-                                        {{ucFirst($language)}}
-                                    </a>
-                                @endforeach
-                            </div>
-                        </li>
-                    </ul>
-                    <ul class="list-unstyled mb-0 m-2 me-2">
-                        <li class="dropdown dash-h-item drp-language">
-                            <a class="email-color dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown"
-                               href="#" role="button" aria-haspopup="false" aria-expanded="false"
-                               id="dropdownLanguage">
-                                <span class="drp-text hide-mob text-primary">{{ __('Template: ') }}{{ $notification_template->name }}</span>
-                                <i class="ti ti-chevron-down drp-arrow nocolor"></i>
-                            </a>
-                            <div class="dropdown-menu dash-h-dropdown dropdown-menu-end email_temp" aria-labelledby="dropdownLanguage">
-                                @foreach ($notification_templates as $notification)
-                                    <a href="{{ route('notification_templates.index', [$notification->id,(Request::segment(3)?Request::segment(3):\Auth::user()->lang)]) }}"
-                                       class="dropdown-item {{$notification->name == $notification_template->name ? 'text-primary' : '' }}">{{ $notification->name }}
-                                    </a>
-                                @endforeach
-                            </div>
-                        </li>
-                    </ul>
-
-                    @php
-                    $user = \App\Models\User::find(\Auth::user()->creatorId());
-                    $plan= \App\Models\Plan::getPlan($user->plan);
-                @endphp
-                    @if($plan->chatgpt == 1)
-                        <ul class="list-unstyled mb-0 mt-3">
-                            <div class="">
-                                <a href="#" data-size="md" class="btn  btn-primary btn-sm" data-ajax-popup-over="true" data-url="{{ route('generate',['notification template']) }}"
-                                   data-bs-placement="top" data-title="{{ __('Generate content with AI') }}">
-                                    <i class="fas fa-robot"></i> <span>{{__('Generate with AI')}}</span>
-                                </a>
-                            </div>
-                        </ul>
-                    @endif
-
-                </div>
-            </div>
-        </div>--}}
+       
     <div class="col-xl-12">
         <div class="card">
-            <div class="card-header card-body table-border-style">
+            <div class="card-header">
+                <div class="float-end d-flex">
+                    @can('send bulk sms')
+                    <a href="#" data-size="md" data-url="{{ route('sms.bulk.form') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Bulk Sms')}}" data-title="{{__('Send Bulk SMS')}}" class="btn btn-sm btn-primary me-2">
+                        <i class="ti ti-mail-fast"></i> {{__('Send Bulk Email')}}
+                    </a>
+                    @endcan
+                    @can('manage sent sms')
+                    <a href="{{ route('sms.delivery') }}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" title="{{ __('Delivery Reports') }}">
+                        <i class="ti ti-mail-check"></i> {{ __('Sent Emails') }}
+                    </a>
+                    @endcan
+                    @can('create sms template')
+                        <a href="#" data-size="md" data-url="{{ route('sms.create') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Create')}}" data-title="{{__('Create SMS Template')}}" class="btn btn-sm btn-primary me-2">
+                            <i class="ti ti-plus"></i> {{__('Create Email Template')}}
+                        </a>
+                    @endcan
+                </div>
+            </div>
+            <div class=" card-body table-border-style">
                 <h5></h5>
                 <div class="table-responsive">
                     <table class="table datatable" id="pc-dt-simple">

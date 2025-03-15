@@ -1,7 +1,19 @@
 {{ Form::open(['route' => 'sms.bulk.send', 'method' => 'POST', 'class'=>'needs-validation', 'novalidate']) }}
     <div class="modal-body">
         <div class="row g-2">
+        <div class="form-group">
+                {{ Form::label('sender', __('Send Via')) }}
+                {{ Form::select('sender', [
+                    'sms' => 'SMS', 
+                    'whatsapp' => 'WhatsApp',
+                    'both' => 'SMS & WhatsApp'
+                ], 'sms', [ // 'sms' is the default value
+                    'class' => 'form-control', 
+                    'required'
+                ]) }}
+            </div>
             <div class="form-group">
+                {{ Form::label('category', __('Customer Type')) }}
                 {{ Form::select('category', [
                     'expired' => 'Expired', 
                     'active' => 'Active', 
@@ -20,6 +32,7 @@
                 {{ Form::select('sms_group', $smsGroups->pluck('sms_group', 'sms_group'), null, ['class' => 'form-control']) }}
             </div>
             <div class="form-group mt-3">
+                {{ Form::label('mesage_type', __('Message Type')) }}
                 {{ Form::select('message_type', ['template' => 'Use Template', 'custom' => 'Custom Message'], null, [
                     'class' => 'form-control', 
                     'required', 
@@ -60,6 +73,6 @@
     
     <div class="modal-footer">
         <input type="button" value="{{ __('Cancel') }}" class="btn btn-secondary" data-bs-dismiss="modal">
-        <input type="submit" value="{{ __('Update') }}" class="btn btn-primary">
+        <input type="submit" value="{{ __('Send') }}" class="btn btn-primary">
     </div>
 {{ Form::close() }}

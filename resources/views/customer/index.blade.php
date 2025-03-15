@@ -102,7 +102,7 @@ $profile=\App\Models\Utility::get_file('uploads/avatar/');
                 <i class="ti ti-plus"></i> {{__('Create Customer')}}
             </a>--}}
         </div>
-        <div class="col-sm-12">
+        {{--<div class="col-sm-12">
             <div class="mt-2 mb-3" id="multiCollapseExample1">
                 <div class="card">
                     <div class="card-body">
@@ -153,7 +153,7 @@ $profile=\App\Models\Utility::get_file('uploads/avatar/');
                     </div>
                 </div>
             </div>
-        </div>
+        </div>--}}
         <div class="col-md-12">
             <div class="nav-align-top mb-6">
                 <ul class="nav nav-pills mb-4 nav-fill col-xl-4" role="tablist">

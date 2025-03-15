@@ -103,11 +103,11 @@ $configData = Helper::appClasses();
                                     <a class="menu-link" href="{{ route('sms.index') }}">{{ __('Bulk SMS') }}</a>
                                 </li>
                             @endcan
-                            @can('manage bulk chats')
-                                <li class="menu-item {{ Request::route()->getName() == 'roles.index' || Request::route()->getName() == 'roles.create' || Request::route()->getName() == 'roles.edit' ? ' active' : '' }} ">
-                                    <a class="menu-link" href="{{ url('chats') }}">{{ __('Bulk Customers') }}</a>
-                                </li>
-                            @endcan
+                            <li class="menu-item {{ Request::segment(1) == 'notification_templates' ? 'active' : '' }}">
+                                <a href="{{ route('notification-templates.index') }}" class="menu-link">
+                                    {{ __('Send Email') }}
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -214,12 +214,6 @@ $configData = Helper::appClasses();
                     </ul>
                 </li>
             @endif
-            <li class="menu-item {{ Request::segment(1) == 'notification_templates' ? 'active' : '' }}">
-                <a href="{{ route('notification-templates.index') }}" class="menu-link">
-                    <i class="menu-icon ti ti-notification"></i>
-                    <div data-i18n="Notification Template">{{ __('Notification Template') }}</div>
-                </a>
-            </li>
             @if (Gate::check('manage company plan') || Gate::check('manage order') || Gate::check('manage company settings'))
                 <li class="menu-item {{ Request::segment(1) == 'settings' || Request::segment(1) == 'plans' || Request::segment(1) == 'stripe' || Request::segment(1) == 'order' ? ' active dash-trigger' : '' }}">
                     <a href="#!" class="menu-link menu-toggle">

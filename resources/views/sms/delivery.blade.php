@@ -10,11 +10,11 @@
             <div class="card">
                 <div class="card-header">
                     <div class="float-end d-flex">
-                        @can('send bulk sms')
-                            <a href="#" data-size="md" data-url="{{ route('sms.create') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Bulk Sms')}}" data-title="{{__('Send Bulk SMS')}}" class="btn btn-sm btn-primary me-2">
-                                <i class="ti ti-send"></i> {{__('Send Bulk SMS')}}
-                            </a>
-                        @endcan
+                       {{-- @can('send bulk sms')
+                        <a href="#" data-size="md" data-url="{{ route('sms.bulk.form') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Bulk Sms')}}" data-title="{{__('Send Bulk SMS')}}" class="btn btn-sm btn-primary me-2">
+                            <i class="ti ti-send"></i> {{__('Send Bulk SMS')}}
+                        </a>
+                        @endcan--}}
                     </div>
                 </div>
                 <div class="card-body table-border-style mt-0">

@@ -13,10 +13,6 @@
 @section('page-title')
     {{ $notification_template->name }}
 @endsection
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ __('Notification Template') }}</li>
-@endsection
 @push('pre-purpose-css-page')
     <link rel="stylesheet" href="{{asset('css/summernote/summernote-bs4.css')}}">
 @endpush
@@ -35,14 +31,14 @@
                                 class="drp-text hide-mob text-primary me-2">{{ucfirst($LangName->full_name)}}</span>
                                 <i class="ti ti-chevron-down drp-arrow nocolor"></i>
                             </a>
-                            <div class="dropdown-menu dash-h-dropdown dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                            {{--<div class="dropdown-menu dash-h-dropdown dropdown-menu-end" aria-labelledby="dropdownLanguage">
                                 @foreach ($languages as $code => $language)
                                     <a href="{{ route('notification_templates.index', [$notification_template->id, $code]) }}"
                                        class="dropdown-item {{ $curr_noti_tempLang->lang == $code ? 'text-primary' : '' }}">
                                         {{ucFirst($language)}}
                                     </a>
                                 @endforeach
-                            </div>
+                            </div>--}}
                         </li>
                     </ul>
                     <ul class="list-unstyled mb-0 m-2 me-2">
@@ -120,7 +116,7 @@
         <div class="col-12">
             <h5></h5>
             <div class="row">
-                <div class="col-sm-3 col-md-3 col-lg-3 col-xl-3 ">
+                {{--<div class="col-sm-3 col-md-3 col-lg-3 col-xl-3 ">
                     <div class="card sticky-top language-sidebar mb-0">
                         <div class="list-group list-group-flush" id="useradd-sidenav">
                             @foreach ($languages as $key => $lang)
@@ -131,8 +127,8 @@
                             @endforeach
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-9 col-md-9 col-sm-9">
+                </div>--}}
+                <div class="col-lg-12 col-md-12 col-sm-12">
                     <div class="card h-100 p-3">
                         {{ Form::model($curr_noti_tempLang, ['route' => ['notification-templates.update', $curr_noti_tempLang->parent_id], 'method' => 'PUT']) }}
                         <div class="row">
@@ -144,10 +140,10 @@
                                 {{ Form::label('content', __('Notification Message'), ['class' => 'col-form-label text-dark']) }}
                                 {{ Form::textarea('content', $curr_noti_tempLang->content, ['class' => 'form-control font-style', 'required' => 'required']) }}
                             </div>
-                            <div class="col-md-12 text-end mb-3">
+                            <div class="col-md-12 text-end mb-3 mt-3">
                                 {{ Form::hidden('lang', null) }}
-                                <input type="submit" value="{{ __('Save') }}"
-                                    class="btn btn-print-invoice  btn-primary m-r-10">
+                                <button type="submit" 
+                                    class="btn btn-print-invoice  btn-primary m-r-10">{{ __('Save') }}</button>
                             </div>
                         </div>
                         {{ Form::close() }}

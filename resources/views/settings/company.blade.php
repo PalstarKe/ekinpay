@@ -338,7 +338,7 @@
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
                             <a href="#email-notification-settings"
-                                class="list-group-item list-group-item-action border-0">{{ __('Email Notification Settings') }}
+                                class="list-group-item list-group-item-action border-0">{{ __('Email Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
                             {{--<a href="#noc-settings"
