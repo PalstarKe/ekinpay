@@ -352,9 +352,6 @@
                                     </button>
                                 </div>
                                 <div>
-                                    <!-- <button class="btn bg-label-warning btn-md" data-bs-toggle="modal" data-bs-target="#">
-                                       Deactivate
-                                    </button> -->
                                     @if( $customer->is_active == 1)
                                         <form action="{{ route('customer.deactivate', $customer->id) }}" method="POST">
                                             @csrf
@@ -372,7 +369,7 @@
                             </div>
                         </div>
                     </li>
-                    <div class="row">
+                    <div class="row mt-3">
                         <ul class="d mb-3 col-4">
                             <small class="font-w400">Service: {{$customer['service']}}</small><br>
                             <small class="font-w400">Old Username: {{$customer['username']}}</small><br>
@@ -503,7 +500,7 @@
                         @csrf
                         <div id="flatpickr-update"></div> 
                         <input type="hidden" name="expiry" id="expiry-input">
-                        <button class="btn btn-primary w-100 mt-3" type="submit">Update</button>
+                        <button class="btn btn-primary w-100 mt-3" type="submit">Extend</button>
                     </form>
                 </div>
             </div>
