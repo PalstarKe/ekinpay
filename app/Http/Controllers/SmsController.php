@@ -5,6 +5,7 @@ use App\Exports\CustomerExport;
 use App\Imports\CustomerImport;
 use App\Models\Customer;
 use App\Models\SmsAlert;
+use App\Models\SmsDelivered;
 use App\Models\Transaction;
 use App\Models\Package;
 use App\Models\Utility;
