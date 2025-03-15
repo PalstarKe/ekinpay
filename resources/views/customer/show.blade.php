@@ -4,31 +4,60 @@
 @section('page-title')
     {{__('Manage Customer-Detail')}}
 @endsection
-
+<style>
+    .flatpickr-calendar {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .flatpickr-innerContainer{
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+    }
+    .dayContainer {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+    }
+</style>
 @push('script-page')
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            flatpickr("#flatpickr-container", {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                inline: true, // Makes the calendar always visible
-                onChange: function(selectedDates, dateStr) {
-                    document.getElementById("expiry-input").value = dateStr; // Update hidden input
-                }
-            });
+        
+        flatpickr("#flatpickr-update", {
+            enableTime: true,
+            minDate: "today",
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i",
+            inline: true,
+            allowInput: false,
+            monthSelectorType: 'static',
+            locale: {
+        firstDayOfWeek: 0  // Ensure the week starts from Monday (0 = Sunday)
+    },
+            onChange: function(selectedDates, dateStr) {
+                let adjustedDate = new Date(selectedDates[0].getTime() - (selectedDates[0].getTimezoneOffset() * 60000));
+                document.getElementById("expiry-input").value = adjustedDate.toISOString().slice(0, 16).replace("T", " ");
+            }
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            flatpickr("#flatpickr-container-update", {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                inline: true, // Makes the calendar always visible inside the modal
-                onChange: function(selectedDates, dateStr) {
-                    document.getElementById("expiry-input-update").value = dateStr; // Update hidden input
-                }
-            });
+
+        flatpickr("#flatpickr-container-update", {
+            enableTime: true,
+            minDate: "today",
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i",
+            inline: true,
+            onChange: function(selectedDates, dateStr) {
+                let adjustedDate = new Date(selectedDates[0].getTime() - (selectedDates[0].getTimezoneOffset() * 60000));
+                document.getElementById("expiry-input-update").value = adjustedDate.toISOString().slice(0, 16).replace("T", " ");
+            }
         });
+
     </script>
     <script>
         function copyToClipboard(element) {
@@ -385,7 +414,7 @@
             <div class="card-body">
                 <div class="profile-statistics">
                     <div class="">
-                        <div class="row mb-3 g-2">
+                        <div class="row g-2">
                             <div class="col-6">
                                 <form action="{{ route('customer.refresh', $customer->id) }}" method="POST">
                                     @csrf
@@ -405,7 +434,7 @@
                                 <button class="btn bg-label-primary btn-md btn-block w-100" type="button" data-bs-toggle="modal" data-bs-target="#changePlan">Change Plan</button>
                             </div>
                         </div>
-                        <div class="row mb-3 g-2">
+                        <div class="row  g-2">
                             <div class="col-6">
                                 <form action="{{ route('customer.clearmac', $customer->id) }}" method="POST">
                                     @csrf
@@ -450,9 +479,8 @@
                     <form action="{{ route('customer.updateExpiry', $customer->id) }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <!-- <label class="form-label">Select Date & Time</label> -->
-                            <div id="flatpickr-container-update"></div> <!-- Full calendar inside modal -->
-                            <input type="hidden" name="expiry" id="expiry-input-update"> <!-- Hidden field -->
+                            <div id="flatpickr-container-update"></div>
+                            <input type="hidden" name="expiry" id="expiry-input-update">
                         </div>
                         <button class="btn btn-primary w-100" type="submit">Update</button>
                     </form>
@@ -473,12 +501,9 @@
                 <div class="modal-body">
                     <form action="{{ route('customer.updateExpiry', $customer->id) }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <!-- <label class="form-label">Select Date & Time</label> -->
-                            <div id="flatpickr-container"></div> <!-- Full calendar inside modal -->
-                            <input type="hidden" name="expiry" id="expiry-input"> <!-- Hidden field -->
-                        </div>
-                        <button class="btn btn-primary w-100" type="submit">Update</button>
+                        <div id="flatpickr-update"></div> 
+                        <input type="hidden" name="expiry" id="expiry-input">
+                        <button class="btn btn-primary w-100 mt-3" type="submit">Update</button>
                     </form>
                 </div>
             </div>
