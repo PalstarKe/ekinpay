@@ -11,9 +11,9 @@
                 <div class="card-header">
                     <div class="float-end d-flex">
                         @can('send bulk sms')
-                            <a href="#" data-size="md" data-url="{{ route('sms.bulk') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Bulk Sms')}}" data-title="{{__('Send Bulk SMS')}}" class="btn btn-sm btn-primary me-2">
-                                <i class="ti ti-send"></i> {{__('Send Bulk SMS')}}
-                            </a>
+                        <a href="#" data-size="md" data-url="{{ route('sms.bulk.form') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Bulk Sms')}}" data-title="{{__('Send Bulk SMS')}}" class="btn btn-sm btn-primary me-2">
+                            <i class="ti ti-send"></i> {{__('Send Bulk SMS')}}
+                        </a>
                         @endcan
                         @can('manage sent sms')
                         <a href="{{ route('sms.delivery') }}" class="btn btn-sm btn-primary me-2" data-bs-toggle="tooltip" title="{{ __('Delivery Reports') }}">
