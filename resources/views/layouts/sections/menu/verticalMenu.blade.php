@@ -91,16 +91,16 @@ $configData = Helper::appClasses();
                         <div data-i18n="Companies">{{ __('Messenger') }}</div>
                     </a>
                 </li> -->
-                @if ((Gate::check('manage messages') || Gate::check('manage bulk messages')))
+                @if ((Gate::check('manage sms template') || Gate::check('manage email template')))
                     <li class="menu-item {{ Request::segment(1) == 'chats' ? ' active dash-trigger' : '' }}">
                         <a href="#!" class="menu-link menu-toggle">
-                            <i class="menu-icon ti message-circle"></i>
+                            <i class="menu-icon ti ti-message"></i>
                             <div data-i18n="Messages">{{ __('Messages') }}</div>
                         </a>
                         <ul class="menu-sub">
-                            @can('manage messages')
-                                <li class="menu-item {{ Request::route()->getName() == 'chat.index' || Request::route()->getName() == 'chats.create' || Request::route()->getName() == 'users.edit' || Request::route()->getName() == 'user.userlog' ? ' active' : '' }}">
-                                    <a class="menu-link" href="{{ url('chats') }}">{{ __('Send Email') }}</a>
+                            @can('manage sms template')
+                                <li class="menu-item {{ Request::segment(1) == 'sms' ? 'active' : '' }}">
+                                    <a class="menu-link" href="{{ route('sms.index') }}">{{ __('Bulk SMS') }}</a>
                                 </li>
                             @endcan
                             @can('manage bulk chats')

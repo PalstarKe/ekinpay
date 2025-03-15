@@ -13,7 +13,7 @@ use App\Http\Controllers\BankTransferController;
 use App\Http\Controllers\BankTransferPaymentController;
 use App\Http\Controllers\RouterController;
 use App\Http\Controllers\RadiusUserController;
-use App\Http\Controllers\BiometricAttendanceController;
+use App\Http\Controllers\SmsController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\ClientController;
@@ -229,6 +229,19 @@ Route::group(['middleware' => ['verified']], function () {
             Route::post('customer/{id}/deactivate', [CustomerController::class, 'deactivate'])->name('customer.deactivate');
             Route::post('customer/{id}/clearmac', [CustomerController::class, 'clearMac'])->name('customer.clearmac');
             Route::post('customer/{id}/refresh', [CustomerController::class, 'refreshAccount'])->name('customer.refresh');
+        }
+    );
+
+    Route::group(
+        [
+            'middleware' => [
+                'auth'
+            ],
+        ],
+        function (){
+            Route::resource('sms', SmsController::class)->parameters([
+                'sms' => 'sms'
+            ]);
         }
     );
 
