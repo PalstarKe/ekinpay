@@ -15,14 +15,6 @@
                                 <i class="ti ti-send"></i> {{__('Send Bulk SMS')}}
                             </a>
                         @endcan
-                        {{--<a href="#" data-size="md" data-url="{{ route('sms.create') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Delivery Reports')}}" data-title="{{__('Delivery Reports')}}" class="btn btn-sm btn-primary me-2">
-                            <i class="ti ti-clock-share"></i> {{__('Delivery Reports')}}
-                        </a>--}}
-                        @can('create sms template')
-                            <a href="#" data-size="md" data-url="{{ route('sms.create') }}" data-ajax-popup="true" data-bs-toggle="tooltip" title="{{__('Create')}}" data-title="{{__('Create SMS Template')}}" class="btn btn-sm btn-primary me-2">
-                                <i class="ti ti-plus"></i> {{__('Create SMS Template')}}
-                            </a>
-                        @endcan
                     </div>
                 </div>
                 <div class="card-body table-border-style mt-0">
@@ -35,25 +27,28 @@
                                     <th>{{ __('Sent To')}}</th>
                                     <th>{{ __('Message')}}</th>
                                     <th>{{ __('Deliverly')}}</th>
-                                    <th>{{ __('Customer')}}</th>
-                                    @if (Gate::check('edit sms template') || Gate::check('delete sms template') || Gate::check('show sms template'))
+                                    <th>{{ __('Customer Name')}}</th>
+                                    {{--@if (Gate::check('edit sms template') || Gate::check('delete sms template') || Gate::check('show sms template'))
                                         <th>{{ __('Action') }}</th>
-                                    @endif
+                                    @endif--}}
                                 </tr>
                             </thead>
                             <tbody>
-                                {{--@foreach ($smsTemplates as $sms)
+                                @foreach ($SmsDelivered as $sms)
                                     <tr>
-                                        <td>{{ $sms->type }}</td>
-                                        <td>{{ $sms->template }}</td>
+                                        <td>{{ $sms->smsalert }}</td>
+                                        <td>{{ $sms->datetime }}</td>
+                                        <td>{{ $sms->destination }}</td>
+                                        <td>{{ $sms->message }}</td>
                                         <td>
-                                            @if($sms->status == '1')
-                                                <span class="badge bg-label-success">Active</span>
+                                            @if($sms->sms_api_response == '200')
+                                                <span class="badge bg-label-success">Success</span>
                                             @else
-                                                <span class="badge bg-label-warning">Inactive</span>
+                                                <span class="badge bg-label-warning">Failed</span>
                                             @endif
                                         </td>
-                                        @if (Gate::check('edit sms template') || Gate::check('delete sms template'))
+                                        <td>{{ $sms->userid }}</td>
+                                        {{--@if (Gate::check('edit sms template') || Gate::check('delete sms template'))
                                         <td class="Action">
                                             <div class="d-flex gap-2">
                                                 @can('edit sms template')
@@ -77,9 +72,9 @@
                                                 @endcan
                                             </div>
                                         </td>
-                                        @endif
+                                        @endif--}}
                                     </tr>
-                                @endforeach--}}
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

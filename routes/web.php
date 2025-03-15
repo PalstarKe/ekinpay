@@ -239,9 +239,13 @@ Route::group(['middleware' => ['verified']], function () {
             ],
         ],
         function (){
+            Route::get('sms/delivery', [SmsController::class, 'smsDelivery'])->name('sms.delivery');
+            Route::get('sms/bulk', [SmsController::class, 'bulkSmsForm'])->name('sms.bulk');
+            Route::get('sms/sendbulksms', [SmsController::class, 'sendBulkSms'])->name('sms.bulk.send');
             Route::resource('sms', SmsController::class)->parameters([
                 'sms' => 'sms'
             ]);
+           
         }
     );
 

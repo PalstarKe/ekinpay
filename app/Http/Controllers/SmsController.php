@@ -137,4 +137,30 @@ class SmsController extends Controller
         return redirect()->route('sms.index')->with('success', __('Template deleted successfully.'));
     }
 
+    public function smsDelivery()
+    {
+        if (Auth::user()->can('manage sent sms')) {
+            $SmsDelivered = SmsDelivered::where('created_by', Auth::user()->creatorId())->get();
+            return view('sms.delivery', compact('SmsDelivered'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function bulkSmsForm()
+    {
+        if (!auth()->user()->can('send bulk sms')) {
+            $smsTemplates = SmsAlert::where('created_by', Auth::user()->creatorId())->get();
+            return view('sms.bulk', compact('smsTemplates'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    // public function sendBulkSms()
+	// {
+	// 	$fail = [];
+	// 	$success = [];
+    // }
+
 }
