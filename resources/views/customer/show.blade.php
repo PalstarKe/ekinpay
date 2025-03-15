@@ -320,7 +320,8 @@
                 <div class="profile-blog">
                     <li class="header-profile d-flex align-items-start">
                         <div class="row w-100 g-0">
-                            <div class="col-md-4 d-flex align-items-start gap-2">
+                            <!-- Profile Avatar & Info -->
+                            <div class="col-md-3 d-flex align-items-center gap-3">
                                 <div class="avatar {{ $online ? 'avatar-online' : '' }}">
                                     <img src="https://robohash.org/{{$customer['id']}}?set=set3&size=100x100&bgset=bg1" 
                                         width="60" alt="Profile" class="rounded-circle">
@@ -334,38 +335,38 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-8 d-flex justify-content-start align-items-center gap-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="avatar">
-                                        <div class="avatar-initial bg-label-primary rounded">
-                                            <i class="ti ti-brand-cashapp ti-md"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0">{{$customer['balance']}}</h5>
-                                        <span>Balance</span>
-                                    </div>
+                            <!-- Balance & Buttons -->
+                            <div class="col-md-9 d-flex justify-content-between align-items-center gap-1 flex-wrap">
+                                <!-- Balance -->
+                                <div class="text-center">
+                                    <h5 class="mb-0">{{$customer['balance']}}</h5>
+                                    <span>Balance</span>
                                 </div>
-                                <div>
-                                    <button class="btn bg-label-primary btn-md" data-bs-toggle="modal" data-bs-target="#useBalance">
-                                        Use Balance
+
+                                <!-- Use Balance Button -->
+                                <button class="btn bg-label-primary btn-md" data-bs-toggle="modal" data-bs-target="#useBalance">
+                                    Use Balance
+                                </button>
+
+                                <!-- Activate/Deactivate Button -->
+                                <form action="{{ route('customer.deactivate', $customer->id) }}" method="POST" 
+                                    class="d-flex align-items-center m-0 p-0">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" class="btn bg-label-warning btn-md">
+                                        {{ $customer->is_active == 1 ? 'Deactivate' : 'Activate' }}
                                     </button>
-                                </div>
-                                <div>
-                                    @if( $customer->is_active == 1)
-                                        <form action="{{ route('customer.deactivate', $customer->id) }}" method="POST">
-                                            @csrf
-                                            @method('POST') 
-                                            <button type="submit" class="btn bg-label-warning btn-md">Deactivate</button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('customer.deactivate', $customer->id) }}" method="POST">
-                                            @csrf
-                                            @method('POST') 
-                                            <button type="submit" class="btn bg-label-warning btn-md">Activate</button>
-                                        </form>
-                                    @endif
-                                </div>
+                                </form>
+
+                                <!-- Business Button -->
+                                <form action="{{ route('customer.corporate', $customer->id) }}" method="POST" 
+                                    class="d-flex align-items-center m-0 p-0">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" class="btn {{ $customer->corporate == 1 ? 'bg-label-success' : 'bg-label-info' }} btn-md">
+                                        {{ $customer->corporate == 0 ? 'Not Corporate' : 'Corporate' }}
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </li>
@@ -523,7 +524,7 @@
                             <label class="form-label" for="cash">Amount</label>
                             <div class="input-group">
                                 <span class="input-group-text">Ksh</span>
-                                <input type="number" id="balance" name="balance" class="form-control" placeholder="1000" required min="1"/>
+                                <input type="number" id="balance" name="balance" class="form-control" placeholder="1000" required min="-100000"/>
                             </div>
                         </div>
                         <div class="col-12 mt-2">

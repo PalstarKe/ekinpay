@@ -229,6 +229,7 @@ Route::group(['middleware' => ['verified']], function () {
             Route::post('customer/{id}/deactivate', [CustomerController::class, 'deactivate'])->name('customer.deactivate');
             Route::post('customer/{id}/clearmac', [CustomerController::class, 'clearMac'])->name('customer.clearmac');
             Route::post('customer/{id}/refresh', [CustomerController::class, 'refreshAccount'])->name('customer.refresh');
+            Route::post('customer/{id}/corporate', [CustomerController::class, 'asCorporate'])->name('customer.corporate');
         }
     );
 

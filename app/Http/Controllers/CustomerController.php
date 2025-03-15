@@ -139,6 +139,7 @@ class CustomerController extends Controller
                 'contact'   => ['required', 'regex:/^254[17][0-9]{8}$/'],
                 'service'   => 'nullable|string|max:255',
                 'mac_address' => 'nullable|string|max:255|unique:customers,mac_address',
+                'charges'   => 'nullable|string|max:255',
                 'static_ip'   => 'nullable|ip',
                 'expiry'      => 'nullable|date',
             ];
@@ -183,7 +184,7 @@ class CustomerController extends Controller
                 $customer->expiry       = $request->expiry;
                 $customer->expiry_status= $request->expiry_status;
                 $customer->lang         = !empty($defaultLanguage) ? $defaultLanguage : 'en';
-                $customer->balance      = 0.00;
+                $customer->balance      = !empty($request->charges) ? -abs($request->charges) : 0.00;
                 $customer->save();
                 
                 // $id = Customer::find($customer->id);
@@ -458,17 +459,12 @@ class CustomerController extends Controller
         ]);
 
         $customer = Customer::findOrFail($id);
-        // $package = Package::where('name_plan', $customer->package)->firstOrFail();
-        // $customer->expiry_status = 'on';
         $customer->balance += $request->balance;
 
-        // If balance was 0 and status was OFF, reactivate customer
         if ($customer->expiry_status == 'off') {
             $customer->expiry_status = 'on';
             $customer->save();
 
-            // Assign package to customer in RADIUS
-            // $this->assignCustomerPackage($customer->id);
             CustomHelper::assignCustomerPackage($customer->id);
         } else {
             $customer->save();
@@ -489,6 +485,16 @@ class CustomerController extends Controller
             return redirect()->route('customer.show', ['customer' => encrypt($id)])
                 ->with('error', __($result['message']));
         }
+    }
+
+    public function asCorporate(Request $request, $id)
+    {
+        $customer = Customer::findOrFail($id);
+        
+        $customer->corporate = $customer->corporate == 0 ? 1 : 0;
+        $customer->save();
+
+        return redirect()->route('customer.show', ['customer' => encrypt($id)])->with('success', __('Corporate added successfully.'));
     }
 
     public function changePlan(Request $request, $id)

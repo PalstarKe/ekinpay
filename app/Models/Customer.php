@@ -23,6 +23,7 @@ class Customer extends Authenticatable
         'email',
         'expiry_extended',
         'contact',
+        'corporate',
         'avatar',
         'created_by',
         'is_active',
