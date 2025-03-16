@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\CustomField;
 use App\Models\Transaction;
 use App\Models\Package;
+use App\Models\Router;
 use App\Models\Utility;
 use Auth;
 use App\Helpers\CustomHelper;
@@ -187,12 +188,14 @@ class CustomerController extends Controller
                 $customer->balance      = !empty($request->charges) ? -abs($request->charges) : 0.00;
                 $customer->save();
                 
+                $createdBy = Auth::user()->creatorId();
                 // $id = Customer::find($customer->id);
                 DB::connection('radius')->table('radcheck')->insert([
                     'username'  => $customer->username,
                     'attribute' => 'Cleartext-Password',
                     'op'        => ':=',
                     'value'     => $request->password,
+                    'created_by' => $createdBy,
                 ]);
 
                 // Assign the Expired_Plan
@@ -200,6 +203,7 @@ class CustomerController extends Controller
                     'username'  => $customer->username,
                     'groupname' => 'Expired_Plan',
                     'priority'  => 1,
+                    'created_by' => $createdBy,
                 ]);
 
                 // Custom Field Handling
@@ -250,6 +254,7 @@ class CustomerController extends Controller
         ->pluck('name_plan')
         ->toArray();
 
+
         $expiryDate = $customer->expiry_extended ?? $customer->expiry;
         $currentDate = Carbon::now();
         $expiryStatus = 'No Expiry Set';
@@ -274,57 +279,80 @@ class CustomerController extends Controller
 
         CustomHelper::lockMac($customer);
         
-        $online = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->exists();
-        $session = DB::connection('radius')->table('radacct')->whereNull('acctstoptime')->where('username', $customer->username)->select('framedipaddress as ip', 'acctsessiontime as uptime')
+
+        $nasIps = Router::where('created_by', \Auth::user()->creatorId())->pluck('ip_address')->toArray();
+
+        // Check if the user is online only if the NAS IP matches the ISP's NAS
+        $online = DB::connection('radius')
+            ->table('radacct')
+            ->whereNull('acctstoptime')
+            ->where('username', $customer->username)
+            ->whereIn('nasipaddress', $nasIps)
+            ->exists();
+        
+        $session = DB::connection('radius')
+            ->table('radacct')
+            ->whereNull('acctstoptime')
+            ->where('username', $customer->username)
+            ->whereIn('nasipaddress', $nasIps)
+            ->select('framedipaddress as ip', 'acctsessiontime as uptime')
             ->first();
+        
+        // Fetch uptime only if the NAS matches
         $uptime = DB::connection('radius')
             ->table('radacct')
             ->whereNull('acctstoptime')
             ->where('username', $customer->username)
-            ->select('acctsessiontime as uptime')
-            ->first();
+            ->whereIn('nasipaddress', $nasIps)
+            ->value('acctsessiontime');
         
         if ($uptime) {
-            $displayUptime = gmdate('H:i:s', $uptime->uptime);
+            $displayUptime = gmdate('H:i:s', $uptime);
         } else {
             $lastSession = DB::connection('radius')
                 ->table('radacct')
                 ->whereNotNull('acctstoptime')
                 ->where('username', $customer->username)
+                ->whereIn('nasipaddress', $nasIps)
                 ->orderByDesc('acctstoptime')
-                ->select('acctstoptime')
-                ->first();
-
+                ->value('acctstoptime');
+        
             if ($lastSession) {
-                $offlineSeconds = Carbon::parse($lastSession->acctstoptime)->diffInSeconds(Carbon::now());
+                $offlineSeconds = Carbon::parse($lastSession)->diffInSeconds(now());
                 $displayUptime = "Offline for " . gmdate('H:i:s', $offlineSeconds);
             } else {
-                $displayUptime = "No session history";
+                $displayUptime = "00:00:00";
             }
         }
-
-        $dataUsage = DB::connection('radius')->table('radacct')
+        
+        // Fetch data usage only for sessions matching the NAS
+        $dataUsage = DB::connection('radius')
+            ->table('radacct')
             ->where('username', $customer->username)
+            ->whereIn('nasipaddress', $nasIps)
             ->selectRaw('COALESCE(SUM(acctoutputoctets), 0) as download, COALESCE(SUM(acctinputoctets), 0) as upload')
             ->first();
-
-        $activeUsage = DB::connection('radius')->table('radacct')
+        
+        $activeUsage = DB::connection('radius')
+            ->table('radacct')
             ->where('username', $customer->username)
             ->whereNull('acctstoptime')
+            ->whereIn('nasipaddress', $nasIps)
             ->selectRaw('COALESCE(SUM(acctoutputoctets), 0) as download, COALESCE(SUM(acctinputoctets), 0) as upload')
             ->first();
-
+        
         $downloadMB = round($activeUsage->download / 1048576, 2);
         $uploadMB = round($activeUsage->upload / 1048576, 2);
-
-
+        
         $transactions = Transaction::where('user_id', $id)->where('user_type', 'Customer')->get();
         $invoices = Invoice::where('customer_id', $id)->get();
-
-        $authLogs = DB::connection('radius')->table('radacct')
-        ->where('username', $customer->username)
-        ->orderBy('acctstarttime', 'desc')
-        ->get();
+        
+        $authLogs = DB::connection('radius')
+            ->table('radacct')
+            ->where('username', $customer->username)
+            ->whereIn('nasipaddress', $nasIps)
+            ->orderBy('acctstarttime', 'desc')
+            ->get();
 
         $deviceVendor = $customer->mac_address ? CustomHelper::getMacVendor($customer->mac_address) : 'N/A';
     

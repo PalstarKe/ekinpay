@@ -29,7 +29,6 @@
 			</div>
 		</div>
 		<div class="card mt-3">
-			<!-- <div class="card-header"><h5 class="">Assigned Packages</h5></div> -->
 			<div class="card-body">
 				<div class="mb-3">
 					<button class="clipboard-btn btn btn-primary me-2 mb-2 w-100" type="submit" data-bs-toggle="modal" data-bs-target="#assignPackage">Assign New Packages</button>

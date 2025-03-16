@@ -97,7 +97,10 @@ $navbarDetached = ($navbarDetached ?? '');
           <li class="nav-item navbar-dropdown dropdown-user dropdown">
             <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
               <div class="avatar avatar-online">
-                <img src="https://robohash.org/{{ \Auth::user()->id }}?set=set3&size=100x100&bgset=bg1" alt class="rounded-circle">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                      style="width: 40px; height: 40px; background-color: #007bff; color: white; font-weight: bold; font-size: 1.4rem; letter-spacing: 0; line-height: 1;">
+                      {{ strtoupper(substr(explode(' ', \Auth::user()->name)[0], 0, 1)) }}{{ strtoupper(substr(explode(' ', \Auth::user()->name)[1] ?? '', 0, 1)) }}
+                  </div>
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -106,7 +109,10 @@ $navbarDetached = ($navbarDetached ?? '');
                   <div class="d-flex align-items-center">
                     <div class="flex-shrink-0 me-2">
                       <div class="avatar avatar-online">
-                        <img src="https://robohash.org/{{ \Auth::user()->id }}?set=set3&size=100x100&bgset=bg1" alt class="rounded-circle">
+                          <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                              style="width: 40px; height: 40px; background-color: #007bff; color: white; font-weight: bold; font-size: 1.4rem; letter-spacing: 0; line-height: 1;">
+                              {{ strtoupper(substr(explode(' ', \Auth::user()->name)[0], 0, 1)) }}{{ strtoupper(substr(explode(' ', \Auth::user()->name)[1] ?? '', 0, 1)) }}
+                          </div>
                       </div>
                     </div>
                     <div class="flex-grow-1">

@@ -777,7 +777,7 @@
                         </div>
                         <!-- Bulk Message -->
                         <div class="col-12 col-sm-6 col-md-6 col-lg-6">
-                            <a href="{{ url('chats') }}" class="btn btn-outline-primary w-100">Bulk Message</a>
+                            <a href="{{ route('sms.index') }}" class="btn btn-outline-primary w-100">Bulk Message</a>
                         </div>
                         <!-- Export Clients -->
                         <div class="col-12 col-sm-6 col-md-6 col-lg-6">

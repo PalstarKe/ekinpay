@@ -309,7 +309,20 @@
     <div class="col-sm-12 col-lg-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title mb-0">{{ $customer->fullname ?? 'N/A' }}</h3>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar {{ $online ? 'avatar-online' : '' }} me-2">
+                        <div class="rounded d-flex align-items-center justify-content-center" 
+                            style="width: 50px; height: 50px; background-color: #007bff; color: white; font-weight: bold; font-size: 1.8rem; letter-spacing: 0; line-height: 1;">
+                            {{ strtoupper(substr(explode(' ', $customer->fullname)[0], 0, 1)) }}{{ strtoupper(substr(explode(' ', $customer->fullname)[1] ?? '', 0, 1)) }}
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <h3 class="card-title mb-0 text-truncate" style="max-width: 200px;">
+                            {{ $customer->fullname ?? 'N/A' }}
+                        </h3>
+                        <small class="font-w400 text-muted">{{ $customer['email'] ?? 'N/A' }}</small>
+                    </div>
+                </div>
                 <div class="d-flex flex-column text-start">
                     <a href="#" class="text-info">MAC: {{ $customer['mac_address'] ?? 'N/A' }}</a>
                     <a href="#" class="text-info">IP: {{ optional($session)->ip ?? 'N/A' }}</a>
@@ -322,15 +335,11 @@
                         <div class="row w-100 g-0">
                             <!-- Profile Avatar & Info -->
                             <div class="col-md-3 d-flex align-items-center gap-3">
-                                <div class="avatar {{ $online ? 'avatar-online' : '' }}">
-                                    <img src="https://robohash.org/{{$customer['id']}}?set=set3&size=100x100&bgset=bg1" 
-                                        width="60" alt="Profile" class="rounded-circle">
-                                </div>
                                 <div class="header-info" style="cursor: pointer;">
                                     <a data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd">
-                                        <span class="font-w600 {{ $online ? 'text-success' : 'text-danger' }}">
-                                            <b>{{$customer['username']}}</b>
-                                        </span>
+                                    <span class="font-w800 fs-4 {{ $customer->is_active == 1 ? 'text-success' : 'text-danger' }}">
+                                        <b>{{$customer['username']}}</b>
+                                    </span>
                                     </a>
                                 </div>
                             </div>
@@ -353,7 +362,7 @@
                                     class="d-flex align-items-center m-0 p-0">
                                     @csrf
                                     @method('POST')
-                                    <button type="submit" class="btn bg-label-warning btn-md">
+                                    <button type="submit" class="btn {{ $customer->is_active == 1 ? 'bg-label-success' : 'bg-label-danger' }} btn-md">
                                         {{ $customer->is_active == 1 ? 'Deactivate' : 'Activate' }}
                                     </button>
                                 </form>
@@ -363,22 +372,49 @@
                                     class="d-flex align-items-center m-0 p-0">
                                     @csrf
                                     @method('POST')
-                                    <button type="submit" class="btn {{ $customer->corporate == 1 ? 'bg-label-success' : 'bg-label-info' }} btn-md">
-                                        {{ $customer->corporate == 0 ? 'Not Corporate' : 'Corporate' }}
+                                    <button type="submit" class="btn {{ $customer->corporate == 1 ? 'bg-label-success' : 'bg-label-danger' }} btn-md">
+                                        {{ $customer->corporate == 0 ? 'Corporate' : 'Corporate' }}
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </li>
                     <div class="row mt-3">
-                        <ul class="d mb-3 col-4">
-                            <small class="font-w400">Service: {{$customer['service']}}</small><br>
-                            <small class="font-w400">Old Username: {{$customer['username']}}</small><br>
-                            <small class="font-w400">Status: @if($customer->is_active == 1)<span class="text-success">Active</span>@else<span class="badge bg-label-warning">Inactive</span>@endif</small><br>
-                            <small class="font-w400">Location: {{$customer['location']}}</small><br>
-                            <small class="font-w400">Created On: {{ \Carbon\Carbon::parse($customer['created_at'])->format('Y-m-d') }}</small><br>
-                            <small class="font-w400">Phone No: {{$customer['contact']}}</small><br>
-                            <small class="font-w400">Email: {{$customer['email']}}</small><br>
+                        <ul class="mb-3 col-4 list-unstyled" style="font-size: small;">
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Service:</span>
+                                <span>{{$customer['service']}}</span>
+                            </li>
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Old Username:</span>
+                                <span>{{$customer['username']}}</span>
+                            </li>
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Status:</span>
+                                <span>
+                                    @if($customer->is_active == 1)
+                                        <span class="text-success">Active</span>
+                                    @else
+                                        <span class="badge bg-label-warning">Inactive</span>
+                                    @endif
+                                </span>
+                            </li>
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Location:</span>
+                                <span>{{$customer['location']}}</span>
+                            </li>
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Created On:</span>
+                                <span>{{ \Carbon\Carbon::parse($customer['created_at'])->format('Y-m-d') }}</span>
+                            </li>
+                            <li class="d-flex">
+                                <span class=" fw-bold me-1" style="min-width: 100px;">Phone No:</span>
+                                <span>{{$customer['contact']}}</span>
+                            </li>
+                            <li class="d-flex">
+                                <span class="fw-bold me-1" style="min-width: 100px;">Expiry:</span>
+                                <span>{{$customer['expiry']}}</span>
+                            </li>
                         </ul>
                         <div class="card col-8">
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -392,7 +428,7 @@
                                         <tr>
                                             <th>Username</th>
                                             <th>Status</th>
-                                            <th>Shared</th>
+                                            <th>Plan</th>
                                             <th>Expiry</th>
                                         </tr>
                                     </thead>
@@ -402,7 +438,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -706,9 +741,9 @@
                             <div class="content-left">
                                 <span class="text-heading">Uptime</span>
                                 <div class="d-flex align-items-center my-1">
-                                <h6 class="mb-0 me-2">
-                                {{ $displayUptime }} 
-                                </h6>
+                                    <h6 class="mb-0 me-2">
+                                        {{ $displayUptime }} 
+                                    </h6>
                                 </div>
                             </div>
                             <div class="avatar">

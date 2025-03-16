@@ -1201,7 +1201,6 @@
                                 </div>
                             </div>
                         </div>
-
                         {{ Form::close() }}
                     </div>
 
@@ -1209,8 +1208,7 @@
                     <div class="card mb-3" id="payment-settings">
                         <div class="card-header">
                             <h5>{{ 'Payment Settings' }}</h5>
-                            <small
-                                class="text-secondary font-weight-bold">{{ __('These details will be used to collect invoice payments. Each invoice will have a payment button based on the below configuration.') }}</small>
+                            <small class="text-secondary font-weight-bold">{{ __('These details will be used to collect invoice payments. Each invoice will have a payment button based on the below configuration.') }}</small>
                         </div>
                         {{ Form::model($setting, ['route' => 'company.payment.settings', 'method' => 'POST']) }}
                         @csrf
@@ -1623,7 +1621,6 @@
                                                                     {{ __('Bank and Sacco') }}
                                                                 </span>
                                                                 <div class="d-flex align-items-center">
-                                                                    <!-- <span class="me-2"> {{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
                                                                         <input type="hidden" name="is_mpesa_bank_enabled"
                                                                             value="off">
