@@ -124,6 +124,148 @@ class PackageController extends Controller
             $bandwidth->created_by = Auth::user()->id;
             $bandwidth->save();
 
+            // Assign package to RADIUS
+            $planName = $package->name_plan;
+            
+            $timeout = '60';
+
+            $timelimit = 0;
+
+            if ($package->validity_unit == 'Minutes') {
+                $timelimit = $package->validity * 60;
+            } elseif ($package->validity_unit == 'Hours') {
+                $timelimit = $package->validity * 3600;
+            } elseif ($package->validity_unit == 'Days') {
+                $timelimit = $package->validity * 86400;
+            } elseif ($package->validity_unit == 'Months') {
+                $timelimit = $package->validity * 2592000; // Assuming 30 days per month
+            }
+            $planTimeBank = $timelimit;
+
+            $shared = $package->shared_users;
+
+            function convertBandwidth($rate, $unit) {
+                $multipliers = [
+                    'K' => 1000,  // Kilobits to bits
+                    'M' => 1000000, // Megabits to bits
+                    'G' => 1000000000 // Gigabits to bits (if needed)
+                ];
+                return isset($multipliers[$unit]) ? ($rate * $multipliers[$unit]) : $rate;
+            }
+            
+            $down = convertBandwidth($package->bandwidth->rate_down, $package->bandwidth->rate_down_unit);
+            $up = convertBandwidth($package->bandwidth->rate_up, $package->bandwidth->rate_up_unit);
+
+            $downm = $package->bandwidth->rate_down . $package->bandwidth->rate_down_unit;
+            $upm = $package->bandwidth->rate_up . $package->bandwidth->rate_up_unit;
+            $MikroRate = $downm . "/" . $upm;
+            
+            function convertDataLimit($data, $unit) {
+                $multipliers = [
+                    'K' => 1024, 
+                    'M' => 1048576, 
+                    'G' => 1073741824
+                ];
+                return isset($multipliers[$unit]) ? ($data * $multipliers[$unit]) : 0;
+            }
+
+            $datalimit = convertDataLimit($package->data_limit, $package->data_limit_unit);
+
+            $bw_name = $package->bandwidth->name_plan;
+            $bw_id = $package->bandwidth->id;
+
+            $group_name = 'package_' . $package->id;
+            $profileType = $package->typebp;
+            $limitType = $package->limit_type;
+
+            if ($profileType === 'Unlimited') {
+                unset($datalimit); 
+            } elseif ($profileType === 'Limited') {
+                if ($limitType === 'Time_Limit') {
+                    unset($datalimit);
+                } elseif ($limitType === 'Data_Limit') {
+                    unset($planTimeBank, $timelimit);
+                }
+            }
+         
+
+            DB::beginTransaction();
+
+            try {
+                // Insert into radgroupcheck
+                $planCheckData = [
+                    ['groupname' => $group_name, 'attribute' => 'Auth-Type', 'op' => ':=', 'value' => 'Accept']
+                ];
+
+                if (!empty($planTimeBank)) {
+                    $planCheckData[] = ['groupname' => $group_name, 'attribute' => 'Session-Timeout', 'op' => ':=', 'value' => $planTimeBank];
+                }
+                if (!empty($datalimit)) {
+                    $planCheckData[] = ['groupname' => $group_name, 'attribute' => 'Max-Octets', 'op' => ':=', 'value' => $datalimit];
+                }
+                if (!empty($shared)) {
+                    $planCheckData[] = ['groupname' => $group_name, 'attribute' => 'Simultaneous-Use', 'op' => ':=', 'value' => $shared];
+                }
+
+                if (!empty($planCheckData)) {
+                    DB::connection('radius')->table('radgroupcheck')->insert($planCheckData);
+                }
+                $planCheckExists = DB::connection('radius')->table('radgroupcheck')
+                    ->where('groupname', 'Expired_Plan')
+                    ->exists();
+
+                if (!$planCheckExists) {
+                    DB::connection('radius')->table('radgroupcheck')->insert([
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'Auth-Type', 'op' => ':=', 'value' => 'Accept'],
+                        // ['groupname' => 'Expired_Plan', 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => '300'] // 5 min idle timeout
+                    ]);
+                }
+
+                // Insert into radgroupreply
+                $planReplyData = [];
+                 
+                if (!empty( $MikroRate)) {
+                    $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Mikrotik-Rate-Limit', 'op' => ':=', 'value' =>  $MikroRate];
+                }
+
+                if (!empty($down)) {
+                    $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'WISPr-Bandwidth-Max-Down', 'op' => ':=', 'value' => $down];
+                }
+               
+                if (!empty($up)) {
+                    $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'WISPr-Bandwidth-Max-Up', 'op' => ':=', 'value' => $up];
+                }
+
+                // if (!empty($timeout)) {
+                //     $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => $timeout];
+                // }
+
+                // Acct-Interim-Interval is always added
+                $planReplyData[] = ['groupname' => $group_name, 'attribute' => 'Acct-Interim-Interval', 'op' => ':=', 'value' => '60'];
+
+                if (!empty($planReplyData)) {
+                    DB::connection('radius')->table('radgroupreply')->insert($planReplyData);
+                }
+                $planExists = DB::connection('radius')->table('radgroupreply')
+                    ->where('groupname', 'Expired_Plan')
+                    ->exists();
+
+                if (!$planExists) {
+                    DB::connection('radius')->table('radgroupreply')->insert([
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'Mikrotik-Rate-Limit', 'op' => ':=', 'value' => '256K/256K'],
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'WISPr-Bandwidth-Max-Down', 'op' => ':=', 'value' => '256000'],
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'WISPr-Bandwidth-Max-Up', 'op' => ':=', 'value' => '256000'],
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'Idle-Timeout', 'op' => ':=', 'value' => '300'],
+                        ['groupname' => 'Expired_Plan', 'attribute' => 'Mikrotik-Address-List', 'op' => ':=', 'value' => 'EXPIRED_POOL']
+                    ]);
+                }
+
+
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
             return redirect()->route('packages.index')->with('success', __('Package & Bandwidth Created Successfully.'));
         }else{
             return redirect()->back()->with('error', __('Permission denied.'));
