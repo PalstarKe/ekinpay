@@ -1239,7 +1239,7 @@
                                                                             class="form-check-input input-primary"
                                                                             id="customswitchv1-1 is_mpesa_enabled"
                                                                             name="is_mpesa_enabled"
-                                                                            {{ isset($admin_payment_setting['is_mpesa_enabled']) && $admin_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
+                                                                            {{ isset($company_payment_setting['is_mpesa_enabled']) && $company_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
                                                                     </div>
                                                                 </div>
                                                             </button>
@@ -1254,9 +1254,9 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="Hotspot"
+                                                                                        name="mpesa_mode" value="PPPoE"
                                                                                         class="form-check-input"
-                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'PPPoE') ? 'checked="checked"' : '' }}>
+                                                                                        {{ (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == '') || (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'PPPoE') ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
@@ -1267,9 +1267,9 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="PPPoE"
+                                                                                        name="mpesa_mode" value="Hotspot"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'Hotspot' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'Hotspot' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Hotspot') }}
                                                                                 </label>
                                                                             </div>
@@ -1282,7 +1282,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="both"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'Both' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'Both' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
@@ -1294,7 +1294,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_key', __('Mpesa Consumer Key'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_key', isset($admin_payment_setting['mpesa_key']) ? $admin_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
+                                                                                {{ Form::text('mpesa_key', isset($company_payment_setting['mpesa_key']) ? $company_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
                                                                                 @if ($errors->has('mpesa_key'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_key') }}
@@ -1307,7 +1307,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_secret', __('Mpesa Consumer Secret'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_secret', isset($admin_payment_setting['mpesa_secret']) ? $admin_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
+                                                                                {{ Form::text('mpesa_secret', isset($company_payment_setting['mpesa_secret']) ? $company_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
                                                                                 @if ($errors->has('mpesa_secret'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_secret') }}
@@ -1320,7 +1320,11 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_shortcode_type', __('Mpesa Business Shortcode Type'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_shortcode_type', isset($admin_payment_setting['mpesa_shortcode_type']) ? $admin_payment_setting['mpesa_shortcode_type'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode Type')]) }}
+                                                                                {{ Form::select('mpesa_shortcode_type', 
+                                                                                    ['paybill' => 'Mpesa Paybill', 'till' => 'Mpesa Till/Buy Goods'], 
+                                                                                    isset($company_payment_setting['mpesa_shortcode_type']) ? $company_payment_setting['mpesa_shortcode_type'] : '', 
+                                                                                    ['class' => 'form-control', 'required' => 'required']) 
+                                                                                }}
                                                                                 @if ($errors->has('mpesa_shortcode_type'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_shortcode_type') }}
@@ -1333,7 +1337,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_shortcode', isset($admin_payment_setting['mpesa_shortcode']) ? $admin_payment_setting['mpesa_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                {{ Form::text('mpesa_shortcode', isset($company_payment_setting['mpesa_shortcode']) ? $company_payment_setting['mpesa_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
                                                                                 @if ($errors->has('mpesa_shortcode'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_shortcode') }}
@@ -1345,11 +1349,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('passkey', isset($admin_payment_setting['passkey']) ? $admin_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
-                                                                                @if ($errors->has('passkey'))
+                                                                                {{ Form::label('mpesa_passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_passkey', isset($company_payment_setting['mpesa_passkey']) ? $company_payment_setting['mpesa_passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
+                                                                                @if ($errors->has('mpesa_passkey'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('passkey') }}
+                                                                                        {{ $errors->first('mpesa_passkey') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1360,7 +1364,7 @@
                                                         </div>
                                                     </div>
                                                     <!-- Mpesa Till-->
-                                                    <div class="accordion-item card mt-2">
+                                                    {{--<div class="accordion-item card mt-2">
                                                         <h2 class="accordion-header" id="headingOne">
                                                             <button class="accordion-button collapsed" type="button"
                                                                 data-bs-toggle="collapse" data-bs-target="#mpesaTill"
@@ -1377,7 +1381,7 @@
                                                                             class="form-check-input input-primary"
                                                                             id="customswitchv1-1 is_mpesa_enabled"
                                                                             name="is_mpesa_enabled"
-                                                                            {{ isset($admin_payment_setting['is_mpesa_enabled']) && $admin_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
+                                                                            {{ isset($company_payment_setting['is_mpesa_enabled']) && $company_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
                                                                     </div>
                                                                 </div>
                                                             </button>
@@ -1394,7 +1398,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="sandbox"
                                                                                         class="form-check-input"
-                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
+                                                                                        {{ (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == '') || (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
@@ -1407,7 +1411,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Hotspot') }}
                                                                                 </label>
                                                                             </div>
@@ -1420,7 +1424,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
@@ -1432,7 +1436,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_key', __('Mpesa Consumer Key'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_key', isset($admin_payment_setting['mpesa_key']) ? $admin_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
+                                                                                {{ Form::text('mpesa_key', isset($company_payment_setting['mpesa_key']) ? $company_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
                                                                                 @if ($errors->has('mpesa_key'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_key') }}
@@ -1445,7 +1449,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_secret', __('Mpesa Consumer Secret'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_secret', isset($admin_payment_setting['mpesa_secret']) ? $admin_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
+                                                                                {{ Form::text('mpesa_secret', isset($company_payment_setting['mpesa_secret']) ? $company_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
                                                                                 @if ($errors->has('mpesa_secret'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_secret') }}
@@ -1458,7 +1462,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
                                                                                 @if ($errors->has('shortcode'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('shortcode') }}
@@ -1471,7 +1475,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('passkey', isset($admin_payment_setting['passkey']) ? $admin_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
+                                                                                {{ Form::text('passkey', isset($company_payment_setting['passkey']) ? $company_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
                                                                                 @if ($errors->has('passkey'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('passkey') }}
@@ -1502,7 +1506,7 @@
                                                                             class="form-check-input input-primary"
                                                                             id="customswitchv1-1 is_mpesa_enabled"
                                                                             name="is_mpesa_enabled"
-                                                                            {{ isset($admin_payment_setting['is_mpesa_enabled']) && $admin_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
+                                                                            {{ isset($company_payment_setting['is_mpesa_enabled']) && $company_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
                                                                     </div>
                                                                 </div>
                                                             </button>
@@ -1519,7 +1523,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="sandbox"
                                                                                         class="form-check-input"
-                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
+                                                                                        {{ (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == '') || (isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
@@ -1532,7 +1536,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Hotspot') }}
                                                                                 </label>
                                                                             </div>
@@ -1545,7 +1549,7 @@
                                                                                     <input type="radio"
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
@@ -1557,7 +1561,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_key', __('Mpesa Consumer Key'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_key', isset($admin_payment_setting['mpesa_key']) ? $admin_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
+                                                                                {{ Form::text('mpesa_key', isset($company_payment_setting['mpesa_key']) ? $company_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
                                                                                 @if ($errors->has('mpesa_key'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_key') }}
@@ -1570,7 +1574,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_secret', __('Mpesa Consumer Secret'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_secret', isset($admin_payment_setting['mpesa_secret']) ? $admin_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
+                                                                                {{ Form::text('mpesa_secret', isset($company_payment_setting['mpesa_secret']) ? $company_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
                                                                                 @if ($errors->has('mpesa_secret'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('mpesa_secret') }}
@@ -1583,7 +1587,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
                                                                                 @if ($errors->has('shortcode'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('shortcode') }}
@@ -1596,7 +1600,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('passkey', isset($admin_payment_setting['passkey']) ? $admin_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
+                                                                                {{ Form::text('passkey', isset($company_payment_setting['passkey']) ? $company_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
                                                                                 @if ($errors->has('passkey'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('passkey') }}
@@ -1608,7 +1612,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div>--}}
                                                     <!-- Mpesa Bank and Sacco -->
                                                     <div class="accordion-item card mt-2">
                                                         <h2 class="accordion-header" id="headingOne">
@@ -1621,13 +1625,13 @@
                                                                 <div class="d-flex align-items-center">
                                                                     <!-- <span class="me-2"> {{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
-                                                                        <input type="hidden" name="is_mpesa_enabled"
+                                                                        <input type="hidden" name="is_mpesa_bank_enabled"
                                                                             value="off">
                                                                         <input type="checkbox"
                                                                             class="form-check-input input-primary"
-                                                                            id="customswitchv1-1 is_mpesa_enabled"
-                                                                            name="is_mpesa_enabled"
-                                                                            {{ isset($admin_payment_setting['is_mpesa_enabled']) && $admin_payment_setting['is_mpesa_enabled'] == 'on' ? 'checked="checked"' : '' }}>
+                                                                            id="customswitchv1-1 is_mpesa_bank_enabled"
+                                                                            name="is_mpesa_bank_enabled"
+                                                                            {{ isset($company_payment_setting['is_mpesa_bank_enabled']) && $company_payment_setting['is_mpesa_bank_enabled'] == 'on' ? 'checked="checked"' : '' }}>
                                                                     </div>
                                                                 </div>
                                                             </button>
@@ -1642,9 +1646,9 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="sandbox"
+                                                                                        name="mpesa_bank_mode" value="PPPoE"
                                                                                         class="form-check-input"
-                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
+                                                                                        {{ (isset($company_payment_setting['mpesa_bank_mode']) && $company_payment_setting['mpesa_bank_mode'] == '') || (isset($company_payment_setting['mpesa_bank_mode']) && $company_payment_setting['mpesa_bank_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
@@ -1655,9 +1659,9 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="live"
+                                                                                        name="mpesa_bank_mode" value="Hotspot"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_bank_mode']) && $company_payment_setting['mpesa_bank_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Hotspot') }}
                                                                                 </label>
                                                                             </div>
@@ -1668,9 +1672,9 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="live"
+                                                                                        name="mpesa_bank_mode" value="Both"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                        {{ isset($company_payment_setting['mpesa_bank_mode']) && $company_payment_setting['mpesa_bank_mode'] == 'live' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
@@ -1681,11 +1685,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('mpesa_key', __('Mpesa Consumer Key'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_key', isset($admin_payment_setting['mpesa_key']) ? $admin_payment_setting['mpesa_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
-                                                                                @if ($errors->has('mpesa_key'))
+                                                                                {{ Form::label('mpesa_bank_key', __('Mpesa Consumer Key'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_bank_key', isset($company_payment_setting['mpesa_bank_key']) ? $company_payment_setting['mpesa_bank_key'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Consumer Key')]) }}
+                                                                                @if ($errors->has('mpesa_bank_key'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('mpesa_key') }}
+                                                                                        {{ $errors->first('mpesa_bank_key') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1694,11 +1698,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('mpesa_secret', __('Mpesa Consumer Secret'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('mpesa_secret', isset($admin_payment_setting['mpesa_secret']) ? $admin_payment_setting['mpesa_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
-                                                                                @if ($errors->has('mpesa_secret'))
+                                                                                {{ Form::label('mpesa_bank_secret', __('Mpesa Consumer Secret'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_bank_secret', isset($company_payment_setting['mpesa_bank_secret']) ? $company_payment_setting['mpesa_bank_secret'] : '', ['class' => 'form-control ', 'placeholder' => __('Enter Mpesa Consumer Secret')]) }}
+                                                                                @if ($errors->has('mpesa_bank_secret'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('mpesa_secret') }}
+                                                                                        {{ $errors->first('mpesa_bank_secret') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1707,11 +1711,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
-                                                                                @if ($errors->has('shortcode'))
+                                                                                {{ Form::label('mpesa_bank_shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text(''mpesa_bank_shortcode', isset($company_payment_setting[''mpesa_bank_shortcode']) ? $company_payment_setting[''mpesa_bank_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                @if ($errors->has(''mpesa_bank_shortcode'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('shortcode') }}
+                                                                                        {{ $errors->first(''mpesa_bank_shortcode') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1720,11 +1724,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('passkey', isset($admin_payment_setting['passkey']) ? $admin_payment_setting['passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
-                                                                                @if ($errors->has('passkey'))
+                                                                                {{ Form::label(''mpesa_bank_passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text(''mpesa_bank_passkey', isset($company_payment_setting[''mpesa_bank_passkey']) ? $company_payment_setting[''mpesa_bank_passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
+                                                                                @if ($errors->has(''mpesa_bank_passkey'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('passkey') }}
+                                                                                        {{ $errors->first(''mpesa_bank_passkey') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1734,7 +1738,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('shortcode', __('Bank Paybill'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Paybill Number')]) }}
+                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Paybill Number')]) }}
                                                                                 @if ($errors->has('shortcode'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('shortcode') }}
@@ -1747,7 +1751,7 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('shortcode', __('Bank Account'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Account Number')]) }}
+                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Account Number')]) }}
                                                                                 @if ($errors->has('shortcode'))
                                                                                     <span class="invalid-feedback d-block">
                                                                                         {{ $errors->first('shortcode') }}
