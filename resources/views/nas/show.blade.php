@@ -170,10 +170,10 @@
 								<div id="accordionCustomIcon-1" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<!-- <button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
 											Copy
-										</button> -->
-										<pre highlighter="hljs"  style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCode7" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#VPN and Radius Config </span><span>
+										</button>
+										<pre highlighter="hljs"  style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCode" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#VPN and Radius Config </span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">2</span><span></span><span style="color: rgb(136, 136, 136);">#Dont Edit anything</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">3</span><span></span><span style="color: rgb(12, 154, 154);">/ip dns
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">4</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">set</span><span> </span><span style="color: rgb(14, 154, 0);">servers</span><span>=8.8.8.8,8.8.4.4
@@ -205,9 +205,9 @@
 								<div id="accordionCustomIcon-2" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<!-- <button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
 											Copy
-										</button> -->
+										</button>
 										<pre highlighter="hljs"  style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCode7" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#VPN and Radius Config </span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">2</span><span></span><span style="color: rgb(136, 136, 136);">#Dont Edit anything</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">3</span><span></span><span style="color: rgb(12, 154, 154);">/ip dns
@@ -238,28 +238,32 @@
 								</h2>
 								<div id="accordionCustomIcon-3" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
-									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Hotspot settings (Change the Interface "FUTURE-BRIDGE" and "address-pool" to match that of your router)</span><span>
+									<div class="position-relative">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+											Copy
+										</button>
+									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeH" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Hotspot settings (Change the Interface "FUTURE-BRIDGE" and "address-pool" to match that of your router)</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">2</span><span></span><span style="color: rgb(12, 154, 154);">/interface bridge
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">3</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=FUTURE-BRIDGE
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">4</span><span></span><span style="color: rgb(12, 154, 154);">/ip hotspot profile
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">5</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-name</span><span>=hot.spot </span><span style="color: rgb(14, 154, 0);">hotspot-address</span><span>=10.251.0.1 </span><span style="color: rgb(14, 154, 0);">login-by</span><span>=\
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">5</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-name</span><span>=hot.spot </span><span style="color: rgb(14, 154, 0);">hotspot-address</span><span>=10.201.0.1 </span><span style="color: rgb(14, 154, 0);">login-by</span><span>=\
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">6</span><span>    mac,http-chap,http-pap </span><span style="color: rgb(14, 154, 0);">mac-auth-mode</span><span>=mac-as-username-and-password </span><span style="color: rgb(14, 154, 0);">name</span><span>=\
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">7</span><span>    thefuture </span><span style="color: rgb(14, 154, 0);">use-radius</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">8</span><span></span><span style="color: rgb(12, 154, 154);">/ip pool
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">9</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=hotspot-pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=10.251.0.2-10.251.255.254
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">9</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=hotspot-pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=10.201.0.2-10.201.255.254
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">10</span><span></span><span style="color: rgb(12, 154, 154);">/ip dhcp-server
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">11</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address-pool</span><span>=hotspot-pool </span><span style="color: rgb(14, 154, 0);">disabled</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=FUTURE-BRIDGE </span><span style="color: rgb(14, 154, 0);">lease-time</span><span>=1h </span><span style="color: rgb(14, 154, 0);">name</span><span>=HOTSPOT_DHCP </span><span style="color: rgb(14, 154, 0);">conflict-detection</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">add-arp</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">12</span><span></span><span style="color: rgb(12, 154, 154);">/ip hotspot
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">13</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address-pool</span><span>=hotspot-pool </span><span style="color: rgb(14, 154, 0);">disabled</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=FUTURE-BRIDGE </span><span style="color: rgb(14, 154, 0);">name</span><span>=hotspot </span><span style="color: rgb(14, 154, 0);">profile</span><span>=one-isp
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">14</span><span></span><span style="color: rgb(12, 154, 154);">/ip hotspot </span><span>ip-binding
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">15</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.251.0.1/16 </span><span style="color: rgb(14, 154, 0);">server</span><span>=hotspot
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">15</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.201.0.1/16 </span><span style="color: rgb(14, 154, 0);">server</span><span>=hotspot
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">16</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=0.0.0.0/0  </span><span style="color: rgb(14, 154, 0);">server</span><span>=hotspot </span><span style="color: rgb(14, 154, 0);">type</span><span>=blocked
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">17</span><span></span><span style="color: rgb(12, 154, 154);">/ip address
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">18</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.251.0.1/16 </span><span style="color: rgb(14, 154, 0);">comment</span><span>=</span><span style="color: rgb(136, 0, 0);">"hotspot network"</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=FUTURE-BRIDGE </span><span style="color: rgb(14, 154, 0);">network</span><span>=10.251.0.0
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">18</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.201.0.1/16 </span><span style="color: rgb(14, 154, 0);">comment</span><span>=</span><span style="color: rgb(136, 0, 0);">"hotspot network"</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=FUTURE-BRIDGE </span><span style="color: rgb(14, 154, 0);">network</span><span>=10.201.0.0
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">19</span><span></span><span style="color: rgb(12, 154, 154);">/ip dhcp-server network
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">20</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.251.0.0/16 </span><span style="color: rgb(14, 154, 0);">comment</span><span>=</span><span style="color: rgb(136, 0, 0);">"hotspot network"</span><span> </span><span style="color: rgb(14, 154, 0);">gateway</span><span>=10.251.0.1
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">20</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.201.0.0/16 </span><span style="color: rgb(14, 154, 0);">comment</span><span>=</span><span style="color: rgb(136, 0, 0);">"hotspot network"</span><span> </span><span style="color: rgb(14, 154, 0);">gateway</span><span>=10.201.0.1
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">21</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall address-list
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">22</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">list</span><span>=ALLOWED_USERS </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.251.0.0/16
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">22</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">list</span><span>=ALLOWED_USERS </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.201.0.0/16
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">23</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall nat </span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">24</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">action</span><span>=masquerade </span><span style="color: rgb(14, 154, 0);">chain</span><span>=srcnat </span><span style="color: rgb(14, 154, 0);">src-address-list</span><span>=ALLOWED_USERS
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">25</span><span></span><span style="color: rgb(12, 154, 154);">/ip hotspot </span><span>walled-garden
@@ -268,6 +272,7 @@
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">28</span>
 </code></pre>
 									</div>
+								</div>
 								</div>
 							</div>
 							<div class="accordion-item previous-active">
@@ -279,19 +284,23 @@
 								</h2>
 								<div id="accordionCustomIcon-4" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
-									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#PPPoE Settings (Change the Interface "PPPoE-Server" and "PPPoE-Pool" to match that of your router)</span><span>
+									<div class="position-relative">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+											Copy
+										</button>
+									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeP" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#PPPoE Settings (Change the Interface "PPPoE-Server" and "PPPoE-Pool" to match that of your router)</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">2</span><span></span><span style="color: rgb(12, 154, 154);">/interface bridge
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">3</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=FUTURE-BRIDGE
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">4</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall address-list
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">5</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">list</span><span>=ALLOWED_USERS  </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.254.0.0/16
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">6</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">list</span><span>=DISABLED_USERS </span><span style="color: rgb(14, 154, 0);">address</span><span>=10.255.0.0/16 
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">6</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">list</span><span>=DISABLED_USERS </span><span style="color: rgb(14, 154, 0);">address</span><span>=90.90.0.0/16 
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">7</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall nat </span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">8</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">action</span><span>=masquerade </span><span style="color: rgb(14, 154, 0);">chain</span><span>=srcnat </span><span style="color: rgb(14, 154, 0);">src-address-list</span><span>=ALLOWED_USERS
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">9</span><span></span><span style="color: rgb(12, 154, 154);">/ip pool
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">10</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=EXPIRED_POOL </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=10.255.0.10-10.255.255.255
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">11</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=PPPoE-Pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=10.254.0.10-10.254.255.255
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">10</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=EXPIRED_POOL </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=90.90.0.2-90.90.255.254
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">11</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=PPPoE-Pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=172.16.0.2-172.16.255.254
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">12</span><span></span><span style="color: rgb(12, 154, 154);">/ppp profile
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">13</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-server</span><span>=8.8.8.8,8.8.4.4 </span><span style="color: rgb(14, 154, 0);">local-address</span><span>=10.254.0.1 </span><span style="color: rgb(14, 154, 0);">name</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">remote-address</span><span>=PPPoE-Pool
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">13</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-server</span><span>=8.8.8.8,8.8.4.4 </span><span style="color: rgb(14, 154, 0);">local-address</span><span>=172.16.0.1 </span><span style="color: rgb(14, 154, 0);">name</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">remote-address</span><span>=PPPoE-Pool
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">14</span><span></span><span style="color: rgb(12, 154, 154);">/interface </span><span>pppoe-server</span><span style="color: rgb(12, 154, 154);"> server
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">15</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">authentication</span><span>=pap </span><span style="color: rgb(14, 154, 0);">default-profile</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">disabled</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=FUTURE-BRIDGE \
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">16</span><span>    </span><span style="color: rgb(14, 154, 0);">max-mru</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">max-mtu</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">mrru</span><span>=1600 </span><span style="color: rgb(14, 154, 0);">one-session-per-host</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span> \
@@ -302,6 +311,7 @@
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">21</span><span></span><span style="color: rgb(136, 136, 136);">#</span></code></pre>
 									</div>
 								</div>
+				</div>
 							</div>
 							<div class="accordion-item previous-active">
 								<h2 class="accordion-header text-body d-flex justify-content-between" id="accordionCustomIconTwo">
@@ -312,7 +322,11 @@
 								</h2>
 								<div id="accordionCustomIcon-5" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
-									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Mikrotik Non-payment page (Dont change anything here)</span><span>
+									<div class="position-relative">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+											Copy
+										</button>
+									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeE" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Mikrotik Non-payment page (Dont change anything here)</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">2</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall address-list
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">3</span><span style="color: rgb(12, 154, 154);"></span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">address</span><span>=redirect.thefuturefirm.net </span><span style="color: rgb(14, 154, 0);">list</span><span>=</span><span style="color: rgb(136, 0, 0);">"THFUTURE_REDIRECT_IP"</span><span> </span><span style="color: rgb(14, 154, 0);">comment</span><span>=</span><span style="color: rgb(136, 0, 0);">"-- DON'T REMOVE ::: THFUTURE EXPIRED USERS --"</span><span>
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">4</span><span></span><span style="color: rgb(12, 154, 154);">/ip firewall filter
@@ -346,74 +360,111 @@
 </code></pre>
 									</div>
 								</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
               <!--/ Accordion With Custom Button -->
-				{{--<span class="">RouterOS V6</span>
-				<div class="row g-2 mb-2">
-					<div class="col-md-10 col-sm-12 pe-0 mb-md-0 mb-2">
-						<input class="form-control" id="rosv6" type="text" value="/interface ovpn-client add connect-to=158.220.116.211 port=1094 name=THEFUTUREOVPN user={{$nas['shortname']}} password={{$nas['shortname']}} profile=default comment=THEFUTUREOVPN cipher=aes256 auth=sha1" />
-					</div>
-					<div class="col-md-2 col-sm-12">
-						<button class="clipboard-btn btn btn-primary me-2" data-clipboard-action="copy" data-clipboard-target="#rosv6">Copy </button>
-					</div>
-				</div>
-				<span class="">RouterOS V7</span>
-				<div class="row g-2 mb-2">
-					<div class="col-md-10 col-sm-12 pe-0 mb-md-0 mb-2">
-						<input class="form-control" id="rosv7" type="text" value="/interface ovpn-client add connect-to=158.220.116.211 port=1094 proto=tcp name=THEFUTUREOVPN user={{$nas['shortname']}} password={{$nas['shortname']}} profile=default comment=THEFUTUREOVPN cipher=aes256-cbc auth=sha1 route-nopull=yes" />
-					</div>
-					<div class="col-md-2 col-sm-12">
-						<button class="clipboard-btn btn btn-primary me-2" data-clipboard-action="copy" data-clipboard-target="#rosv7">Copy </button>
-					</div>
-				</div>
-				<span class="">Add Radius</span>
-				<div class="row g-2 mb-2">
-					<div class="col-md-10 col-sm-12 pe-0 mb-md-0 mb-2">
-						<input class="form-control" id="radiusadd" type="text" value="/radius add address=10.108.0.1 secret=thefuture2025 service=ppp,hotspot timeout=3s" />
-					</div>
-					<div class="col-md-2 col-sm-12">
-						<button class="clipboard-btn btn btn-primary me-2" data-clipboard-action="copy" data-clipboard-target="#radiusadd">Copy </button>
-					</div>
-				</div>
-				<div class="row g-2 mb-2">
-					<div class="col-md-10 col-sm-12 pe-0 mb-md-0 mb-2">
-						<input class="form-control" id="radiusin" type="text" value="/radius incoming set accept=yes port=3799" />
-					</div>
-					<div class="col-md-2 col-sm-12">
-						<button class="clipboard-btn btn btn-primary me-2" data-clipboard-action="copy" data-clipboard-target="#radiusin">Copy </button>
-					</div>
-				</div>
-				<span class="">Adjust Mikrotik Time</span>
-				<div class="row g-2 mb-2">
-					<div class="col-md-10 col-sm-12 pe-0 mb-md-0 mb-2">
-						<input class="form-control" id="timeset" type="text" value="/system clock set time-zone-name=Africa/Nairobi " />
-					</div>
-					<div class="col-md-2 col-sm-12">
-						<button class="clipboard-btn btn btn-primary me-2" data-clipboard-action="copy" data-clipboard-target="#timeset">Copy </button>
-					</div>
-				</div>--}}
     		</div>
   		</div>
   	</div>
 </div>
 @endsection
 <script>
-	function copyCode() {
-		var codeBlock = document.getElementById("configCode").innerText;
-		var codeBlock7 = document.getElementById("configCode7").innerText;
-		navigator.clipboard.writeText(codeBlock).then(() => {
-			alert("Configuration copied to clipboard!");
-		}).catch(err => {
-			console.error("Failed to copy: ", err);
-		});
+function copyCode() {
+    var codeElement = document.getElementById("configCode7");
+    var clonedCode = codeElement.cloneNode(true); // Clone the code block
 
-		navigator.clipboard.writeText(codeBlock7).then(() => {
-			alert("Configuration copied to clipboard!");
-		}).catch(err => {
-			console.error("Failed to copy: ", err);
-		});
-	}
+    // Remove line number spans
+    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
+    lineNumbers.forEach(span => span.remove());
+
+    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+
+    var tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("Code copied successfully!");
+}
+function copyCode() {
+    var codeElement = document.getElementById("configCode");
+    var clonedCode = codeElement.cloneNode(true); // Clone the code block
+
+    // Remove line number spans
+    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
+    lineNumbers.forEach(span => span.remove());
+
+    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+
+    var tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("Code copied successfully!");
+}
+function copyCode() {
+    var codeElement = document.getElementById("configCodeH");
+    var clonedCode = codeElement.cloneNode(true); // Clone the code block
+
+    // Remove line number spans
+    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
+    lineNumbers.forEach(span => span.remove());
+
+    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+
+    var tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("Code copied successfully!");
+}
+function copyCode() {
+    var codeElement = document.getElementById("configCodeP");
+    var clonedCode = codeElement.cloneNode(true); // Clone the code block
+
+    // Remove line number spans
+    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
+    lineNumbers.forEach(span => span.remove());
+
+    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+
+    var tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("Code copied successfully!");
+}
+function copyCode() {
+    var codeElement = document.getElementById("configCodeE");
+    var clonedCode = codeElement.cloneNode(true); // Clone the code block
+
+    // Remove line number spans
+    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
+    lineNumbers.forEach(span => span.remove());
+
+    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+
+    var tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempTextArea);
+
+    alert("Code copied successfully!");
+}
 </script>
