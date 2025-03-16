@@ -1712,10 +1712,10 @@
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
                                                                                 {{ Form::label('mpesa_bank_shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text(''mpesa_bank_shortcode', isset($company_payment_setting[''mpesa_bank_shortcode']) ? $company_payment_setting[''mpesa_bank_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
-                                                                                @if ($errors->has(''mpesa_bank_shortcode'))
+                                                                                {{ Form::text('mpesa_bank_shortcode', isset($company_payment_setting['mpesa_bank_shortcode']) ? $company_payment_setting['mpesa_bank_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                @if ($errors->has('mpesa_bank_shortcode'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first(''mpesa_bank_shortcode') }}
+                                                                                        {{ $errors->first('mpesa_bank_shortcode') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1724,11 +1724,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label(''mpesa_bank_passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text(''mpesa_bank_passkey', isset($company_payment_setting[''mpesa_bank_passkey']) ? $company_payment_setting[''mpesa_bank_passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
-                                                                                @if ($errors->has(''mpesa_bank_passkey'))
+                                                                                {{ Form::label('mpesa_bank_passkey', __('Mpesa Passkey'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_bank_passkey', isset($company_payment_setting['mpesa_bank_passkey']) ? $company_payment_setting['mpesa_bank_passkey'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Passkey')]) }}
+                                                                                @if ($errors->has('mpesa_bank_passkey'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first(''mpesa_bank_passkey') }}
+                                                                                        {{ $errors->first('mpesa_bank_passkey') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1737,11 +1737,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('shortcode', __('Bank Paybill'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Paybill Number')]) }}
-                                                                                @if ($errors->has('shortcode'))
+                                                                                {{ Form::label('mpesa_bank_paybill', __('Bank Paybill'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_bank_paybill', isset($company_payment_setting['mpesa_bank_paybill']) ? $company_payment_setting['mpesa_bank_paybill'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Paybill Number')]) }}
+                                                                                @if ($errors->has('mpesa_bank_paybill'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('shortcode') }}
+                                                                                        {{ $errors->first('mpesa_bank_paybill') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1750,11 +1750,11 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('shortcode', __('Bank Account'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($company_payment_setting['shortcode']) ? $company_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Account Number')]) }}
-                                                                                @if ($errors->has('shortcode'))
+                                                                                {{ Form::label('mpesa_bank_account', __('Bank Account'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_bank_account', isset($company_payment_setting['mpesa_bank_account']) ? $company_payment_setting['mpesa_bank_account'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Bank Account Number')]) }}
+                                                                                @if ($errors->has('mpesa_bank_account'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('shortcode') }}
+                                                                                        {{ $errors->first('mpesa_bank_account') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
