@@ -333,12 +333,16 @@
                                 class="list-group-item list-group-item-action border-0">{{ __('Telegram Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>--}}
-                            <a href="#twilio-settings"
+                            <a href="#sms-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('SMS Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
-                            <a href="#email-notification-settings"
+                            {{--<a href="#email-notification-settings"
                                 class="list-group-item list-group-item-action border-0">{{ __('Email Settings') }}
+                                <div class="float-end"><i class="ti ti-chevron-right"></i></div>
+                            </a>--}}
+                            <a href="#whatsapp-settings"
+                                class="list-group-item list-group-item-action border-0">{{ __('Whatsapp Settings') }}
                                 <div class="float-end"><i class="ti ti-chevron-right"></i></div>
                             </a>
                             {{--<a href="#noc-settings"
@@ -1223,11 +1227,11 @@
                                                             <button class="accordion-button collapsed" type="button"
                                                                 data-bs-toggle="collapse" data-bs-target="#mpesa"
                                                                 aria-expanded="false" aria-controls="collapseOne">
-                                                                <span class="d-flex align-items-center">
-                                                                    {{ __('Mpesa') }}
+                                                                <span class="d-flex align-items-center me-4">
+                                                                    {{ __('Mpesa Business') }}
                                                                 </span>
                                                                 <div class="d-flex align-items-center">
-                                                                    <span class="me-2">{{ __('Enable') }}:</span>
+                                                                    <!-- <span class="me-2">{{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
                                                                         <input type="hidden" name="is_mpesa_enabled"
                                                                             value="off">
@@ -1250,10 +1254,10 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="sandbox"
+                                                                                        name="mpesa_mode" value="Hotspot"
                                                                                         class="form-check-input"
-                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Sandbox') }}
+                                                                                        {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'PPPoE') ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1263,10 +1267,23 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="live"
+                                                                                        name="mpesa_mode" value="PPPoE"
                                                                                         class="form-check-input"
-                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Live') }}
+                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'Hotspot' ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For Hotspot') }}
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mr-2" style="margin-right: 15px;">
+                                                                        <div class="border card p-3">
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label text-dark">
+                                                                                    <input type="radio"
+                                                                                        name="mpesa_mode" value="both"
+                                                                                        class="form-check-input"
+                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'Both' ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1302,11 +1319,24 @@
                                                                     <div class="col-lg-6">
                                                                         <div class="input-edits">
                                                                             <div class="form-group">
-                                                                                {{ Form::label('shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
-                                                                                {{ Form::text('shortcode', isset($admin_payment_setting['shortcode']) ? $admin_payment_setting['shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
-                                                                                @if ($errors->has('shortcode'))
+                                                                                {{ Form::label('mpesa_shortcode_type', __('Mpesa Business Shortcode Type'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_shortcode_type', isset($admin_payment_setting['mpesa_shortcode_type']) ? $admin_payment_setting['mpesa_shortcode_type'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode Type')]) }}
+                                                                                @if ($errors->has('mpesa_shortcode_type'))
                                                                                     <span class="invalid-feedback d-block">
-                                                                                        {{ $errors->first('shortcode') }}
+                                                                                        {{ $errors->first('mpesa_shortcode_type') }}
+                                                                                    </span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-lg-6">
+                                                                        <div class="input-edits">
+                                                                            <div class="form-group">
+                                                                                {{ Form::label('mpesa_shortcode', __('Mpesa Business Shortcode'), ['class' => 'col-form-label']) }}
+                                                                                {{ Form::text('mpesa_shortcode', isset($admin_payment_setting['mpesa_shortcode']) ? $admin_payment_setting['mpesa_shortcode'] : '', ['class' => 'form-control', 'placeholder' => __('Enter Mpesa Business Shortcode')]) }}
+                                                                                @if ($errors->has('mpesa_shortcode'))
+                                                                                    <span class="invalid-feedback d-block">
+                                                                                        {{ $errors->first('mpesa_shortcode') }}
                                                                                     </span>
                                                                                 @endif
                                                                             </div>
@@ -1335,11 +1365,11 @@
                                                             <button class="accordion-button collapsed" type="button"
                                                                 data-bs-toggle="collapse" data-bs-target="#mpesaTill"
                                                                 aria-expanded="false" aria-controls="collapseOne">
-                                                                <span class="d-flex align-items-center">
-                                                                    {{ __('Mpesa Till') }}
+                                                                <span class="d-flex align-items-center me-4">
+                                                                    {{ __('Mpesa Personal Till') }}
                                                                 </span>
                                                                 <div class="d-flex align-items-center">
-                                                                    <span class="me-2">{{ __('Enable') }}:</span>
+                                                                    <!-- <span class="me-2">{{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
                                                                         <input type="hidden" name="is_mpesa_enabled"
                                                                             value="off">
@@ -1365,7 +1395,7 @@
                                                                                         name="mpesa_mode" value="sandbox"
                                                                                         class="form-check-input"
                                                                                         {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Sandbox') }}
+                                                                                    {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1378,7 +1408,20 @@
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
                                                                                         {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Live') }}
+                                                                                    {{ __('For Hotspot') }}
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mr-2" style="margin-right: 15px;">
+                                                                        <div class="border card p-3">
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label text-dark">
+                                                                                    <input type="radio"
+                                                                                        name="mpesa_mode" value="live"
+                                                                                        class="form-check-input"
+                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1447,11 +1490,11 @@
                                                             <button class="accordion-button collapsed" type="button"
                                                                 data-bs-toggle="collapse" data-bs-target="#mpesaPaybill"
                                                                 aria-expanded="false" aria-controls="collapseOne">
-                                                                <span class="d-flex align-items-center">
-                                                                    {{ __('Mpesa PayBill') }}
+                                                                <span class="d-flex align-items-center me-4">
+                                                                    {{ __('Mpesa Personal PayBill') }}
                                                                 </span>
                                                                 <div class="d-flex align-items-center">
-                                                                    <span class="me-2">{{ __('Enable') }}:</span>
+                                                                    <!-- <span class="me-2"> {{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
                                                                         <input type="hidden" name="is_mpesa_enabled"
                                                                             value="off">
@@ -1477,7 +1520,7 @@
                                                                                         name="mpesa_mode" value="sandbox"
                                                                                         class="form-check-input"
                                                                                         {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Sandbox') }}
+                                                                                    {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1490,7 +1533,20 @@
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
                                                                                         {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Live') }}
+                                                                                    {{ __('For Hotspot') }}
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mr-2" style="margin-right: 15px;">
+                                                                        <div class="border card p-3">
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label text-dark">
+                                                                                    <input type="radio"
+                                                                                        name="mpesa_mode" value="live"
+                                                                                        class="form-check-input"
+                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1559,11 +1615,11 @@
                                                             <button class="accordion-button collapsed" type="button"
                                                                 data-bs-toggle="collapse" data-bs-target="#BankSacco"
                                                                 aria-expanded="false" aria-controls="collapseOne">
-                                                                <span class="d-flex align-items-center">
+                                                                <span class="d-flex align-items-center me-4">
                                                                     {{ __('Bank and Sacco') }}
                                                                 </span>
                                                                 <div class="d-flex align-items-center">
-                                                                    <span class="me-2"> {{ __('Enable') }}:</span>
+                                                                    <!-- <span class="me-2"> {{ __('Enable') }}:</span> -->
                                                                     <div class="form-check form-switch custom-switch-v1">
                                                                         <input type="hidden" name="is_mpesa_enabled"
                                                                             value="off">
@@ -1589,7 +1645,7 @@
                                                                                         name="mpesa_mode" value="sandbox"
                                                                                         class="form-check-input"
                                                                                         {{ (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == '') || (isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'sandbox') ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Sandbox') }}
+                                                                                    {{ __('For PPPoE') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1602,7 +1658,20 @@
                                                                                         name="mpesa_mode" value="live"
                                                                                         class="form-check-input"
                                                                                         {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
-                                                                                    {{ __('Live') }}
+                                                                                    {{ __('For Hotspot') }}
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mr-2" style="margin-right: 15px;">
+                                                                        <div class="border card p-3">
+                                                                            <div class="form-check">
+                                                                                <label class="form-check-label text-dark">
+                                                                                    <input type="radio"
+                                                                                        name="mpesa_mode" value="live"
+                                                                                        class="form-check-input"
+                                                                                        {{ isset($admin_payment_setting['mpesa_mode']) && $admin_payment_setting['mpesa_mode'] == 'live' ? 'checked="checked"' : '' }}>
+                                                                                    {{ __('For Both') }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -1859,21 +1928,30 @@
                     </div>
 
                     
-                    <!--Twilio Settings-->
-                    <div id="twilio-settings" class="card mb-3">
+                    <!--sms Settings-->
+                    <div id="sms-settings" class="card mb-3">
                         <div class="card-header">
                             <h5>{{ __('SMS Settings') }}</h5>
                             <small class="text-muted">{{ __('Edit your SMS settings') }}</small>
                         </div>
-                        {{ Form::model($setting, ['route' => 'twilio.setting', 'method' => 'post']) }}
+                        {{ Form::model($setting, ['route' => 'sms.setting', 'method' => 'post']) }}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        {{ Form::label('twilio_sid', __('SMS Provider'), ['class' => 'form-label']) }}
-                                        {{ Form::text('twilio_sid', isset($comSetting['twilio_sid']) ? $comSetting['twilio_sid'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter SMS Provider'), 'required' => 'required']) }}
-                                        @error('twilio_sid')
-                                            <span class="invalid-twilio_sid" role="alert">
+                                        {{ Form::label('sms_url', __('SMS Provider'), ['class' => 'form-label']) }}
+                                        {{ Form::select('sms_url', [
+                                            'https://blessedtexts.com/api/sms/v1/sendsms?api_key=[apikey]&sender_id=[senderid]&message=[text]&phone=[number]' => 'Blessed TEXT',
+                                            'https://sms.textsms.co.ke/api/services/sendsms/?apikey=[apikey]&partnerID=[patnerid]&message=[text]&shortcode=[senderid]&mobile=[number]' => 'TextSMS',
+                                            'https://api.clicksend.com' => 'TrueHost',
+                                            'https://api.textlocal.in' => 'ByteWave',
+                                            'https://api.africastalking.com' => 'HostAfrica',
+                                            'https://api.africastalking.com' => 'AfroKat',
+                                            'https://api.africastalking.com' => 'Africa’s Talking',
+                                        ], isset($comSetting['sms_url']) ? $comSetting['sms_url'] : '', ['class' => 'form-control w-100', 'required' => 'required']) }}
+
+                                        @error('sms_url')
+                                            <span class="invalid-sms_url" role="alert">
                                                 <strong class="text-danger">{{ $message }}</strong>
                                             </span>
                                         @enderror
@@ -1881,10 +1959,10 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        {{ Form::label('twilio_token', __('API Token'), ['class' => 'form-label']) }}
-                                        {{ Form::text('twilio_token', isset($comSetting['twilio_token']) ? $comSetting['twilio_token'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter API Token'), 'required' => 'required']) }}
-                                        @error('twilio_token')
-                                            <span class="invalid-twilio_token" role="alert">
+                                        {{ Form::label('sms_apitoken', __('API Token'), ['class' => 'form-label']) }}
+                                        {{ Form::text('sms_apitoken', isset($comSetting['sms_apitoken']) ? $comSetting['sms_apitoken'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter API Token'), 'required' => 'required']) }}
+                                        @error('sms_apitoken')
+                                            <span class="invalid-sms_apitoken" role="alert">
                                                 <strong class="text-danger">{{ $message }}</strong>
                                             </span>
                                         @enderror
@@ -1892,14 +1970,207 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        {{ Form::label('twilio_from', __('Sender ID'), ['class' => 'form-label']) }}
-                                        {{ Form::text('twilio_from', isset($comSetting['twilio_from']) ? $comSetting['twilio_from'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter Sender ID'), 'required' => 'required']) }}
-                                        @error('twilio_from')
-                                            <span class="invalid-twilio_from" role="alert">
+                                        {{ Form::label('sms_senderid', __('Sender ID'), ['class' => 'form-label']) }}
+                                        {{ Form::text('sms_senderid', isset($comSetting['sms_senderid']) ? $comSetting['sms_senderid'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter Sender ID'), 'required' => 'required']) }}
+                                        @error('sms_senderid')
+                                            <span class="invalid-sms_senderid" role="alert">
                                                 <strong class="text-danger">{{ $message }}</strong>
                                             </span>
                                         @enderror
                                     </div>
+                                </div>
+
+                                <div class="col-md-12 mt-4 mb-2">
+                                    <h5 class="small-title">{{ __('Notification Settings') }}</h5>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Customer') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_customer_notification', '1', isset($comSetting['sms_customer_notification']) && $comSetting['sms_customer_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_customer_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_customer_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Balance Deposit') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_deposit_notification', '1', isset($comSetting['sms_deposit_notification']) && $comSetting['sms_deposit_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_deposit_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_deposit_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Invoice') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_invoice_notification', '1', isset($comSetting['sms_invoice_notification']) && $comSetting['sms_invoice_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_invoice_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_invoice_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Payment') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_payment_notification', '1', isset($comSetting['sms_payment_notification']) && $comSetting['sms_payment_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_payment_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_payment_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Payment Reminder') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_reminder_notification', '1', isset($comSetting['sms_reminder_notification']) && $comSetting['sms_reminder_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_reminder_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_reminder_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Expiry Notification') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('sms_expiry_notification', '1', isset($comSetting['sms_expiry_notification']) && $comSetting['sms_expiry_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'sms_expiry_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="sms_expiry_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-end">
+                            <div class="form-group">
+                                <button class="btn btn-print-invoice btn-primary m-r-10" type="submit">{{ __('Save Changes') }}</button>
+                            </div>
+                        </div>
+                        {{ Form::close() }}
+                    </div>
+
+                    <!--Whatsapp Settings-->
+                    <div id="whatsapp-settings" class="card mb-3">
+                        <div class="card-header">
+                            <h5>{{ __('Whatsapp Settings') }}</h5>
+                            <small class="text-muted">{{ __('Edit your Whatsapp settings') }}</small>
+                        </div>
+                        {{ Form::model($setting, ['route' => 'whatsapp.setting', 'method' => 'post']) }}
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        {{ Form::label('whatsapp_url', __('Whatsapp  Url'), ['class' => 'form-label']) }}
+                                        {{ Form::text('whatsapp_url', isset($comSetting['whatsapp_url']) ? $comSetting['whatsapp_url'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter Whatsapp Url'), 'required' => 'required']) }}
+                                        @error('whatsapp_url')
+                                            <span class="invalid-whatsapp_url" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                {{--<div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('sms_apitoken', __('API Token'), ['class' => 'form-label']) }}
+                                        {{ Form::text('sms_apitoken', isset($comSetting['sms_apitoken']) ? $comSetting['sms_apitoken'] : '', ['class' => 'form-control w-100', 'placeholder' => __('Enter API Token'), 'required' => 'required']) }}
+                                        @error('sms_apitoken')
+                                            <span class="invalid-sms_apitoken" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>--}}
+
+                                <div class="col-md-12 mt-4 mb-2">
+                                    <h5 class="small-title">{{ __('Notification Settings') }}</h5>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Customer') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_customer_notification', '1', isset($comSetting['whatsapp_customer_notification']) && $comSetting['whatsapp_customer_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_customer_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_customer_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Balance Deposit') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_deposit_notification', '1', isset($comSetting['whatsapp_deposit_notification']) && $comSetting['whatsapp_deposit_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_deposit_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_deposit_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Invoice') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_invoice_notification', '1', isset($comSetting['whatsapp_invoice_notification']) && $comSetting['whatsapp_invoice_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_invoice_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_invoice_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('New Payment') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_payment_notification', '1', isset($comSetting['whatsapp_payment_notification']) && $comSetting['whatsapp_payment_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_payment_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_payment_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Payment Reminder') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_reminder_notification', '1', isset($comSetting['whatsapp_reminder_notification']) && $comSetting['whatsapp_reminder_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_reminder_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_reminder_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span>{{ __('Expiry Notification') }}</span>
+                                                <div class=" form-switch form-switch-right">
+                                                    {{ Form::checkbox('whatsapp_expiry_notification', '1', isset($comSetting['whatsapp_expiry_notification']) && $comSetting['whatsapp_expiry_notification'] == '1' ? 'checked' : '', ['class' => 'form-check-input', 'id' => 'whatsapp_expiry_notification']) }}
+                                                    <label class="form-check-label"
+                                                        for="whatsapp_expiry_notification"></label>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>

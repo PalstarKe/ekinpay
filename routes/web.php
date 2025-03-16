@@ -181,7 +181,8 @@ Route::group(['middleware' => ['verified']], function () {
             Route::post('tracker-settings', [SystemController::class, 'saveTrackerSettings'])->name('tracker.settings');
             Route::post('slack-settings', [SystemController::class, 'saveSlackSettings'])->name('slack.settings');
             Route::post('telegram-settings', [SystemController::class, 'saveTelegramSettings'])->name('telegram.settings');
-            Route::post('twilio-settings', [SystemController::class, 'saveTwilioSettings'])->name('twilio.setting');
+            Route::post('sms-settings', [SystemController::class, 'saveSMSSettings'])->name('sms.setting');
+            Route::post('whatsapp-settings', [SystemController::class, 'saveWhatsappSettings'])->name('whatsapp.setting');
             Route::get('print-setting', [SystemController::class, 'printIndex'])->name('print.setting');
             Route::get('settings', [SystemController::class, 'companyIndex'])->name('settings');
             Route::post('business-setting', [SystemController::class, 'saveBusinessSettings'])->name('business.setting');

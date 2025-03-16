@@ -613,6 +613,31 @@ class SystemController extends Controller
             $post['is_bank_transfer_enabled'] = 'off';
         }
 
+        if (isset($request->is_mpesa_enabled) && $request->is_mpesa_enabled == 'on') {
+            $request->validate(
+                [
+                    'mpesa_mode' => 'required',
+                    'mpesa_key' => 'required',
+                    'mpesa_secret' => 'required',
+                    'mpesa_shortcode' => 'required',
+                    'mpesa_shortcode_type' => 'required',
+                    'mpesa_passkey' => 'required',
+                    // 'mpesa_secret_key' => 'required',
+                ]
+            );
+
+            $post['is_mpesa_enabled'] = $request->is_mpesa_enabled;
+            $post['mpesa_mode'] = $request->mpesa_mode;
+            $post['mpesa_key'] = $request->mpesa_key;
+            $post['mpesa_secret'] = $request->mpesa_secret;
+            $post['mpesa_shortcode'] = $request->mpesa_shortcode;
+            $post['mpesa_shortcode_type'] = $request->mpesa_shortcode_type;
+            $post['mpesa_passkey'] = $request->mpesa_secret_key;
+            // $post['mpesa_secret_key'] = $request->mpesa_secret_key;
+        } else {
+            $post['is_mpesa_enabled'] = 'off';
+        }
+
         if (isset($request->is_stripe_enabled) && $request->is_stripe_enabled == 'on') {
 
             $request->validate(
@@ -1903,20 +1928,21 @@ class SystemController extends Controller
         return redirect()->back()->with('success', __('Telegram updated successfully.'));
     }
 
-    public function saveTwilioSettings(Request $request)
+    public function saveSMSSettings(Request $request)
     {
         $post = [];
-        $post['twilio_sid'] = $request->input('twilio_sid');
-        $post['twilio_token'] = $request->input('twilio_token');
-        $post['twilio_from'] = $request->input('twilio_from');
-        $post['twilio_customer_notification'] = $request->has('twilio_customer_notification') ? $request->input('twilio_customer_notification') : 0;
-        $post['twilio_vender_notification'] = $request->has('twilio_vender_notification') ? $request->input('twilio_vender_notification') : 0;
-        $post['twilio_invoice_notification'] = $request->has('twilio_invoice_notification') ? $request->input('twilio_invoice_notification') : 0;
-        $post['twilio_revenue_notification'] = $request->has('twilio_revenue_notification') ? $request->input('twilio_revenue_notification') : 0;
-        $post['twilio_bill_notification'] = $request->has('twilio_bill_notification') ? $request->input('twilio_bill_notification') : 0;
-        $post['twilio_proposal_notification'] = $request->has('twilio_proposal_notification') ? $request->input('twilio_proposal_notification') : 0;
-        $post['twilio_payment_notification'] = $request->has('twilio_payment_notification') ? $request->input('twilio_payment_notification') : 0;
-        $post['twilio_reminder_notification'] = $request->has('twilio_reminder_notification') ? $request->input('twilio_reminder_notification') : 0;
+        $post['sms_url'] = $request->input('sms_url');
+        $post['sms_apitoken'] = $request->input('sms_apitoken');
+        $post['sms_senderid'] = $request->input('sms_senderid');
+        $post['sms_customer_notification'] = $request->has('sms_customer_notification') ? $request->input('sms_customer_notification') : 0;
+        $post['sms_deposit_notification'] = $request->has('sms_deposit_notification') ? $request->input('sms_deposit_notification') : 0;
+        $post['sms_invoice_notification'] = $request->has('sms_invoice_notification') ? $request->input('sms_invoice_notification') : 0;
+        // $post['twilio_revenue_notification'] = $request->has('twilio_revenue_notification') ? $request->input('twilio_revenue_notification') : 0;
+        // $post['twilio_bill_notification'] = $request->has('twilio_bill_notification') ? $request->input('twilio_bill_notification') : 0;
+        // $post['sms_proposal_notification'] = $request->has('sms_proposal_notification') ? $request->input('twilio_proposal_notification') : 0;
+        $post['sms_payment_notification'] = $request->has('sms_payment_notification') ? $request->input('sms_payment_notification') : 0;
+        $post['sms_reminder_notification'] = $request->has('sms_reminder_notification') ? $request->input('sms_reminder_notification') : 0;
+        $post['sms_expiry_notification'] = $request->has('sms_expiry_notification') ? $request->input('sms_expiry_notification') : 0;
 
         if (isset($post) && !empty($post) && count($post) > 0) {
             $created_at = $updated_at = date('Y-m-d H:i:s');
@@ -1935,7 +1961,42 @@ class SystemController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', __('Twilio updated successfully.'));
+        return redirect()->back()->with('success', __('SMS Settings updated successfully.'));
+    }
+    public function saveWhatsappSettings(Request $request)
+    {
+        $post = [];
+        $post['whatsapp_url'] = $request->input('whatsapp_url');
+        // $post['whatsapp_apitoken'] = $request->input('whatsapp_apitoken');
+        // $post['sms_senderid'] = $request->input('sms_senderid');
+        $post['whatsapp_customer_notification'] = $request->has('whatsapp_customer_notification') ? $request->input('whatsapp_customer_notification') : 0;
+        $post['whatsapp_deposit_notification'] = $request->has('whatsapp_deposit_notification') ? $request->input('whatsapp_deposit_notification') : 0;
+        $post['whatsapp_invoice_notification'] = $request->has('whatsapp_invoice_notification') ? $request->input('whatsapp_invoice_notification') : 0;
+        // $post['twilio_revenue_notification'] = $request->has('twilio_revenue_notification') ? $request->input('twilio_revenue_notification') : 0;
+        // $post['twilio_bill_notification'] = $request->has('twilio_bill_notification') ? $request->input('twilio_bill_notification') : 0;
+        // $post['sms_proposal_notification'] = $request->has('sms_proposal_notification') ? $request->input('twilio_proposal_notification') : 0;
+        $post['whatsapp_payment_notification'] = $request->has('whatsapp_payment_notification') ? $request->input('whatsapp_payment_notification') : 0;
+        $post['whatsapp_reminder_notification'] = $request->has('whatsapp_reminder_notification') ? $request->input('whatsapp_reminder_notification') : 0;
+        $post['whatsapp_expiry_notification'] = $request->has('whatsapp_expiry_notification') ? $request->input('whatsapp_expiry_notification') : 0;
+
+        if (isset($post) && !empty($post) && count($post) > 0) {
+            $created_at = $updated_at = date('Y-m-d H:i:s');
+
+            foreach ($post as $key => $data) {
+                DB::insert(
+                    'INSERT INTO settings (`value`, `name`,`created_by`,`created_at`,`updated_at`) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `updated_at` = VALUES(`updated_at`) ',
+                    [
+                        $data,
+                        $key,
+                        Auth::user()->id,
+                        $created_at,
+                        $updated_at,
+                    ]
+                );
+            }
+        }
+
+        return redirect()->back()->with('success', __('SMS Settings updated successfully.'));
     }
 
     public function recaptchaSettingStore(Request $request)
