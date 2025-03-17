@@ -13,6 +13,7 @@ use App\Models\RouterPackage;
 use App\Models\Plan;
 use App\Models\Customer;
 use Auth;
+use Carbon\Carbon;
 use App\Helpers\CustomHelper;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -106,12 +107,12 @@ class CaptivePortalController extends Controller
         $phone = (substr($phone, 0,1) == '0') ? preg_replace('/^01/', '2541', $phone) : $phone;
         $phone = (substr($phone, 0,1) == '0') ? preg_replace('/^07/', '2547', $phone) : $phone;
     
-        $existingCustomer = Customer::where('fullname', $phone)
+        $customer = Customer::where('fullname', $phone)
         ->where('mac_address', $request->mac_address)
         ->first();
 
         // Create new customer
-        if (!$existingCustomer) {
+        if (!$customer) {
             $customer = new Customer();
             $customer->fullname     = $phone;
             $customer->username     = $request->mac_address;
@@ -121,11 +122,12 @@ class CaptivePortalController extends Controller
             $customer->created_by   = $router->created_by;
             $customer->service      = 'Hotspot';
             $customer->auto_renewal = 1;
-            $customer->is_active    = 0;
+            $customer->is_active    = 1;
             $customer->mac_address  = $request->mac_address;
             $customer->package      = $package->name_plan;
             $customer->save();
         }
+        $cID = $customer->id;
 
         $mpesaResponse = CustomHelper::initiateHotspotSTKPush($phone, $package->price, $router->created_by);
 
@@ -138,29 +140,119 @@ class CaptivePortalController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Payment request sent',
-            'checkoutRequestID' => $checkoutRequestID
+            'checkoutRequestID' => $checkoutRequestID,
+            'cID' => $cID
         ]);
 
     }
 
-    public function processQueryMpesa(Request $request){
-
+    public function processQueryMpesa(Request $request)
+    {
         $rules = [
-            'ref'      => 'required'
+            'ref'          => 'required',
+            'nas_ip'       => 'required',
+            'package_id'   => 'required',
+            'phone_number' => 'required',
+            'mac_address'  => 'required',
+            'cID'          => 'required'
         ];
 
-        $mpesastatus = CustomHelper::initiateHotspotSTKPush($phone, $package->price, $router->created_by);
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+        }
 
-        $mpesastatus = (array) $mpesaResponse; 
+        $router = Router::where('ip_address', $request->nas_ip)->first();
+        if (!$router) {
+            return response()->json(['success' => false, 'message' => 'NAS not found']);
+        }
 
-        $responseCode = $mpesastatus['CheckoutRequestID'] ?? null;
+        $ref = $request->ref;
+        
+        // Normalize phone number
+        $phone = $request->phone_number;
+        $phone = ltrim($phone, '+'); // Remove +
+        $phone = preg_replace('/^0/', '254', $phone); // Convert 07xxxxxxx -> 2547xxxxxxx, 01xxxxxxx -> 2541xxxxxxx
+        
+        // Get customer
+        $customer = Customer::find($request->cID);
+        if (!$customer) {
+            return response()->json(['success' => false, 'message' => 'Customer not found']);
+        }
 
-        Log::info("Response for Checkout:", ['CheckoutRequestID' => $checkoutRequestID]);
+        // Query M-Pesa transaction status
+        $mpesastatus = CustomHelper::QueryMpesaHotspot($ref, $router->created_by);
+        $mpesastatus = (array) $mpesastatus; // Ensure it's an array
+
+        $ResultCode = $mpesastatus['ResultCode'] ?? null;
+        $ResultDesc = $mpesastatus['ResultDesc'] ?? null;
+
+        if ($ResultCode !== "0") {
+            return response()->json(['success' => false, 'message' => 'Payment failed', 'ResultDesc' => $ResultDesc]);
+        }
+
+        // Get package details
+        $package = Package::with('bandwidth')
+            ->where('id', $request->package_id)
+            ->where('created_by', $router->created_by)
+            ->where('type', 'Hotspot')
+            ->first();
+
+        if (!$package) {
+            return response()->json(['success' => false, 'message' => 'Package not found']);
+        }
+
+        // Convert validity to seconds
+        $timelimit = match ($package->validity_unit) {
+            'Minutes' => $package->validity * 60,
+            'Hours'   => $package->validity * 3600,
+            'Days'    => $package->validity * 86400,
+            'Months'  => $package->validity * 2592000,
+            default   => 0
+        };
+
+        // Set new expiry date
+        $expiry = Carbon::now()->addSeconds($timelimit);
+
+        // Update customer expiry
+        $customer->expiry = $expiry->toDateTimeString();
+        $customer->expiry_status = 'on';
+        $customer->save();
+
+        DB::connection('radius')->table('radcheck')->insert([
+            'username'  => $customer->username,
+            'attribute' => 'Cleartext-Password',
+            'op'        => ':=',
+            'value'     => $customer->password,
+            'created_by' => $router->created_by,
+        ]);
+        $group_name = 'package_' . $package->id;
+        // Assign the Expired_Plan
+        DB::connection('radius')->table('radusergroup')->insert([
+            'username'  => $customer->username,
+            'groupname' => $group_name,
+            'priority'  => 1,
+            'created_by' => $router->created_by,
+        ]);
+        $type = 'package';
+
+        // Generate and process invoice
+        $invoice = CustomHelper::generateInvoiceH($customer, $type, $package->price);
+        $invoicePayment = CustomHelper::recordInvoicePaymentH($customer, $invoice, $package->price);
+        CustomHelper::updateInvoiceStatusH($invoice);
+        $invoicePayment->refresh();
+        
+        // Process transaction
+        CustomHelper::processTransactionH($invoicePayment, $invoice->customer_id, $router->created_by);
+        
+        // Send notification
+        // CustomHelper::sendInvoiceNotificationH($customer, $invoice, $package->price);
 
         return response()->json([
             'success' => true,
-            'message' => 'Payment request sent',
-            'checkoutRequestID' => $checkoutRequestID
+            'message' => 'Payment successful',
+            'ResponseCode' => $ResultCode,
+            'ResultDesc' => $ResultDesc
         ]);
     }
     public function VerifyMpesa($nas_ip = null){

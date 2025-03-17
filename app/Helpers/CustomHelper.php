@@ -7,6 +7,7 @@ use App\Models\InvoicePayment;
 use App\Models\Transaction;
 use App\Models\Customer;
 use App\Models\Utility;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Package;
 use Illuminate\Support\Facades\DB;
@@ -563,6 +564,142 @@ class CustomHelper
         return $result['access_token'] ?? null;
         Log::info("Response for Access Token: ", $result);
     }
+    public static function QueryMpesaHotspot($ref, $isp){
+        $paymentSettings = self::getHotspotPaymentGateway($isp);
 
+        if (!isset($paymentSettings['partyB']) || !isset($paymentSettings['ref'])) {
+            return ['success' => false, 'message' => 'Payment settings not found.'];
+        }
+        Log::info("Response for Defaults:", $paymentSettings);
+        // Extract required credentials
+        $shortcode       = $paymentSettings['shortcode'] ?? null;
+        $passkey         = $paymentSettings['passkey'] ?? null;
+        $consumerKey     = $paymentSettings['key'] ?? null;
+        $consumerSecret  = $paymentSettings['secret'] ?? null;
+
+        // Validate essential credentials
+        if (!$shortcode || !$passkey || !$consumerKey || !$consumerSecret) {
+            return ['success' => false, 'message' => 'Incomplete payment credentials.'];
+        }
+
+        $timestamp = date("YmdHis",time());
+        $password  = base64_encode($shortcode . $passkey . $timestamp); 
+
+        $accessToken = self::getMpesaAccessToken($consumerKey, $consumerSecret);
+        if (!$accessToken) {
+            return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
+        }
+        Log::info("Response for  R Access Token: " . $accessToken);
+
+        $url = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
+        $stkQueryData = [
+            "BusinessShortCode" => $shortcode,
+            "Password" => $password,
+            "Timestamp" => $timestamp,
+            "CheckoutRequestID" => $ref
+        ];
+        if (!$timestamp || !$password || !$url || !$stkQueryData) {
+            echo json_encode([
+                'status' => 'error', 
+                'message' => 'Missing timestamp and password, url, stkQueryData'
+            ]);
+            exit();
+        } 
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $accessToken
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($stkQueryData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+        Log::info("Response for STK Response:", (array)  $data);
+
+        return  $data;
+    }
+
+    public static function generateInvoiceH($customer, $type, $amount)
+    {
+        $user = User::find($customer->created_by);
+        return Invoice::create([
+            'invoice_id' => self::invoiceNumberH($user),
+            'customer_id' => $customer->id,
+            'issue_date' => now(),
+            'due_date' => now(),
+            'send_date' => now(),
+            'ref_number' => $user->invoiceNumberFormat(self::invoiceNumberH($user)),
+            'status' => 'Unpaid',
+            'category' => $type,
+            'created_by' => $customer->created_by,
+        ]);
+    }
+
+    public static function recordInvoicePaymentH($customer, $invoice, $amount)
+    {
+        $user = User::find($customer->created_by);
+        return InvoicePayment::create([
+            'customer_id' => $customer->id,
+            'invoice_id' => $invoice->id,
+            'amount' => $amount,
+            'payment_method' => 'Mpesa',
+            'date' => now(),
+            'created_by' => $user->id,
+        ]);
+    }
+
+    public static function updateInvoiceStatusH($invoice)
+    {
+        if ($invoice->getDue() <= 0) {
+            $invoice->status = 'Paid';
+            $invoice->save();
+        }
+    }
+
+    public static function processTransactionH($invoicePayment, $user_id, $isp)
+    {
+    
+        $invoicePayment->user_id = $user_id;
+        $invoicePayment->user_type = 'Customer';
+        $invoicePayment->type = 'Fully';
+        $invoicePayment->created_by = $isp;
+        $invoicePayment->payment_id = $invoicePayment->id;
+        $invoicePayment->category = 'Invoice';
+
+        Transaction::addTransaction($invoicePayment);
+    }
+
+    public static function sendInvoiceNotificationH($customer, $invoice, $amount)
+    {
+        $settings = Utility::settings();
+        $user = User::find($customer->created_by);
+        if ($settings['new_invoice_payment'] == 1) {
+            $invoicePaymentArr = [
+                'invoice_payment_name' => $customer->name,
+                'invoice_payment_amount' => $amount,
+                'invoice_payment_date' => now()->format('Y-m-d'),
+                'payment_dueAmount' => $invoice->getDue(),
+                'invoice_number' => $user->invoiceNumberFormat($invoice->invoice_id),
+                'invoice_payment_method' => 'Balance',
+            ];
+
+            Utility::sendEmailTemplate('new_invoice_payment', [$customer->id => $customer->email], $invoicePaymentArr);
+        }
+    }
+
+    public static function invoiceNumberH($user)
+    {
+        $latest = Invoice::where('created_by', '=', $user->creatorId())->latest()->first();
+        if (!$latest) {
+            return 1;
+        }
+
+        return $latest->invoice_id + 1;
+    }
 }
     

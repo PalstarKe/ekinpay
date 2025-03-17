@@ -134,6 +134,7 @@
                     success: function(response) {
                         if (response.success) {
                             checkoutRequestID = response.checkoutRequestID;
+                            cID = response.cID;
                             Swal.fire("STK Push Sent!", "Enter M-Pesa PIN on your phone.", "info");
                             startPolling(nasIp, packageID, phoneNumber, macAddress);
                         } else {
@@ -158,22 +159,27 @@
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        ref: checkoutRequestID
+                        ref: checkoutRequestID,
+                        cID: cID,
+                        nas_ip: nasIp,
+                        package_id: packageID,
+                        phone_number: phoneNumber,
+                        mac_address: macAddress
                     },
                     success: function(response) {
-                        if (response.success && response.status === "COMPLETED") {
+                        if (response.success && response.ResponseCode === "0") {
                             clearInterval(pollingInterval);
                             Swal.fire("Payment Successful!", "You are now connected.", "success").then(() => {
                                 window.location.href = "{{ route('captive.showLogin', ['nas_ip' => '']) }}" + nasIp;
                             });
-                        } else if (response.status === "FAILED") {
+                        } else if (response.ResultCode === 1) {
                             clearInterval(pollingInterval);
-                            Swal.fire("Payment Failed", "Please try again.", "error");
+                            Swal.fire("Payment Failed", response.ResultDesc, "error");
                         }
                     },
                     error: function() {
                         clearInterval(pollingInterval);
-                        Swal.fire("Error", "Could not verify payment. Try again.", "error");
+                        Swal.fire("Error", response.ResultDesc, "Could not verify payment. Try again.", "error");
                     }
                 });
             }
