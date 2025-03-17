@@ -613,7 +613,7 @@ class SystemController extends Controller
                     'mpesa_passkey' => 'required',
                 ]
             );
-            Log::info($request->all());
+            // Log::info($request->all());
             $post['is_mpesa_enabled'] = $request->is_mpesa_enabled;
             $post['mpesa_mode'] = $request->mpesa_mode;
             $post['mpesa_key'] = $request->mpesa_key;
@@ -623,6 +623,63 @@ class SystemController extends Controller
             $post['mpesa_passkey'] = $request->mpesa_passkey;
         } else {
             $post['is_mpesa_enabled'] = 'off';
+        }
+
+        if (isset($request->is_mpesa_bank_enabled) && $request->is_mpesa_bank_enabled == 'on') {
+            $request->validate(
+                [
+                    'mpesa_bank_mode' => 'required',
+                    'is_system_mpesa_api_enabled' => 'required',
+                    'mpesa_bank_paybill' => 'required',
+                    'mpesa_bank_account' => 'required',
+                ]
+            );
+            // Log::info($request->all());
+            $post['is_mpesa_bank_enabled'] = $request->is_mpesa_bank_enabled;
+            $post['mpesa_bank_mode'] = $request->mpesa_bank_mode;
+            $post['is_system_mpesa_api_enabled'] = $request->is_system_mpesa_api_enabled;
+            $post['mpesa_bank_paybill'] = $request->mpesa_bank_paybill;
+            $post['mpesa_bank_account'] = $request->mpesa_bank_account;
+        } else {
+            $post['is_mpesa_bank_enabled'] = 'off';
+        }
+
+        if (isset($request->is_mpesa_paybill_enabled) && $request->is_mpesa_paybill_enabled == 'on') {
+            $request->validate(
+                [
+                    'mpesa_paybill_mode' => 'required',
+                    'is_system_mpesa_paybill_api_enabled' => 'required',
+                    'mpesa_paybill' => 'required',
+                    'mpesa_paybill_account' => 'required',
+                ]
+            );
+            // Log::info($request->all());
+            $post['is_mpesa_paybill_enabled'] = $request->is_mpesa_paybill_enabled;
+            $post['mpesa_paybill_mode'] = $request->mpesa_paybill_mode;
+            $post['is_system_mpesa_paybill_api_enabled'] = $request->is_system_mpesa_paybill_api_enabled;
+            $post['mpesa_paybill'] = $request->mpesa_paybill;
+            $post['mpesa_paybill_account'] = $request->mpesa_paybill_account;
+        } else {
+            $post['is_mpesa_paybill_enabled'] = 'off';
+        }
+
+        if (isset($request->is_mpesa_till_enabled) && $request->is_mpesa_till_enabled == 'on') {
+            $request->validate(
+                [
+                    'mpesa_till_mode' => 'required',
+                    'is_system_mpesa_till_api_enabled' => 'required',
+                    'mpesa_till' => 'required',
+                    'mpesa_till_account' => 'required',
+                ]
+            );
+            // Log::info($request->all());
+            $post['is_mpesa_till_enabled'] = $request->is_mpesa_till_enabled;
+            $post['mpesa_till_mode'] = $request->mpesa_till_mode;
+            $post['is_system_mpesa_till_api_enabled'] = $request->is_system_mpesa_till_api_enabled;
+            $post['mpesa_till'] = $request->mpesa_till;
+            $post['mpesa_till_account'] = $request->mpesa_till_account;
+        } else {
+            $post['is_mpesa_till_enabled'] = 'off';
         }
 
         foreach ($post as $key => $data) {
