@@ -353,6 +353,15 @@ class CustomHelper
         if (empty($txt)) {
             return "";
         }
+        // Notification Handling
+        $settings = Utility::settings(\Auth::user()->creatorId());
+        // if (!empty($settings['twilio_customer_notification']) && $settings['twilio_customer_notification'] == 1) {
+        //     Utility::send_twilio_msg($request->contact, 'new_customer', [
+        //         'user_name'      => \Auth::user()->name,
+        //         'customer_name'  => $customer->fullname,
+        //         'customer_email' => $customer->email,
+        //     ]);
+        // }
 
         $waUrl = config('services.whatsapp.url');
 
@@ -376,5 +385,183 @@ class CustomHelper
         }
         
     }
+    public static function getHotspotPaymentGateway($user_id)
+    {
+        $companySettings = \DB::table('company_payment_settings')->where('created_by', $user_id)->pluck('value', 'name')->toArray();
+    
+        $adminSettings = \DB::table('admin_payment_settings')->pluck('value', 'name')->toArray();
+    
+        $modes = [
+            'mpesa'   => $companySettings['mpesa_mode'] ?? null,
+            'paybill' => $companySettings['mpesa_paybill_mode'] ?? null,
+            'till'    => $companySettings['mpesa_till_mode'] ?? null,
+            'bank'    => $companySettings['mpesa_bank_mode'] ?? null,
+        ];
+    
+        $selectedMode = null;
+        foreach ($modes as $mode => $value) {
+            if (!empty($value) && in_array($value, ['both', 'Hotspot'])) {
+                $selectedMode = $mode;
+                break;
+            }
+        }
+
+        if (!$selectedMode) {
+            return ['success' => false, 'message' => 'No valid payment gateway found.'];
+        }
+    
+        $isSystemAPIEnabled = false;
+        if ($selectedMode === 'bank') {
+            $isSystemAPIEnabled = $companySettings['is_system_mpesa_bank_api_enabled'] ?? 'off';
+        } elseif ($selectedMode === 'paybill') {
+            $isSystemAPIEnabled = $companySettings['is_system_mpesa_paybill_api_enabled'] ?? 'off';
+        } elseif ($selectedMode === 'till') {
+            $isSystemAPIEnabled = $companySettings['is_system_mpesa_till_api_enabled'] ?? 'off';
+        }
+
+        $paymentDetails = [
+            'partyB' => $selectedMode === 'bank' ? $companySettings['mpesa_bank_paybill'] ?? null :
+                        ($selectedMode === 'paybill' ? $companySettings['mpesa_paybill'] ?? null : 
+                        ($selectedMode === 'till' ? $companySettings['mpesa_till'] ?? null : null)),
+            'ref'    => $selectedMode === 'bank' ? $companySettings['mpesa_bank_account'] ?? null :
+                        ($selectedMode === 'paybill' ? $companySettings['mpesa_paybill_account'] ?? null : 
+                        ($selectedMode === 'till' ? $companySettings['mpesa_till_account'] ?? null : null))
+        ];
+    
+        if ($isSystemAPIEnabled === 'on') {
+            if ($selectedMode === 'till') {
+                $paymentDetails['key']       = $adminSettings['personal_till_key'] ?? null;
+                $paymentDetails['secret']    = $adminSettings['personal_till_secret'] ?? null;
+                $paymentDetails['shortcode'] = $adminSettings['personal_till_shortcode'] ?? null;
+                $paymentDetails['passkey']   = $adminSettings['personal_till_passkey'] ?? null;
+                $paymentDetails['TransType']   = 'CustomerBuyGoodsOnline';
+            } elseif (in_array($selectedMode, ['paybill', 'bank'])) {
+                $paymentDetails['key']       = $adminSettings['personal_paybill_key'] ?? null;
+                $paymentDetails['secret']    = $adminSettings['personal_paybill_secret'] ?? null;
+                $paymentDetails['shortcode'] = $adminSettings['personal_paybill_shortcode'] ?? null;
+                $paymentDetails['passkey']   = $adminSettings['personal_paybill_passkey'] ?? null;
+                $paymentDetails['TransType']   = 'CustomerPayBillOnline';
+            }
+            return $paymentDetails;
+        }
+    
+        // Validate shortcode type if API is OFF
+        $shortcodeType = $companySettings['mpesa_shortcode_type'] ?? null;
+    
+        if ($selectedMode === 'till' && $shortcodeType === 'paybill') {
+            return ['success' => false, 'message' => 'Invalid: Till cannot use Paybill shortcode type.'];
+        }
+        if (in_array($selectedMode, ['bank', 'paybill']) && $shortcodeType === 'till') {
+            return ['success' => false, 'message' => 'Invalid: Bank/Paybill cannot use Till shortcode type.'];
+        }
+    
+        // Use company settings for API credentials if API is OFF
+        $paymentDetails['key']       = $companySettings['mpesa_key'] ?? null;
+        $paymentDetails['secret']    = $companySettings['mpesa_secret'] ?? null;
+        $paymentDetails['shortcode'] = $companySettings['mpesa_shortcode'] ?? null;
+        $paymentDetails['passkey']   = $companySettings['mpesa_passkey'] ?? null;
+        if ($selectedMode === 'till') {
+            $paymentDetails['TransType']   = 'CustomerBuyGoodsOnline';
+        } elseif (in_array($selectedMode, ['paybill', 'bank'])) {
+            $paymentDetails['TransType']   = 'CustomerPayBillOnline';
+        }
+    
+        return $paymentDetails;
+    }
+    
+
+
+    public static function initiateHotspotSTKPush($phone, $amount, $isp)
+    {
+        $paymentSettings = self::getHotspotPaymentGateway($isp);
+
+        if (!isset($paymentSettings['partyB']) || !isset($paymentSettings['ref'])) {
+            return ['success' => false, 'message' => 'Payment settings not found.'];
+        }
+
+        // Extract required credentials
+        $accRef          = $paymentSettings['ref'] ?? null;
+        $PartyB          = $paymentSettings['partyB'] ?? null;
+        $TransType       = $paymentSettings['TransType'] ?? null;
+        $shortcode       = $paymentSettings['shortcode'] ?? null;
+        $passkey         = $paymentSettings['passkey'] ?? null;
+        $consumerKey     = $paymentSettings['key'] ?? null;
+        $consumerSecret  = $paymentSettings['secret'] ?? null;
+        $callbackUrl     = route('mpesaCallback'); 
+
+        // Validate essential credentials
+        if (!$shortcode || !$passkey || !$consumerKey || !$consumerSecret) {
+            return ['success' => false, 'message' => 'Incomplete payment credentials.'];
+        }
+
+        // Prepare STK push request
+        $Timestamp = date("YmdHis",time());
+        $password  = base64_encode($shortcode . $passkey . $timestamp);
+
+        $stkPushRequest = [
+            'BusinessShortCode' => $shortcode,
+            'Password'          => $password,
+            'Timestamp'         => $timestamp,
+            'TransactionType'   => $TransType,
+            'Amount'            => $amount,
+            'PartyA'            => $phone,
+            'PartyB'            => $PartyB,
+            'PhoneNumber'       => $phone,
+            'CallBackURL'       => $callbackUrl,
+            'AccountReference'  => $accRef,
+            'TransactionDesc'   => 'Hot Payment'
+        ];
+
+        $response = self::sendMpesaSTKPush($stkPushRequest, $consumerKey, $consumerSecret);
+
+        return $response;
+    }
+
+    public static function sendMpesaSTKPush($stkPushRequest, $consumerKey, $consumerSecret)
+    {
+        $accessToken = self::getMpesaAccessToken($consumerKey, $consumerSecret);
+        if (!$accessToken) {
+            return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
+        }
+
+        $url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json'
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($stkPushRequest));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+
+    public static function getMpesaAccessToken($consumerKey, $consumerSecret)
+    {
+        $credentials = base64_encode($consumerKey . ':' . $consumerSecret);
+        $url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+
+        $headers = ['Authorization: Basic ' . $credentials];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($response, true);
+        return $result['access_token'] ?? null;
+    }
+
 }
     

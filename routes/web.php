@@ -78,7 +78,11 @@ require __DIR__ . '/auth.php';
 // Route::get('/captive/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
 Route::domain('captive.thefuturefirm.net')->group(function () {
     Route::get('/hs/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
+    Route::post('/hs/process-customer', [CaptivePortalController::class, 'processCustomer'])->name('processCustomer');
+    Route::post('/hs/query-mpesa', [CaptivePortalController::class, 'processQueryMpesa'])->name('processQueryMpesa');
+    // Mpesa callback route
 });
+Route::post('/hs/mpesa-callback', [CaptivePortalController::class, 'mpesaCallback'])->name('mpesaCallback');
 //================================= Invoice Payment Gateways  ====================================//
 
 Route::post('/customer-pay-with-bank', [BankTransferPaymentController::class, 'customerPayWithBank'])->name('customer.pay.with.bank');
