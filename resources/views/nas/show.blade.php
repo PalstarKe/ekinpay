@@ -32,7 +32,11 @@
 			<div class="card-body">
 				<div class="mb-3">
 					<button class="clipboard-btn btn btn-primary me-2 mb-2 w-100" type="submit" data-bs-toggle="modal" data-bs-target="#assignPackage">Assign New Packages</button>
-					<button class="clipboard-btn btn btn-primary me-2 w-100" type="submit">Download Hotspot Page</button>
+					<form action="{{ route('nas.downloadHotspot', ['nas_ip' => $nas->nasname]) }}" method="GET">
+						<button class="clipboard-btn btn btn-primary me-2 w-100" type="submit">
+							Download Hotspot Page
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>

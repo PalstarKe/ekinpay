@@ -27,29 +27,160 @@ use Illuminate\Support\Facades\Log;
 
 class CaptivePortalController extends Controller
 {
-    public function showLogin($nas_ip = null)
-    {
-        $router = Router::where('ip_address', $nas_ip)->first();
+    // public function showLogin($nas_ip = null)
+    // {
+    //     $router = Router::where('ip_address', $nas_ip)->first();
     
-        if (!$router) {
-            return abort(404, 'Router not found');
-        }
+    //     if (!$router) {
+    //         return abort(404, 'Router not found');
+    //     }
     
-        // Get package IDs assigned to the router
-        $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
+    //     // Get package IDs assigned to the router
+    //     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
     
-        if ($packageIds->isNotEmpty()) {
-            $packages = Package::with('bandwidth')
-                ->whereIn('id', $packageIds)
-                ->where('created_by', $router->created_by)
-                ->where('type', 'Hotspot')
-                ->get();
-        } else {
-            $packages = collect();
-        }
+    //     if ($packageIds->isNotEmpty()) {
+    //         $packages = Package::with('bandwidth')
+    //             ->whereIn('id', $packageIds)
+    //             ->where('created_by', $router->created_by)
+    //             ->where('type', 'Hotspot')
+    //             ->get();
+    //     } else {
+    //         $packages = collect();
+    //     }
     
-        return view('captive.login', compact('nas_ip', 'packages'));
+    //     return view('captive.login', compact('nas_ip', 'packages'));
+    // }
+    // public function showLogin($nas_ip, Request $request)
+    // {
+    //     $router = Router::where('ip_address', $nas_ip)->first();
+    
+    //     if (!$router) {
+    //         return abort(404, 'Router not found');
+    //     }
+    
+    //     // Get package IDs assigned to the router
+    //     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
+    
+    //     $packages = $packageIds->isNotEmpty()
+    //         ? Package::with('bandwidth')
+    //             ->whereIn('id', $packageIds)
+    //             ->where('created_by', $router->created_by)
+    //             ->where('type', 'Hotspot')
+    //             ->get()
+    //         : collect();
+    
+    //     // Capture MikroTik variables from query string
+    //     $mac = $request->query('mac', '');  
+    //     $chapId = $request->query('chapID', '');  
+    //     $chapChallenge = $request->query('chapChallenge', '');  
+    //     $loginLink = $request->query('loginLink', '');  
+    
+    //     return view('captive.login', compact('nas_ip', 'packages', 'mac', 'chapId', 'chapChallenge', 'loginLink'));
+    // }
+
+// public function showLogin($nas_ip = null, Request $request)
+// {
+//     if (!$nas_ip) {
+//         return abort(400, 'NAS IP is required');
+//     }
+
+//     $router = Router::where('ip_address', $nas_ip)->first();
+//     if (!$router) {
+//         return abort(404, 'Router not found');
+//     }
+
+//     // Get package IDs assigned to the router
+//     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
+//     $packages = $packageIds->isNotEmpty()
+//         ? Package::with('bandwidth')
+//             ->whereIn('id', $packageIds)
+//             ->where('created_by', $router->created_by)
+//             ->where('type', 'Hotspot')
+//             ->get()
+//         : collect();
+
+//     // Capture MikroTik query parameters
+//     $mac = $request->query('mac', '');
+//     $chapId = $request->query('chapID', '');
+//     $chapChallenge = $request->query('chapChallenge', '');
+//     $loginLink = $request->query('loginLink', '');
+
+//     // Detect invalid placeholders (MikroTik variables not replaced)
+//     $invalidPlaceholders = ['$(mac)', '$(chap-id)', '$(chap-challenge)', '$(link-login-only)'];
+//     if (in_array($mac, $invalidPlaceholders) || in_array($chapId, $invalidPlaceholders) || 
+//         in_array($chapChallenge, $invalidPlaceholders) || in_array($loginLink, $invalidPlaceholders)) {
+        
+//         // Redirect to clean URL without placeholders
+//         return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+//     }
+
+//     // Store valid parameters in session and redirect if they exist
+//     if ($mac || $chapId || $chapChallenge || $loginLink) {
+//         session([
+//             'hotspot_mac'         => $mac,
+//             'hotspot_chap_id'     => $chapId,
+//             'hotspot_chap_challenge' => $chapChallenge,
+//             'hotspot_login_link'  => $loginLink
+//         ]);
+
+//         return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+//     }
+
+//     // Retrieve session values if available
+//     $mac = session('hotspot_mac', '');
+//     $chapId = session('hotspot_chap_id', '');
+//     $chapChallenge = session('hotspot_chap_challenge', '');
+//     $loginLink = session('hotspot_login_link', '');
+
+//     return view('captive.login', compact('nas_ip', 'packages', 'mac', 'chapId', 'chapChallenge', 'loginLink'));
+// }
+
+public function showLogin($nas_ip = null, Request $request)
+{
+    if (!$nas_ip) {
+        return abort(400, 'NAS IP is required');
     }
+
+    // Check if NAS exists
+    $router = Router::where('ip_address', $nas_ip)->first();
+    if (!$router) {
+        return abort(404, 'Router not found');
+    }
+
+    // Get packages assigned to the NAS
+    $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
+    $packages = $packageIds->isNotEmpty()
+        ? Package::with('bandwidth')
+            ->whereIn('id', $packageIds)
+            ->where('created_by', $router->created_by)
+            ->where('type', 'Hotspot')
+            ->get()
+        : collect();
+
+    // Capture query parameters
+    $queryParams = $request->query();
+
+    // MikroTik placeholders to check
+    $invalidValues = ['$(mac)', '$(chap-id)', '$(chap-challenge)', '$(link-login-only)'];
+
+    // Remove placeholders if they exist in the URL
+    $hasInvalidValues = collect($queryParams)->contains(fn($value) => in_array($value, $invalidValues));
+
+    if ($hasInvalidValues) {
+        return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+    }
+
+    // If parameters exist, store them in session and redirect to a clean URL
+    if (!empty($queryParams)) {
+        session(['hotspot_login' => $queryParams]);
+        return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+    }
+
+    // Retrieve stored session values
+    $queryParams = session('hotspot_login', []);
+
+    return view('captive.login', compact('nas_ip', 'packages', 'queryParams'));
+}
 
     public function processCustomer(Request $request)
     {

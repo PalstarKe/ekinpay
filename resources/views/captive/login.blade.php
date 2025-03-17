@@ -63,23 +63,17 @@
             </div>
         </div>
     </div>
-    <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-5 rounded-lg text-black w-80">
-            <h2 class="text-lg font-bold text-center mb-3">Enter Your Phone Number</h2>
-            <form id="paymentForm">
-                <input type="hidden" id="selectedPackageId">
-                <input type="hidden" id="nasIp">
-                <input type="hidden" id="macAddress" value="00:11:22:33:44:55"> <!-- Replace dynamically -->
+    <form method="POST" action="">
+    @csrf
+    <input type="hidden" name="mac" value="{{ session('hotspot_login.mac', '') }}">
+    <input type="hidden" name="chapID" value="{{ session('hotspot_login.chapID', '') }}">
+    <input type="hidden" name="chapChallenge" value="{{ session('hotspot_login.chapChallenge', '') }}">
+    <input type="hidden" name="loginLink" value="{{ session('hotspot_login.loginLink', '') }}">
 
-                <div class="mb-4">
-                    <input type="text" id="phoneNumber" placeholder="Enter M-Pesa Number"
-                        class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <button type="submit" class="bg-blue-600 text-white w-full py-2 rounded-lg">Proceed</button>
-                <button type="button" id="closeModal" class="w-full mt-2 py-2 rounded-lg bg-gray-300">Cancel</button>
-            </form>
-        </div>
-    </div>
+    <!-- <button type="submit">Login</button> -->
+</form>
+
+   
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

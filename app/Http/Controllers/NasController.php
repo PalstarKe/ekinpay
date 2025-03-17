@@ -18,6 +18,7 @@ use phpseclib3\Net\SSH2;
 use phpseclib3\Crypt\RSA;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
+use ZipArchive;
 
 class NasController extends Controller
 {
@@ -319,6 +320,51 @@ class NasController extends Controller
             }
         }
         return redirect()->route('nas.show', ['nas' => encrypt($nasId)])->with('success', __('Packages updated successfully.'));
+    }
+
+    public function downloadHotspotPage($nas_ip)
+    {
+        $zipFileName = 'TheFuture-login.zip';
+        $zipPath = storage_path($zipFileName);
+
+        $loginContent = <<<HTML
+    <html>
+    <head>
+        <title>Login</title>
+        <meta http-equiv="refresh"
+            content="0; url=http://captive.thefuturefirm.net/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="expires" content="-1">
+    </head>
+    <body>
+    </body>
+    </html>
+    HTML;
+
+        $statusContent = <<<HTML
+    <html>
+    <head>
+        <title>Status</title>
+        <meta http-equiv="refresh"
+            content="0; url=http://captive.thefuturefirm.net/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="expires" content="-1">
+    </head>
+    <body>
+    </body>
+    </html>
+    HTML;
+
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+            $zip->addFromString('login.html', $loginContent);
+            $zip->addFromString('status.html', $statusContent);
+            $zip->close();
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to create ZIP file'], 500);
+        }
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 
 }
