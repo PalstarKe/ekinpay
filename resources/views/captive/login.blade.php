@@ -158,7 +158,7 @@
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        checkoutRequestID: checkoutRequestID
+                        ref: checkoutRequestID
                     },
                     success: function(response) {
                         if (response.success && response.status === "COMPLETED") {

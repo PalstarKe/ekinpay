@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 
 class CaptivePortalController extends Controller
@@ -51,13 +52,6 @@ class CaptivePortalController extends Controller
 
     public function processCustomer(Request $request)
     {
-        // Format phone number (convert 07xxxxxxx / 01xxxxxxx to 2547xxxxxxx)
-        // if (preg_match('/^(07|01)(\d{8})$/', $request->phone_number, $matches)) {
-        //     $request->merge([
-        //         'contact' => '254' . substr($matches[0], 1), // Removes the leading 0 and adds 254
-        //     ]);
-        // }
-
         // Validate request data
         $rules = [
             'nas_ip'      => 'required',
@@ -133,13 +127,41 @@ class CaptivePortalController extends Controller
             $customer->save();
         }
 
-        CustomHelper::initiateHotspotSTKPush($phone, $package->price, $router->created_by);
+        $mpesaResponse = CustomHelper::initiateHotspotSTKPush($phone, $package->price, $router->created_by);
 
-        return response()->json(['success' => true, 'message' => 'Payment request sent']);
+        $mpesaResponse = (array) $mpesaResponse; 
+
+        $checkoutRequestID = $mpesaResponse['CheckoutRequestID'] ?? null;
+
+        Log::info("Response for Checkout:", ['CheckoutRequestID' => $checkoutRequestID]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment request sent',
+            'checkoutRequestID' => $checkoutRequestID
+        ]);
+
     }
 
-    public function processQueryMpesa($nas_ip = null){
+    public function processQueryMpesa(Request $request){
 
+        $rules = [
+            'ref'      => 'required'
+        ];
+
+        $mpesastatus = CustomHelper::initiateHotspotSTKPush($phone, $package->price, $router->created_by);
+
+        $mpesastatus = (array) $mpesaResponse; 
+
+        $responseCode = $mpesastatus['CheckoutRequestID'] ?? null;
+
+        Log::info("Response for Checkout:", ['CheckoutRequestID' => $checkoutRequestID]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment request sent',
+            'checkoutRequestID' => $checkoutRequestID
+        ]);
     }
     public function VerifyMpesa($nas_ip = null){
 

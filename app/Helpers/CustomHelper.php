@@ -405,7 +405,7 @@ class CustomHelper
                 break;
             }
         }
-
+        Log::info("Response for Mode: " .  $selectedMode);
         if (!$selectedMode) {
             return ['success' => false, 'message' => 'No valid payment gateway found.'];
         }
@@ -418,6 +418,7 @@ class CustomHelper
         } elseif ($selectedMode === 'till') {
             $isSystemAPIEnabled = $companySettings['is_system_mpesa_till_api_enabled'] ?? 'off';
         }
+        Log::info("Response for APi: " .  $isSystemAPIEnabled);
 
         $paymentDetails = [
             'partyB' => $selectedMode === 'bank' ? $companySettings['mpesa_bank_paybill'] ?? null :
@@ -427,7 +428,9 @@ class CustomHelper
                         ($selectedMode === 'paybill' ? $companySettings['mpesa_paybill_account'] ?? null : 
                         ($selectedMode === 'till' ? $companySettings['mpesa_till_account'] ?? null : null))
         ];
-    
+        
+        Log::info("Response for Defaults:", $paymentDetails);
+
         if ($isSystemAPIEnabled === 'on') {
             if ($selectedMode === 'till') {
                 $paymentDetails['key']       = $adminSettings['personal_till_key'] ?? null;
@@ -443,6 +446,7 @@ class CustomHelper
                 $paymentDetails['TransType']   = 'CustomerPayBillOnline';
             }
             return $paymentDetails;
+            Log::info("Response for Defaults:", $paymentDetails);
         }
     
         // Validate shortcode type if API is OFF
@@ -467,6 +471,7 @@ class CustomHelper
         }
     
         return $paymentDetails;
+        Log::info("Response for Defaults:", $paymentDetails);
     }
     
 
@@ -478,7 +483,7 @@ class CustomHelper
         if (!isset($paymentSettings['partyB']) || !isset($paymentSettings['ref'])) {
             return ['success' => false, 'message' => 'Payment settings not found.'];
         }
-
+        Log::info("Response for Defaults:", $paymentSettings);
         // Extract required credentials
         $accRef          = $paymentSettings['ref'] ?? null;
         $PartyB          = $paymentSettings['partyB'] ?? null;
@@ -493,12 +498,24 @@ class CustomHelper
         if (!$shortcode || !$passkey || !$consumerKey || !$consumerSecret) {
             return ['success' => false, 'message' => 'Incomplete payment credentials.'];
         }
-
+        $amount = (int) $amount;
         // Prepare STK push request
-        $Timestamp = date("YmdHis",time());
-        $password  = base64_encode($shortcode . $passkey . $timestamp);
+        $timestamp = date("YmdHis",time());
+        $password  = base64_encode($shortcode . $passkey . $timestamp); 
 
-        $stkPushRequest = [
+        $accessToken = self::getMpesaAccessToken($consumerKey, $consumerSecret);
+        if (!$accessToken) {
+            return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
+        }
+        Log::info("Response for  R Access Token: " . $accessToken);
+
+        $url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '.$accessToken));
+
+        $curl_post_data = array(
             'BusinessShortCode' => $shortcode,
             'Password'          => $password,
             'Timestamp'         => $timestamp,
@@ -510,38 +527,19 @@ class CustomHelper
             'CallBackURL'       => $callbackUrl,
             'AccountReference'  => $accRef,
             'TransactionDesc'   => 'Hot Payment'
-        ];
+        );
+        $data_string = json_encode($curl_post_data);
 
-        $response = self::sendMpesaSTKPush($stkPushRequest, $consumerKey, $consumerSecret);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
 
-        return $response;
-    }
+        $curl_response = curl_exec($curl);
 
-    public static function sendMpesaSTKPush($stkPushRequest, $consumerKey, $consumerSecret)
-    {
-        $accessToken = self::getMpesaAccessToken($consumerKey, $consumerSecret);
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
-        }
+        $mpesaResponse = json_decode($curl_response);
+        Log::info("Response for STK Response:", (array) $mpesaResponse);
 
-        $url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
-
-        $headers = [
-            'Authorization: Bearer ' . $accessToken,
-            'Content-Type: application/json'
-        ];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($stkPushRequest));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        return json_decode($response, true);
+        return $mpesaResponse;
     }
 
     public static function getMpesaAccessToken($consumerKey, $consumerSecret)
@@ -549,8 +547,10 @@ class CustomHelper
         $credentials = base64_encode($consumerKey . ':' . $consumerSecret);
         $url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-        $headers = ['Authorization: Basic ' . $credentials];
+        Log::info("Response for Creds: " . $credentials);
 
+        $headers = ['Authorization: Basic ' . $credentials];
+        Log::info("Response for Headers: " , $headers);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -561,6 +561,7 @@ class CustomHelper
 
         $result = json_decode($response, true);
         return $result['access_token'] ?? null;
+        Log::info("Response for Access Token: ", $result);
     }
 
 }

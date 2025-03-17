@@ -994,7 +994,7 @@
                                                                             <div class="form-check">
                                                                                 <label class="form-check-label text-dark">
                                                                                     <input type="radio"
-                                                                                        name="mpesa_mode" value="both"
+                                                                                        name="mpesa_mode" value="Both"
                                                                                         class="form-check-input"
                                                                                         {{ isset($company_payment_setting['mpesa_mode']) && $company_payment_setting['mpesa_mode'] == 'Both' ? 'checked="checked"' : '' }}>
                                                                                     {{ __('For Both') }}
