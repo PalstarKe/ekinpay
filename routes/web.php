@@ -69,11 +69,16 @@ use App\Http\Controllers\Tr069Controller;
 use App\Http\Controllers\ReferralProgramController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\CaptivePortalController;
 
 
 require __DIR__ . '/auth.php';
 
-
+// Route::get('/captive/{nas_ip?}', [CaptivePortalController::class, 'showLogin']);
+// Route::get('/captive/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
+Route::domain('captive.thefuturefirm.net')->group(function () {
+    Route::get('/hs/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
+});
 //================================= Invoice Payment Gateways  ====================================//
 
 Route::post('/customer-pay-with-bank', [BankTransferPaymentController::class, 'customerPayWithBank'])->name('customer.pay.with.bank');

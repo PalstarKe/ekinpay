@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\Facades\URL;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
+    if (request()->getHost() === 'master.thefuturefirm.net') {
+      URL::forceScheme('https'); 
+    } elseif (request()->getHost() === 'captive.thefuturefirm.net') {
+        URL::forceScheme('http');
+    }
     Vite::useStyleTagAttributes(function (?string $src, string $url, ?array $chunk, ?array $manifest) {
       if ($src !== null) {
         return [
