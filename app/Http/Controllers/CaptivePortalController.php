@@ -27,161 +27,80 @@ use Illuminate\Support\Facades\Log;
 
 class CaptivePortalController extends Controller
 {
-    // public function showLogin($nas_ip = null)
-    // {
-    //     $router = Router::where('ip_address', $nas_ip)->first();
+
+    public function showLogin(Request $request, $nas_ip, $mac = null)
+    {
+        Log::info('Incoming Request:', $request->all());
     
-    //     if (!$router) {
-    //         return abort(404, 'Router not found');
-    //     }
+        if (!$nas_ip) {
+            return abort(400, 'NAS IP is required');
+        }
     
-    //     // Get package IDs assigned to the router
-    //     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
-    
-    //     if ($packageIds->isNotEmpty()) {
-    //         $packages = Package::with('bandwidth')
-    //             ->whereIn('id', $packageIds)
-    //             ->where('created_by', $router->created_by)
-    //             ->where('type', 'Hotspot')
-    //             ->get();
-    //     } else {
-    //         $packages = collect();
-    //     }
-    
-    //     return view('captive.login', compact('nas_ip', 'packages'));
-    // }
-    // public function showLogin($nas_ip, Request $request)
-    // {
-    //     $router = Router::where('ip_address', $nas_ip)->first();
-    
-    //     if (!$router) {
-    //         return abort(404, 'Router not found');
-    //     }
-    
-    //     // Get package IDs assigned to the router
-    //     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
-    
-    //     $packages = $packageIds->isNotEmpty()
-    //         ? Package::with('bandwidth')
-    //             ->whereIn('id', $packageIds)
-    //             ->where('created_by', $router->created_by)
-    //             ->where('type', 'Hotspot')
-    //             ->get()
-    //         : collect();
-    
-    //     // Capture MikroTik variables from query string
-    //     $mac = $request->query('mac', '');  
-    //     $chapId = $request->query('chapID', '');  
-    //     $chapChallenge = $request->query('chapChallenge', '');  
-    //     $loginLink = $request->query('loginLink', '');  
-    
-    //     return view('captive.login', compact('nas_ip', 'packages', 'mac', 'chapId', 'chapChallenge', 'loginLink'));
-    // }
+        $router = Router::where('ip_address', $nas_ip)->first();
+        if (!$router) {
+            return abort(404, 'Router not found');
+        }
+        $createdby = $router->created_by;
 
-// public function showLogin($nas_ip = null, Request $request)
-// {
-//     if (!$nas_ip) {
-//         return abort(400, 'NAS IP is required');
-//     }
-
-//     $router = Router::where('ip_address', $nas_ip)->first();
-//     if (!$router) {
-//         return abort(404, 'Router not found');
-//     }
-
-//     // Get package IDs assigned to the router
-//     $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
-//     $packages = $packageIds->isNotEmpty()
-//         ? Package::with('bandwidth')
-//             ->whereIn('id', $packageIds)
-//             ->where('created_by', $router->created_by)
-//             ->where('type', 'Hotspot')
-//             ->get()
-//         : collect();
-
-//     // Capture MikroTik query parameters
-//     $mac = $request->query('mac', '');
-//     $chapId = $request->query('chapID', '');
-//     $chapChallenge = $request->query('chapChallenge', '');
-//     $loginLink = $request->query('loginLink', '');
-
-//     // Detect invalid placeholders (MikroTik variables not replaced)
-//     $invalidPlaceholders = ['$(mac)', '$(chap-id)', '$(chap-challenge)', '$(link-login-only)'];
-//     if (in_array($mac, $invalidPlaceholders) || in_array($chapId, $invalidPlaceholders) || 
-//         in_array($chapChallenge, $invalidPlaceholders) || in_array($loginLink, $invalidPlaceholders)) {
-        
-//         // Redirect to clean URL without placeholders
-//         return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
-//     }
-
-//     // Store valid parameters in session and redirect if they exist
-//     if ($mac || $chapId || $chapChallenge || $loginLink) {
-//         session([
-//             'hotspot_mac'         => $mac,
-//             'hotspot_chap_id'     => $chapId,
-//             'hotspot_chap_challenge' => $chapChallenge,
-//             'hotspot_login_link'  => $loginLink
-//         ]);
-
-//         return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
-//     }
-
-//     // Retrieve session values if available
-//     $mac = session('hotspot_mac', '');
-//     $chapId = session('hotspot_chap_id', '');
-//     $chapChallenge = session('hotspot_chap_challenge', '');
-//     $loginLink = session('hotspot_login_link', '');
-
-//     return view('captive.login', compact('nas_ip', 'packages', 'mac', 'chapId', 'chapChallenge', 'loginLink'));
-// }
-
-public function showLogin($nas_ip = null, Request $request)
-{
-    if (!$nas_ip) {
-        return abort(400, 'NAS IP is required');
-    }
-
-    // Check if NAS exists
-    $router = Router::where('ip_address', $nas_ip)->first();
-    if (!$router) {
-        return abort(404, 'Router not found');
-    }
-
-    // Get packages assigned to the NAS
-    $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
-    $packages = $packageIds->isNotEmpty()
-        ? Package::with('bandwidth')
+        $packageIds = RouterPackage::where('router_id', $router->id)->pluck('package_id');
+        $packages = Package::with('bandwidth')
             ->whereIn('id', $packageIds)
-            ->where('created_by', $router->created_by)
+            ->where('created_by', $createdby)
             ->where('type', 'Hotspot')
-            ->get()
-        : collect();
+            ->get();
+    
+        $company = User::find($createdby);
 
-    // Capture query parameters
-    $queryParams = $request->query();
+            // ✅ Store values from the request OR session (NO FALLBACK)
+            if ($request->query('loginLink')) {
+                session(['hotspot_login.loginLink' => $request->query('loginLink')]);
+            }
+            $loginLink = session('hotspot_login.loginLink');
 
-    // MikroTik placeholders to check
-    $invalidValues = ['$(mac)', '$(chap-id)', '$(chap-challenge)', '$(link-login-only)'];
+            Log::info('Stored Login Link:', ['loginLink' => $loginLink]);
 
-    // Remove placeholders if they exist in the URL
-    $hasInvalidValues = collect($queryParams)->contains(fn($value) => in_array($value, $invalidValues));
-
-    if ($hasInvalidValues) {
-        return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+    if (!$loginLink) {
+        Log::error('Missing loginLink');
+        return abort(400, 'Missing loginLink');
     }
+        $chapID = $request->query('chapID') ?? session('hotspot_login.chapID');
+        $chapChallenge = $request->query('chapChallenge') ?? session('hotspot_login.chapChallenge');
 
-    // If parameters exist, store them in session and redirect to a clean URL
-    if (!empty($queryParams)) {
-        session(['hotspot_login' => $queryParams]);
-        return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip]);
+        // Ensure loginLink is present, otherwise abort
+        if (!$loginLink) {
+            Log::error('Missing loginLink');
+            return abort(400, 'Missing loginLink');
+        }
+        $mac = $mac ?? $request->query('mac') ?? $request->input('mac');
+        Log::info('Resolved MAC Address:', ['mac' => $mac]);
+    
+        $invalidMacs = ['$(mac)', null, '', 'undefined'];
+        if (in_array($mac, $invalidMacs, true)) {
+            Log::error('Invalid MAC address detected', ['mac' => $mac]);
+            return abort(403, 'Invalid MAC address. Please try again.');
+        }
+    
+        if ($request->getQueryString()) {
+            return redirect()->route('captive.showLogin', ['nas_ip' => $nas_ip, 'mac' => $mac]);
+        }
+        
+    
+        session([
+            'hotspot_login' => [
+                'nas_ip' => $nas_ip,
+                'mac' => $mac,
+                'ip' => $request->query('ip'),
+                'loginLink' => $loginLink,
+                'chapID' => $chapID,
+                'chapChallenge' => $chapChallenge,
+            ],
+            'packages' => $packages,
+            'company' => $company
+        ]);
+    
+        return view('captive.login', compact('nas_ip', 'packages', 'company', 'mac', 'loginLink', 'chapID', 'chapChallenge'));
     }
-
-    // Retrieve stored session values
-    $queryParams = session('hotspot_login', []);
-
-    return view('captive.login', compact('nas_ip', 'packages', 'queryParams'));
-}
-
+    
     public function processCustomer(Request $request)
     {
         // Validate request data
@@ -314,12 +233,13 @@ public function showLogin($nas_ip = null, Request $request)
         // Query M-Pesa transaction status
         $mpesastatus = CustomHelper::QueryMpesaHotspot($ref, $router->created_by);
         $mpesastatus = (array) $mpesastatus; // Ensure it's an array
+        Log::info("Response for STK in captive:", (array)  $mpesastatus);
 
         $ResultCode = $mpesastatus['ResultCode'] ?? null;
         $ResultDesc = $mpesastatus['ResultDesc'] ?? null;
 
         if ($ResultCode !== "0") {
-            return response()->json(['success' => false, 'message' => 'Payment failed', 'ResultDesc' => $ResultDesc]);
+            return response()->json(['success' => false, 'message' => 'Payment failed', 'ResultCode' => $ResultCode, 'ResultDesc' => $ResultDesc]);
         }
 
         // Get package details
@@ -350,21 +270,61 @@ public function showLogin($nas_ip = null, Request $request)
         $customer->expiry_status = 'on';
         $customer->save();
 
-        DB::connection('radius')->table('radcheck')->insert([
-            'username'  => $customer->username,
-            'attribute' => 'Cleartext-Password',
-            'op'        => ':=',
-            'value'     => $customer->password,
+        // Ensure radcheck entry exists (no duplicate passwords)
+        $existingRadcheck = DB::table('radcheck')
+        ->where('username', $customer->username)
+        ->where('attribute', 'Cleartext-Password')
+        ->exists();
+
+        if (!$existingRadcheck) {
+        DB::table('radcheck')->insert([
+            'username'   => $customer->username,
+            'attribute'  => 'Cleartext-Password',
+            'op'         => ':=',
+            'value'      => $customer->password,
             'created_by' => $router->created_by,
         ]);
+        }
+
         $group_name = 'package_' . $package->id;
-        // Assign the Expired_Plan
-        DB::connection('radius')->table('radusergroup')->insert([
-            'username'  => $customer->username,
-            'groupname' => $group_name,
-            'priority'  => 1,
-            'created_by' => $router->created_by,
+
+        // Check existing package assignment
+        $existingRadusergroup = DB::table('radusergroup')
+        ->where('username', $customer->username)
+        ->first();
+
+        if ($existingRadusergroup) {
+        if ($existingRadusergroup->groupname !== $group_name) {
+            DB::table('radusergroup')
+                ->where('username', $customer->username)
+                ->delete();
+        }
+        }
+
+        // Assign new package
+        DB::table('radusergroup')->insert([
+        'username'   => $customer->username,
+        'groupname'  => $group_name,
+        'priority'   => 1,
+        'created_by' => $router->created_by,
         ]);
+
+        // Extend or reset expiry based on the new package
+        $currentExpiry = Carbon::parse($customer->expiry);
+        if ($customer->expiry_status === 'off' || Carbon::now()->gt($currentExpiry)) {
+        // If expired, start new expiry from now
+        $newExpiry = Carbon::now()->addSeconds($timelimit);
+        } else {
+        // If active, extend from the current expiry
+        $newExpiry = $currentExpiry->addSeconds($timelimit);
+        }
+
+        // Update customer expiry in your system
+        $customer->expiry = $newExpiry->toDateTimeString();
+        $customer->expiry_status = 'on';
+        $customer->save();
+
+
         $type = 'package';
 
         // Generate and process invoice
@@ -382,9 +342,21 @@ public function showLogin($nas_ip = null, Request $request)
         return response()->json([
             'success' => true,
             'message' => 'Payment successful',
-            'ResponseCode' => $ResultCode,
+            'ResultCode' => $ResultCode,
             'ResultDesc' => $ResultDesc
         ]);
+    }
+    public function connect(Request $request)
+    {
+        // Retrieve session data
+        $mac = Session::get('mac');
+        $ip = Session::get('ip');
+        $link_login_only = Session::get('link_login_only');
+        $linkorig = 'https://www.google.com'; // Default redirect
+
+        $username = "admin"; // You may replace this with dynamic authentication
+
+        return view('captive.connect', compact('username', 'link_login_only', 'linkorig'));
     }
     public function VerifyMpesa($nas_ip = null){
 

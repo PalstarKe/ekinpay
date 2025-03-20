@@ -21,8 +21,7 @@ class CustomHelper
     public static function lockMac(Customer $customer)
     {
         if (empty($customer->mac_address)) {
-            $mac = DB::connection('radius')
-                ->table('radacct')
+            $mac = DB::table('radacct')
                 ->whereNull('acctstoptime')
                 ->where('username', $customer->username)
                 ->value('callingstationid');
@@ -31,7 +30,7 @@ class CustomHelper
                 $customer->mac_address = $mac;
                 $customer->save();
 
-                DB::connection('radius')->table('radcheck')->updateOrInsert(
+                DB::table('radcheck')->updateOrInsert(
                     ['username' => $customer->username, 'attribute' => 'Calling-Station-Id'],
                     ['op' => '==', 'value' => $customer->mac_address]
                 );
@@ -46,8 +45,8 @@ class CustomHelper
 
         if (!empty($group_name)) {
             DB::transaction(function () use ($customer, $group_name) {
-                DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
-                DB::connection('radius')->table('radusergroup')->insert([
+                DB::table('radusergroup')->where('username', $customer->username)->delete();
+                DB::table('radusergroup')->insert([
                     'username'  => $customer->username,
                     'groupname' => $group_name,
                     'priority'  => 1,
@@ -55,10 +54,10 @@ class CustomHelper
             });
 
             // Check if client is active
-            $active = DB::connection('radius')->table('radacct')->where('username', $customer->username)->whereNull('acctstoptime')->orderBy('acctstarttime', 'desc')->first();
+            $active = DB::table('radacct')->where('username', $customer->username)->whereNull('acctstoptime')->orderBy('acctstarttime', 'desc')->first();
 
             if (!empty($active)) {
-                $nasObj = DB::connection('radius')->table('nas')->where('nasname', $active->nasipaddress)->first();
+                $nasObj = DB::table('nas')->where('nasname', $active->nasipaddress)->first();
 
                 if ($nasObj) {
                     $attributes = [
@@ -86,7 +85,7 @@ class CustomHelper
     public static function refreshCustomerInRadius($customer)
     {
         // Get active session
-        $activeSession = DB::connection('radius')->table('radacct')
+        $activeSession = DB::table('radacct')
             ->where('username', $customer->username)
             ->whereNull('acctstoptime')
             ->orderBy('acctstarttime', 'desc')
@@ -96,7 +95,7 @@ class CustomHelper
             return ['status' => 'error', 'message' => 'User is not online'];
         }
 
-        $nasObj = DB::connection('radius')->table('nas')
+        $nasObj = DB::table('nas')
             ->where('nasname', $activeSession->nasipaddress)
             ->first();
 
@@ -157,14 +156,14 @@ class CustomHelper
 
     public static function handleDeactivation($customer)
     {
-        $activeSession = DB::connection('radius')->table('radacct')
+        $activeSession = DB::table('radacct')
             ->where('username', $customer->username)
             ->whereNull('acctstoptime')
             ->orderBy('acctstarttime', 'desc')
             ->first();
 
         if ($activeSession) {
-            $nasObj = DB::connection('radius')->table('nas')->where('nasname', $activeSession->nasipaddress)->first();
+            $nasObj = DB::table('nas')->where('nasname', $activeSession->nasipaddress)->first();
             $attributes = [
                 'acctSessionID' => $activeSession->acctsessionid,
                 'framedIPAddress' => $activeSession->framedipaddress,
@@ -173,8 +172,8 @@ class CustomHelper
             self::kickOutUsersByRadius($nasObj, $customer, $attributes);
         }
 
-        DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->delete();
-        DB::connection('radius')->table('radusergroup')->insert([
+        DB::table('radusergroup')->where('username', $customer->username)->delete();
+        DB::table('radusergroup')->insert([
             'username'  => $customer->username,
             'groupname' => 'Expired_Plan',
             'priority'  => 1,
@@ -213,33 +212,33 @@ class CustomHelper
         $package = Package::where('name_plan', $customer->package)->firstOrFail(); 
         $group_name = 'package_' . $package->id;
 
-        $existingAssignment = DB::connection('radius')->table('radusergroup')->where('username', $customer->username)->exists();
+        $existingAssignment = DB::table('radusergroup')->where('username', $customer->username)->exists();
 
         if (!$existingAssignment) {
-            DB::connection('radius')->table('radusergroup')->insert([
+            DB::table('radusergroup')->insert([
                 'username' => $customer->username,
                 'groupname' => $group_name,
                 'priority' => 0
             ]);
         } else {
-            DB::connection('radius')->table('radusergroup')
+            DB::table('radusergroup')
                 ->where('username', $customer->username)
                 ->update(['groupname' => $group_name]);
         }
 
         $expirationValue = $customer->expiry_extended ? $customer->expiry_extended->format('Y-m-d H:i:s') : Carbon::now()->addDays(30)->format('Y-m-d H:i:s');
 
-        $expirationExists = DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->exists();
+        $expirationExists = DB::table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->exists();
 
         if (!$expirationExists) {
-            DB::connection('radius')->table('radcheck')->insert([
+            DB::table('radcheck')->insert([
                 'username' => $customer->username,
                 'attribute' => 'Expiration',
                 'op' => ':=',
                 'value' => $expirationValue
             ]);
         } else {
-            DB::connection('radius')->table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->update(['value' => $expirationValue]);
+            DB::table('radcheck')->where('username', $customer->username)->where('attribute', 'Expiration')->update(['value' => $expirationValue]);
         }
     }
     public static function getMacVendor($mac)
@@ -406,7 +405,7 @@ class CustomHelper
                 break;
             }
         }
-        Log::info("Response for Mode: " .  $selectedMode);
+        // Log::info("Response for Mode: " .  $selectedMode);
         if (!$selectedMode) {
             return ['success' => false, 'message' => 'No valid payment gateway found.'];
         }
@@ -419,7 +418,7 @@ class CustomHelper
         } elseif ($selectedMode === 'till') {
             $isSystemAPIEnabled = $companySettings['is_system_mpesa_till_api_enabled'] ?? 'off';
         }
-        Log::info("Response for APi: " .  $isSystemAPIEnabled);
+        // Log::info("Response for APi: " .  $isSystemAPIEnabled);
 
         $paymentDetails = [
             'partyB' => $selectedMode === 'bank' ? $companySettings['mpesa_bank_paybill'] ?? null :
@@ -430,7 +429,7 @@ class CustomHelper
                         ($selectedMode === 'till' ? $companySettings['mpesa_till_account'] ?? null : null))
         ];
         
-        Log::info("Response for Defaults:", $paymentDetails);
+        // Log::info("Response for Defaults:", $paymentDetails);
 
         if ($isSystemAPIEnabled === 'on') {
             if ($selectedMode === 'till') {
@@ -447,7 +446,7 @@ class CustomHelper
                 $paymentDetails['TransType']   = 'CustomerPayBillOnline';
             }
             return $paymentDetails;
-            Log::info("Response for Defaults:", $paymentDetails);
+            // Log::info("Response for Defaults:", $paymentDetails);
         }
     
         // Validate shortcode type if API is OFF
@@ -472,7 +471,7 @@ class CustomHelper
         }
     
         return $paymentDetails;
-        Log::info("Response for Defaults:", $paymentDetails);
+        // Log::info("Response for Defaults:", $paymentDetails);
     }
     
 
@@ -484,7 +483,7 @@ class CustomHelper
         if (!isset($paymentSettings['partyB']) || !isset($paymentSettings['ref'])) {
             return ['success' => false, 'message' => 'Payment settings not found.'];
         }
-        Log::info("Response for Defaults:", $paymentSettings);
+        // Log::info("Response for Defaults:", $paymentSettings);
         // Extract required credentials
         $accRef          = $paymentSettings['ref'] ?? null;
         $PartyB          = $paymentSettings['partyB'] ?? null;
@@ -508,7 +507,7 @@ class CustomHelper
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
         }
-        Log::info("Response for  R Access Token: " . $accessToken);
+        // Log::info("Response for  R Access Token: " . $accessToken);
 
         $url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
@@ -538,7 +537,7 @@ class CustomHelper
         $curl_response = curl_exec($curl);
 
         $mpesaResponse = json_decode($curl_response);
-        Log::info("Response for STK Response:", (array) $mpesaResponse);
+        // Log::info("Response for STK Response:", (array) $mpesaResponse);
 
         return $mpesaResponse;
     }
@@ -548,10 +547,10 @@ class CustomHelper
         $credentials = base64_encode($consumerKey . ':' . $consumerSecret);
         $url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
 
-        Log::info("Response for Creds: " . $credentials);
+        // Log::info("Response for Creds: " . $credentials);
 
         $headers = ['Authorization: Basic ' . $credentials];
-        Log::info("Response for Headers: " , $headers);
+        // Log::info("Response for Headers: " , $headers);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -562,7 +561,7 @@ class CustomHelper
 
         $result = json_decode($response, true);
         return $result['access_token'] ?? null;
-        Log::info("Response for Access Token: ", $result);
+        // Log::info("Response for Access Token: ", $result);
     }
     public static function QueryMpesaHotspot($ref, $isp){
         $paymentSettings = self::getHotspotPaymentGateway($isp);
@@ -570,7 +569,7 @@ class CustomHelper
         if (!isset($paymentSettings['partyB']) || !isset($paymentSettings['ref'])) {
             return ['success' => false, 'message' => 'Payment settings not found.'];
         }
-        Log::info("Response for Defaults:", $paymentSettings);
+        // Log::info("Response for Defaults:", $paymentSettings);
         // Extract required credentials
         $shortcode       = $paymentSettings['shortcode'] ?? null;
         $passkey         = $paymentSettings['passkey'] ?? null;
@@ -589,7 +588,7 @@ class CustomHelper
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to obtain M-Pesa access token.'];
         }
-        Log::info("Response for  R Access Token: " . $accessToken);
+        // Log::info("Response for  R Access Token: " . $accessToken);
 
         $url = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
         $stkQueryData = [
@@ -619,7 +618,7 @@ class CustomHelper
         curl_close($ch);
 
         $data = json_decode($response, true);
-        Log::info("Response for STK Response:", (array)  $data);
+        // Log::info("Response for STK Response:", (array)  $data);
 
         return  $data;
     }

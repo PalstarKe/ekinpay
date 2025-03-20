@@ -90,128 +90,129 @@ class NasController extends Controller
 
     public function store(Request $request)
     {
-        if (\Auth::user()->can('create nas')) {
-            $rules = [
-                'site_name' => [
-                    'required',
-                    'string',
-                    Rule::unique('radius.nas', 'shortname')->where(function ($query) {
-                        return $query->where('created_by', \Auth::user()->id);
-                    })
-                ],
-            ];
-
-            $validator = \Validator::make($request->all(), $rules);
-
-            if($validator->fails())
-            {
-                $messages = $validator->getMessageBag();
-                return redirect()->route('nas.index')->with('error', $messages->first());
-            }
-
+        if (!\Auth::user()->can('create nas')) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    
+        $rules = [
+            'site_name' => [
+                'required',
+                'string',
+                Rule::unique('radius.nas', 'shortname')->where(function ($query) {
+                    return $query->where('created_by', \Auth::user()->id);
+                })
+            ],
+        ];
+    
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return redirect()->route('nas.index')->with('error', $validator->errors()->first());
+        }
+    
+        try {
             // Step 1: Generate OpenVPN Client and Get Static IP
             $vpnScriptPath = "/var/www/html/openvpn/openvpn-client.sh";
             $clientName = escapeshellarg($request->site_name);
             $vpnCommand = "sudo -u www-data /bin/bash $vpnScriptPath $clientName";
             $vpnOutput = shell_exec($vpnCommand);
-
+    
             \Log::info("OpenVPN output for {$request->site_name}: " . $vpnOutput);
-
+    
             preg_match('/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/', $vpnOutput, $matches);
             $staticIp = $matches[0] ?? null;
-
+    
             if (!$staticIp) {
                 return redirect()->route('nas.index')->with('error', "❌ Failed to generate OpenVPN client.");
             }
-
+    
             // Step 2: Generate a Secret for FreeRADIUS
             $nasSecret = config('radius.default_secret') ?? Str::random(16);
-
+    
             // Step 3: Store NAS in FreeRADIUS Database
             $nas = new Nas();
             $nas->nasname = $staticIp;
             $nas->shortname = $request->site_name;
             $nas->secret = $nasSecret;
-            $nas->nasapi = 0; // Assuming no API access
+            $nas->nasapi = 0;
             $nas->type = "other";
             $nas->server = 'radius';
             $nas->community = '';
             $nas->created_by = \Auth::user()->creatorId();
             $nas->save();
-            
-            //Link Nas to Routers Table
-            $nas = Nas::find($nas->id);
-            if ($nas->id) {
-                $router = new Router();
-                $router->nas_id = $nas->id;
-                $router->name = $nas->shortname;
-                $router->ip_address = $staticIp;
-                $router->type ='Radius';
-                $router->secret = $nasSecret;
-                $router->location = 'Dynamic';
-                $router->created_by = Auth::user()->creatorId();
-                $router->save();
-            }
+    
+            // Link NAS to Routers Table
+            $router = new Router();
+            $router->nas_id = $nas->id;
+            $router->name = $nas->shortname;
+            $router->ip_address = $staticIp;
+            $router->type = 'Radius';
+            $router->secret = $nasSecret;
+            $router->location = 'Dynamic';
+            $router->created_by = Auth::user()->creatorId();
+            $router->save();
+    
             // Step 4: Update FreeRADIUS Clients Configuration
-            try {
-                $serverIP = config('radius.server_ip');
-                $serverPort = config('radius.server_port');
-                $serverUser = config('radius.server_user');
-                $serverPass = config('radius.server_pass');
-
-                $ssh = new SSH2($serverIP, $serverPort);
-                if (!$ssh->login($serverUser, $serverPass)) {
-                    \Log::error("SSH login failed for FreeRADIUS server: $serverIP");
-                    return redirect()->route('nas.index')->with('error', __('Unable to connect to FreeRADIUS server via SSH.'));
-                }
-                // if ($ssh->login($serverUser, $serverPass)) {
-                    \Log::info("SSH login successful to FreeRADIUS server: $serverIP");
-
-                    $cmds = [
-                        "echo '$serverPass' | sudo -S service freeradius stop",
-                        // "echo '$serverPass' | sudo -S chmod -R 777 /etc/freeradius",
-                    ];
-                    $cmds = [
-                        "echo '$serverPass' | sudo -S service freeradius stop",
-                        // "echo '$serverPass' | sudo -S chmod -R 777 /etc/freeradius",
-                    ];
-                    foreach ($cmds as $cmd) {
-                        // $ssh->exec($cmd);
-                        $output = $ssh->exec($cmd);
-                        \Log::info("Executed: $cmd \nOutput: $output");
-                    }
-
-                    // Append new NAS entry
-                    $config = "\n\n##############################################\n";
-                    $config .= "client $staticIp {\n";
-                    $config .= "\tipaddr = $staticIp\n\tsecret = $nasSecret\n}\n";
-                    $config .= "##############################################\n";
-
-                    $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$config' >> /etc/freeradius/clients.conf\"");
-
-                    $cmds = [
-                        // "echo '$serverPass' | sudo -S chmod -R 751 /etc/freeradius",
-                        "echo '$serverPass' | sudo -S service freeradius restart",
-                        "history -c && history -w",
-                    ];
-                    foreach ($cmds as $cmd) {
-                        // $ssh->exec($cmd);
-                        $output = $ssh->exec($cmd);
-                        \Log::info("Executed: $cmd \nOutput: $output");
-                    }
-                // } else {
-                //     return redirect()->route('nas.index')->with('error', __('Unable to update FreeRADIUS. Set NAS manually.'));
-                // }
-            } catch (\Exception $e) {
-                return redirect()->route('nas.index')->with('error', __('Error updating FreeRADIUS: ') . $e->getMessage());
+            $serverIP = config('radius.server_ip');
+            $serverPort = config('radius.server_port');
+            $serverUser = config('radius.server_user');
+            $serverPass = config('radius.server_pass');
+    
+            $ssh = new SSH2($serverIP, $serverPort);
+            if (!$ssh->login($serverUser, $serverPass)) {
+                \Log::error("SSH login failed for FreeRADIUS server: $serverIP");
+                return redirect()->route('nas.index')->with('error', __('Unable to connect to FreeRADIUS server via SSH.'));
             }
-
+    
+            \Log::info("SSH login successful to FreeRADIUS server: $serverIP");
+    
+            // Stop FreeRADIUS before making changes
+            $ssh->exec("echo '$serverPass' | sudo -S service freeradius stop");
+    
+            // Step 5: Check if CoA exists before appending
+            $coaExists = $ssh->exec("grep -c 'home_server' /etc/freeradius/3.0/clients.conf");
+            if (intval(trim($coaExists)) == 0) {
+                $coaConfig = "\n\n##############################################\n";
+                $coaConfig .= "home_server ekinpay_" . date('YmdHis') . " {\n";
+                $coaConfig .= "\ttype = coa\n";
+                $coaConfig .= "\tipaddr = $staticIp\n";
+                $coaConfig .= "\tport = 3799\n";
+                $coaConfig .= "\tsecret = $nasSecret\n\n";
+                $coaConfig .= "\tcoa {\n";
+                $coaConfig .= "\t\tirt = 2\n";
+                $coaConfig .= "\t\tmrt = 16\n";
+                $coaConfig .= "\t\tmrc = 5\n";
+                $coaConfig .= "\t\tmrd = 30\n";
+                $coaConfig .= "\t}\n";
+                $coaConfig .= "}\n";
+                $coaConfig .= "##############################################\n";
+    
+                $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$coaConfig' >> /etc/freeradius/3.0/clients.conf\"");
+                \Log::info("CoA Home Server added for IP: $staticIp");
+            }
+    
+            // Step 6: Append new NAS entry
+            $clientConfig = "\n\n##############################################\n";
+            $clientConfig .= "client $staticIp {\n";
+            $clientConfig .= "\tipaddr = $staticIp\n";
+            $clientConfig .= "\tsecret = $nasSecret\n";
+            $clientConfig .= "}\n";
+            $clientConfig .= "##############################################\n";
+    
+            $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$clientConfig' >> /etc/freeradius/3.0/clients.conf\"");
+            \Log::info("Client NAS added for IP: $staticIp");
+    
+            // Step 7: Restart FreeRADIUS and clear history
+            $ssh->exec("echo '$serverPass' | sudo -S chmod -R 751 /etc/freeradius");
+            $ssh->exec("echo '$serverPass' | sudo -S service freeradius restart");
+            $ssh->exec("history -c && history -w");
+    
             return redirect()->route('nas.index')->with('success', __('Site successfully created with VPN and FreeRADIUS.'));
-        }else{
-            return redirect()->back()->with('error', __('Permission denied.'));
+        } catch (\Exception $e) {
+            \Log::error("Error updating FreeRADIUS: " . $e->getMessage());
+            return redirect()->route('nas.index')->with('error', __('Error updating FreeRADIUS: ') . $e->getMessage());
         }
     }
-
+    
     public function show($ids)
     {
         try {
@@ -332,7 +333,7 @@ class NasController extends Controller
     <head>
         <title>Login</title>
         <meta http-equiv="refresh"
-            content="0; url=http://captive.thefuturefirm.net/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
+            content="0; url=http://captive.ekinpay.com/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
         <meta http-equiv="pragma" content="no-cache">
         <meta http-equiv="expires" content="-1">
     </head>
@@ -346,7 +347,7 @@ class NasController extends Controller
     <head>
         <title>Status</title>
         <meta http-equiv="refresh"
-            content="0; url=http://captive.thefuturefirm.net/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
+            content="0; url=http://captive.ekinpay.com/hs/{$nas_ip}/\$(mac)?chapID=\$(chap-id)&chapChallenge=\$(chap-challenge)&loginLink=\$(link-login-only)">
         <meta http-equiv="pragma" content="no-cache">
         <meta http-equiv="expires" content="-1">
     </head>

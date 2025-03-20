@@ -76,12 +76,14 @@ require __DIR__ . '/auth.php';
 
 // Route::get('/captive/{nas_ip?}', [CaptivePortalController::class, 'showLogin']);
 // Route::get('/captive/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
-Route::domain('captive.thefuturefirm.net')->group(function () {
-    Route::get('/hs/{nas_ip?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
+Route::domain('captive.ekinpay.com')->group(function () {
+    Route::get('hs/{nas_ip}/{mac?}', [CaptivePortalController::class, 'showLogin'])->name('captive.showLogin');
+    Route::get('hs/{nas_ip}/Buy-Package', [CaptivePortalController::class, 'cleanLogin'])->name('captive.cleanLogin');
     Route::post('/hs/process-customer', [CaptivePortalController::class, 'processCustomer'])->name('processCustomer');
     Route::post('/hs/query-mpesa', [CaptivePortalController::class, 'processQueryMpesa'])->name('processQueryMpesa');
-    // Mpesa callback route
+    Route::post('/hs/connect', [CaptivePortalController::class, 'connect'])->name('captive.connect');
 });
+
 Route::post('/hs/mpesa-callback', [CaptivePortalController::class, 'mpesaCallback'])->name('mpesaCallback');
 //================================= Invoice Payment Gateways  ====================================//
 

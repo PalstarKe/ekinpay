@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class Nas extends Model
 {
-    protected $connection = 'radius';
+    // protected $connection = 'radius';
 
     protected $table = 'nas';
     use Notifiable;
 
     protected $fillable = [
+        'created_by',
         'nasname',
         'shortname',
         'secret',
@@ -21,7 +22,10 @@ class Nas extends Model
         'server',
         'community',
         'description',
-        'created_by',
+        'api_port',
+        'checkedTime',
+        'status',
+
     ];
 
     protected $casts = [

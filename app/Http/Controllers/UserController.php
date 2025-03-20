@@ -123,7 +123,7 @@ class UserController extends Controller
                 $user->assignRole($role_r);
                 //                $user->userDefaultData();
                 $user->userDefaultDataRegister($user->id);
-                $user->userWarehouseRegister($user->id);
+                // $user->userWarehouseRegister($user->id);
 
                 //default bank account for new company
                 $user->userDefaultBankAccount($user->id);

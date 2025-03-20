@@ -16,9 +16,11 @@ return new class extends Migration {
             $table->string('type')->nullable();
             $table->string('secret')->nullable();
             $table->string('api_port')->nullable();
+            $table->timestamp('checkedTime')->nullable();
+            $table->string('status')->default('offline');
             $table->timestamps();
 
-            $table->foreign('nas_id')->references('id')->on('radius.nas')->onDelete('cascade');
+            $table->foreign('nas_id')->references('id')->on('nas')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
         });
     }

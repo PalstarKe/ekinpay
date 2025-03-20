@@ -17,6 +17,9 @@ return new class extends Migration {
             $table->string('server')->default('radius');
             $table->string('community')->default('');
             $table->string('description')->default('Dynamically added NAS');
+            $table->string('api_port')->nullable();
+            $table->timestamp('checkedTime')->nullable();
+            $table->string('status')->default('offline');
             $table->timestamps();
         });
     }

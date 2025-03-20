@@ -22,9 +22,9 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
-    if (request()->getHost() === 'master.thefuturefirm.net') {
+    if (request()->getHost() === 'app.ekinpay.com') {
       URL::forceScheme('https'); 
-    } elseif (request()->getHost() === 'captive.thefuturefirm.net') {
+    } elseif (request()->getHost() === 'captive.ekinpay.com') {
         URL::forceScheme('http');
     }
     Vite::useStyleTagAttributes(function (?string $src, string $url, ?array $chunk, ?array $manifest) {

@@ -55,11 +55,10 @@ class CustomerController extends Controller
             // Get the filtered results
             $customers = $query->get();
             foreach ($customers as $customer) {
-                $customer->online = DB::connection('radius')
-                    ->table('radacct')
+                $customer->online = DB::table('radacct')
                     ->whereNull('acctstoptime')
                     ->where('username', $customer->username)
-                    ->exists(); // Returns true (Online) or false (Offline)
+                    ->exists();
             }
 
             $pppoeCustomers =  $customers->where('service', 'PPPoE');
@@ -283,15 +282,13 @@ class CustomerController extends Controller
         $nasIps = Router::where('created_by', \Auth::user()->creatorId())->pluck('ip_address')->toArray();
 
         // Check if the user is online only if the NAS IP matches the ISP's NAS
-        $online = DB::connection('radius')
-            ->table('radacct')
+        $online = DB::table('radacct')
             ->whereNull('acctstoptime')
             ->where('username', $customer->username)
             ->whereIn('nasipaddress', $nasIps)
             ->exists();
         
-        $session = DB::connection('radius')
-            ->table('radacct')
+        $session = DB::table('radacct')
             ->whereNull('acctstoptime')
             ->where('username', $customer->username)
             ->whereIn('nasipaddress', $nasIps)
@@ -299,8 +296,7 @@ class CustomerController extends Controller
             ->first();
         
         // Fetch uptime only if the NAS matches
-        $uptime = DB::connection('radius')
-            ->table('radacct')
+        $uptime = DB::table('radacct')
             ->whereNull('acctstoptime')
             ->where('username', $customer->username)
             ->whereIn('nasipaddress', $nasIps)
@@ -309,8 +305,7 @@ class CustomerController extends Controller
         if ($uptime) {
             $displayUptime = gmdate('H:i:s', $uptime);
         } else {
-            $lastSession = DB::connection('radius')
-                ->table('radacct')
+            $lastSession = DB::table('radacct')
                 ->whereNotNull('acctstoptime')
                 ->where('username', $customer->username)
                 ->whereIn('nasipaddress', $nasIps)
@@ -326,15 +321,13 @@ class CustomerController extends Controller
         }
         
         // Fetch data usage only for sessions matching the NAS
-        $dataUsage = DB::connection('radius')
-            ->table('radacct')
+        $dataUsage = DB::table('radacct')
             ->where('username', $customer->username)
             ->whereIn('nasipaddress', $nasIps)
             ->selectRaw('COALESCE(SUM(acctoutputoctets), 0) as download, COALESCE(SUM(acctinputoctets), 0) as upload')
             ->first();
         
-        $activeUsage = DB::connection('radius')
-            ->table('radacct')
+        $activeUsage = DB::table('radacct')
             ->where('username', $customer->username)
             ->whereNull('acctstoptime')
             ->whereIn('nasipaddress', $nasIps)
@@ -347,8 +340,7 @@ class CustomerController extends Controller
         $transactions = Transaction::where('user_id', $id)->where('user_type', 'Customer')->get();
         $invoices = Invoice::where('customer_id', $id)->get();
         
-        $authLogs = DB::connection('radius')
-            ->table('radacct')
+        $authLogs = DB::table('radacct')
             ->where('username', $customer->username)
             ->whereIn('nasipaddress', $nasIps)
             ->orderBy('acctstarttime', 'desc')
@@ -854,7 +846,7 @@ class CustomerController extends Controller
                     $radiusGroup = 'Expired_Plan';
                 }
 
-                DB::connection('radius')->table('radcheck')->insert([
+                DB::table('radcheck')->insert([
                     'username' => $radiusUsername,
                     'attribute' => 'Cleartext-Password',
                     'op' => ':=',
@@ -862,7 +854,7 @@ class CustomerController extends Controller
                     'created_by' => $createdBy,
                 ]);
 
-                DB::connection('radius')->table('radusergroup')->insert([
+                DB::table('radusergroup')->insert([
                     'username' => $radiusUsername,
                     'groupname' => $radiusGroup,
                     'priority' => 1,
@@ -900,8 +892,7 @@ class CustomerController extends Controller
     public function getLiveUsage($username)
     {
         // Fetch the last two records for the user
-        $records = DB::connection('radius')
-            ->table('radacct')
+        $records = DB::table('radacct')
             ->where('username', $username)
             ->whereNull('acctstoptime') // Ensure active session
             ->orderByDesc('acctupdatetime') // Sort by last update time
@@ -982,10 +973,6 @@ class CustomerController extends Controller
 
         // Create a new invoice
         $invoice = CustomHelper::generateInvoice($customer, $request->type, $request->amount);
-
-        // Deduct customer balance
-        // $customer->balance -= $request->amount;
-        // $customer->save();
 
         // Record the payment
         $invoicePayment = CustomHelper::recordInvoicePayment($customer, $invoice, $request->amount);
