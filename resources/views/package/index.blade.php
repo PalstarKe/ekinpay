@@ -187,7 +187,7 @@
 @endsection
 @push('script-page')
     <script>
-        $(document).on('change', '#burst_input', function() {
+        $(document).on('change', '#enable_burst', function() {
             if ($(this).is(':checked')) {
                 $('.burst_div').removeClass('d-none');
                 // $('#trial_days').attr("required", true);
@@ -238,6 +238,16 @@
             burstPriority.addEventListener("input", updateBurstValue);
             burstLimitAt.addEventListener("input", updateBurstValue);
             enableBurstCheckbox.addEventListener("change", toggleBurstInputs);
+        });
+    </script>
+    <script>
+        $(document).on('change', '#enable_fup', function() {
+            if ($(this).is(':checked')) {
+                $('.fup_div').removeClass('d-none');
+
+            } else {
+                $('.fup_div').addClass('d-none');
+            }
         });
     </script>
 @endpush

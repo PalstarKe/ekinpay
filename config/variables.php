@@ -3,7 +3,7 @@
 return [
   "creatorName" => "Codevibe",
   "creatorUrl" => "https://codevibe.mikropulse.com",
-  "templateName" => "TheFuture",
+  "templateName" => "EKINPAY",
   "templateSuffix" => "Mordern ISP Billing System",
   "templateVersion" => "2.0.0",
   "templateFree" => false,

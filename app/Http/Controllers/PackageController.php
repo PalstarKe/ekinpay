@@ -60,11 +60,20 @@ class PackageController extends Controller
                 'K' => __('Kbps'),
                 'M' => __('Mbps'),
             ];
+            $arrfup = [
+                'MB' => __('MB'),
+                'GB' => __('GB'),
+                'TB' => __('TB'),
+            ];
             $arrType = [
                 'PPPoE' => __('PPPoE'),
                 'Hotspot' => __('Hotspot'),
             ];
-            return view('package.create', compact('arrDevices', 'arrValidity', 'arrSpeed', 'arrType'));
+            $arrTax = [
+                'Inclusive' => __('Inclusive'),
+                'Exclusive' => __('Exclusive'),
+            ];
+            return view('package.create', compact('arrDevices', 'arrValidity', 'arrSpeed', 'arrType', 'arrTax', 'arrfup'));
         }
         else
         {
@@ -90,6 +99,8 @@ class PackageController extends Controller
             'rate_up'        => 'required|integer',
             'rate_up_unit'   => 'required',
             'burst'          => 'nullable|integer',
+            'tax_value'      => 'nullable|integer',
+            'tax_type'       => 'nullable|integer',
         ];
         $validator = \Validator::make($request->all(), $rules);
     

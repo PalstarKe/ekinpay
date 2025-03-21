@@ -69,6 +69,10 @@
     },
     "files": [
       "app/Helpers/Helpers.php",
+      "app/Helpers/NetworkHelper.php",
+      "app/Helpers/PackagesHelper.php",
+      "app/Helpers/RadiusHelper.php",
+      "app/Helpers/SmsHelper.php",
       "app/Helpers/CustomHelper.php"
     ]
   },
