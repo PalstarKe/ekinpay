@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('created_by');
             $table->string('name_plan');
-            $table->decimal('price', 10, 2);
+            $table->integer('price');
             $table->string('type');
             $table->string('typebp');
             $table->string('limit_type');
