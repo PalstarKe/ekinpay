@@ -21,6 +21,14 @@ return new class extends Migration {
             $table->integer('validity');
             $table->string('validity_unit');
             $table->integer('shared_users');
+            $table->integer('tax_value');
+            $table->string('tax_type');
+            $table->integer('fup_limit');
+            $table->string('fup_unit');
+            $table->integer('fup_down_speed');
+            $table->string('fup_down_unit');
+            $table->integer('fup_up_speed');
+            $table->string('fup_up_unit');
             // $table->boolean('enabled')->default(true);
             $table->string('device')->nullable();
             $table->json('assigned_to')->nullable();

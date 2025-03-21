@@ -172,12 +172,12 @@ $configData = Helper::appClasses();
                     <div data-i18n="Packages">{{ __('Packages') }}</div>
                 </a>
             </li>
-            <li class="menu-item {{ Request::segment(1) == 'fup' ? 'active' : '' }}">
+            {{--<li class="menu-item {{ Request::segment(1) == 'fup' ? 'active' : '' }}">
                 <a href="{{ route('fup.index') }}" class="menu-link">
                     <i class="menu-icon ti ti-brand-speedtest"></i>
                     <div data-i18n="FUP">{{ __('FUP') }}</div>
                 </a>
-            </li>
+            </li>--}}
             <li class="menu-item {{ Request::segment(1) == 'nas' ? 'active' : '' }}">
                 <a href="{{ route('nas.index') }}" class="menu-link">
                     <i class="menu-icon ti ti-server-2"></i>

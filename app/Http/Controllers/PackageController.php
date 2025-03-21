@@ -100,7 +100,13 @@ class PackageController extends Controller
             'rate_up_unit'   => 'required',
             'burst'          => 'nullable|integer',
             'tax_value'      => 'nullable|integer',
-            'tax_type'       => 'nullable|integer',
+            'tax_type'       => 'nullable',
+            'fup_limit'      => 'nullable|integer',
+            'fup_unit'       => 'nullable',
+            'fup_down_speed' => 'nullable|integer',
+            'fup_down_unit'  => 'nullable',
+            'fup_up_speed'   => 'nullable|integer',
+            'fup_up_unit'    => 'nullable',
         ];
         $validator = \Validator::make($request->all(), $rules);
     
@@ -120,6 +126,14 @@ class PackageController extends Controller
                 'validity_unit' => $request->validity_unit,
                 'shared_users'  => $request->shared_users,
                 'device'        => $request->device,
+                'tax_value'     => $request->tax_value,
+                'tax_type'      => $request->tax_type,
+                'fup_limit'     => $request->fup_limit,
+                'fup_unit'      => $request->fup_unit,
+                'fup_down_speed'=> $request->fup_down_speed,
+                'fup_down_unit' => $request->fup_down_unit,
+                'fup_up_speed'  => $request->fup_up_speed,
+                'fup_up_unit'   => $request->fup_up_unit,
                 'created_by'    => Auth::user()->id,
             ]);
     
