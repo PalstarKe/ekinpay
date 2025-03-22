@@ -51,9 +51,9 @@ class PackageController extends Controller
                 'API' => __('API'),
             ];
             $arrValidity = [
+                'Minutes' => __('Minutes'),
                 'Hours' => __('Hours'),
                 'Days' => __('Days'),
-                'Weeks' => __('Weeks'),
                 'Months' => __('Months'),
             ];
             $arrSpeed = [
@@ -83,61 +83,100 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
-        if (!\Auth::user()->can('create package')) {
+        if (!Auth::user()->can('create package')) {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
-    
+
         $rules = [
             'name_plan'      => ['required',
-                Rule::unique('packages', 'name_plan')->where(fn($query) => $query->where('created_by', \Auth::user()->id))
+                Rule::unique('packages', 'name_plan')->where(fn($query) => $query->where('created_by', Auth::user()->id))
             ],
             'price'          => 'required|numeric',
             'validity'       => 'required|integer',
-            'validity_unit'  => 'required',
+            'validity_unit'  => 'required|string',
             'rate_down'      => 'required|integer',
-            'rate_down_unit' => 'required',
+            'rate_down_unit' => 'required|string',
             'rate_up'        => 'required|integer',
-            'rate_up_unit'   => 'required',
-            'burst'          => 'nullable|integer',
+            'rate_up_unit'   => 'required|string',
             'tax_value'      => 'nullable|integer',
-            'tax_type'       => 'nullable',
-            'fup_limit'      => 'nullable|integer',
-            'fup_unit'       => 'nullable',
-            'fup_down_speed' => 'nullable|integer',
-            'fup_down_unit'  => 'nullable',
-            'fup_up_speed'   => 'nullable|integer',
-            'fup_up_unit'    => 'nullable',
+            'tax_type'       => 'nullable|string',
+            // Additional package fields
+            'device'         => 'required|string',
+            'type'           => 'required|string',
+            'shared_users'   => 'nullable|integer',
+            'data_limit'     => 'nullable|numeric',
+            'data_limit_unit'=> 'nullable|string',
+            // Burst fields (required if enable_burst is "1")
+            'enable_burst'      => 'nullable|in:1',
+            'burst_limit'       => 'required_if:enable_burst,1|numeric',
+            'burst_threshold'   => 'required_if:enable_burst,1|numeric',
+            'burst_time'        => 'required_if:enable_burst,1|numeric',
+            'burst_priority'    => 'required_if:enable_burst,1|integer',
+            'burst_limit_at'    => 'required_if:enable_burst,1|numeric',
+            // FUP fields (required if enable_fup is "1")
+            'enable_fup'        => 'nullable|in:1',
+            'fup_limit'         => 'required_if:enable_fup,1|numeric',
+            'fup_unit'          => 'required_if:enable_fup,1|string',
+            'fup_down_speed'    => 'required_if:enable_fup,1|numeric',
+            'fup_down_unit'     => 'required_if:enable_fup,1|string',
+            'fup_up_speed'      => 'required_if:enable_fup,1|numeric',
+            'fup_up_unit'       => 'required_if:enable_fup,1|string',
         ];
-        $validator = \Validator::make($request->all(), $rules);
-    
+
+        $validator = Validator::make($request->all(), $rules);
+
         if ($validator->fails()) {
             return redirect()->route('packages.index')->with('error', $validator->getMessageBag()->first());
         }
-    
+
+        // Retrieve validated data
+        $validated = $validator->validated();
+
         DB::beginTransaction();
-    
+
         try {
-            // Create Package
-            $package = Package::create([
-                'name_plan'     => $request->name_plan,
-                'price'         => $request->price,
-                'type'          => $request->type,
-                'validity'      => $request->validity,
-                'validity_unit' => $request->validity_unit,
-                'shared_users'  => $request->shared_users,
-                'device'        => $request->device,
-                'tax_value'     => $request->tax_value,
-                'tax_type'      => $request->tax_type,
-                'fup_limit'     => $request->fup_limit,
-                'fup_unit'      => $request->fup_unit,
-                'fup_down_speed'=> $request->fup_down_speed,
-                'fup_down_unit' => $request->fup_down_unit,
-                'fup_up_speed'  => $request->fup_up_speed,
-                'fup_up_unit'   => $request->fup_up_unit,
-                'created_by'    => Auth::user()->id,
-            ]);
-    
-            // Create Bandwidth
+            // Prepare package data without burst and FUP fields first
+            $packageData = [
+                'device'          => $validated['device'],
+                'name_plan'       => $validated['name_plan'],
+                'price'           => $validated['price'],
+                'type'            => $validated['type'],
+                'shared_users'    => $validated['shared_users'] ?? null,
+                'validity'        => $validated['validity'],
+                'validity_unit'   => $validated['validity_unit'],
+                'tax_value'       => $validated['tax_value'] ?? null,
+                'tax_type'        => $validated['tax_type'] ?? null,
+                'data_limit'      => $validated['data_limit'] ?? null,
+                'data_limit_unit' => $validated['data_limit_unit'] ?? null,
+                'created_by'      => Auth::user()->id,
+            ];
+
+            // Include FUP fields if enabled
+            if ($request->input('enable_fup') == 1) {
+                $packageData['fup_limit']       = $validated['fup_limit'];
+                $packageData['fup_unit']        = $validated['fup_unit'];
+                $packageData['fup_down_speed']  = $validated['fup_down_speed'];
+                $packageData['fup_down_unit']   = $validated['fup_down_unit'];
+                $packageData['fup_up_speed']    = $validated['fup_up_speed'];
+                $packageData['fup_up_unit']     = $validated['fup_up_unit'];
+            }
+
+            // Create the package record
+            $package = Package::create($packageData);
+
+            // Prepare burst value: combine burst fields into one space-separated string (if enabled)
+            $burstValue = null;
+            if ($request->input('enable_burst') == 1) {
+                $burstValue = implode(' ', [
+                    $validated['burst_limit'],
+                    $validated['burst_threshold'],
+                    $validated['burst_time'],
+                    $validated['burst_priority'],
+                    $validated['burst_limit_at']
+                ]);
+            }
+
+            // Create Bandwidth record (burst field now stores the combined burst string)
             $bandwidth = Bandwidth::create([
                 'package_id'     => $package->id,
                 'name_plan'      => $package->name_plan,
@@ -145,25 +184,26 @@ class PackageController extends Controller
                 'rate_down_unit' => $request->rate_down_unit,
                 'rate_up'        => $request->rate_up,
                 'rate_up_unit'   => $request->rate_up_unit,
-                'burst'          => $request->burst,
+                'burst'          => $burstValue,
                 'created_by'     => Auth::user()->id,
             ]);
-    
+
             // RADIUS Settings
             $group_name = 'package_' . $package->id;
             $timelimit = match ($package->validity_unit) {
                 'Minutes' => $package->validity * 60,
                 'Hours'   => $package->validity * 3600,
                 'Days'    => $package->validity * 86400,
-                'Months'  => $package->validity * 2592000, 
-                default   => 0
+                'Months'  => $package->validity * 2592000,
+                default   => 0,
             };
-    
+
             $down = $this->convertBandwidth($bandwidth->rate_down, $bandwidth->rate_down_unit);
             $up = $this->convertBandwidth($bandwidth->rate_up, $bandwidth->rate_up_unit);
             $datalimit = $this->convertDataLimit($package->data_limit, $package->data_limit_unit);
             $MikroRate = "{$bandwidth->rate_down}{$bandwidth->rate_down_unit}/{$bandwidth->rate_up}{$bandwidth->rate_up_unit}";
-    
+
+            // Prepare RADIUS check attributes for the package group
             $planCheckData = [
                 ['groupname' => $group_name, 'attribute' => 'Auth-Type', 'op' => ':=', 'value' => 'Accept']
             ];
@@ -176,26 +216,27 @@ class PackageController extends Controller
             if ($package->shared_users) {
                 $planCheckData[] = ['groupname' => $group_name, 'attribute' => 'Simultaneous-Use', 'op' => ':=', 'value' => $package->shared_users];
             }
-    
+
             DB::table('radgroupcheck')->insert($planCheckData);
-    
-            // Expired Plan Handling
+
+            // Insert default Expired Plan into radgroupcheck if not exists
             if (!DB::table('radgroupcheck')->where('groupname', 'Expired_Plan')->exists()) {
                 DB::table('radgroupcheck')->insert([
                     ['groupname' => 'Expired_Plan', 'attribute' => 'Auth-Type', 'op' => ':=', 'value' => 'Accept']
                 ]);
             }
-    
+
+            // Prepare RADIUS reply attributes for the package group
             $planReplyData = [
                 ['groupname' => $group_name, 'attribute' => 'Mikrotik-Rate-Limit', 'op' => ':=', 'value' => $MikroRate],
                 ['groupname' => $group_name, 'attribute' => 'WISPr-Bandwidth-Max-Down', 'op' => ':=', 'value' => $down],
                 ['groupname' => $group_name, 'attribute' => 'WISPr-Bandwidth-Max-Up', 'op' => ':=', 'value' => $up],
                 ['groupname' => $group_name, 'attribute' => 'Acct-Interim-Interval', 'op' => ':=', 'value' => '60']
             ];
-    
+
             DB::table('radgroupreply')->insert($planReplyData);
-    
-            // Expired Plan Reply Handling
+
+            // Insert default Expired Plan Reply into radgroupreply if not exists
             if (!DB::table('radgroupreply')->where('groupname', 'Expired_Plan')->exists()) {
                 DB::table('radgroupreply')->insert([
                     ['groupname' => 'Expired_Plan', 'attribute' => 'Mikrotik-Rate-Limit', 'op' => ':=', 'value' => '2K/2K'],
@@ -205,25 +246,22 @@ class PackageController extends Controller
                     ['groupname' => 'Expired_Plan', 'attribute' => 'Mikrotik-Address-List', 'op' => ':=', 'value' => 'EXPIRED_POOL']
                 ]);
             }
-    
+
             DB::commit();
-    
+
             return redirect()->route('packages.index')->with('success', __('Package & Bandwidth Created Successfully.'));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('packages.index')->with('error', $e->getMessage());
         }
     }
-    
-    /**
-     * Convert bandwidth to bits.
-     */
+
     private function convertBandwidth($rate, $unit)
     {
         $multipliers = ['K' => 1000, 'M' => 1000000, 'G' => 1000000000];
         return isset($multipliers[$unit]) ? ($rate * $multipliers[$unit]) : $rate;
     }
-    
+
     /**
      * Convert data limit to bytes.
      */

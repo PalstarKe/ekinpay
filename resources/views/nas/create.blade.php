@@ -6,6 +6,10 @@
                     {{ Form::label('site_name', __('Site Name'), ['class' => 'form-label']) }}<x-required></x-required>
                     {{ Form::text('site_name', null, ['class' => 'form-control', 'required' => true, 'placeholder' => __('Enter Site Name')]) }}
                 </div>
+                <div class="form-group mt-2">
+                    {{ Form::label('api_port', __('Mikrotik Api Port (If not Default)'), ['class' => 'form-label']) }}
+                    {{ Form::text('api_port', null, ['class' => 'form-control', 'required' => true, 'placeholder' => __('Enter API Port')]) }}
+                </div>
             </div>
         </div>
     </div>

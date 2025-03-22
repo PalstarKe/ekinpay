@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('location')->nullable();
             $table->string('type')->nullable();
             $table->string('secret')->nullable();
-            $table->string('api_port')->nullable();
+            $table->string('api_port')->default('8728');
             $table->timestamp('checkedTime')->nullable();
             $table->string('status')->default('offline');
             $table->timestamps();

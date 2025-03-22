@@ -273,6 +273,9 @@ Route::group(['middleware' => ['verified']], function () {
             Route::post('nas/{id}/assign-package', [NasController::class, 'assignPackage'])->name('nas.assignPackage')->middleware(['auth']);
             Route::get('nas/status', [NasController::class, 'getNasStatus'])->name('nas.status');
             Route::get('nas/download-hotspot/{nas_ip}', [NasController::class, 'downloadHotspotPage'])->name('nas.downloadHotspot');
+            // Route::get('nas/status/{ip}/{port}', [NasController::class, 'checkStatus']);
+            Route::get('/nas/status', [NasController::class, 'checkStatus']);
+
         }
     );
     Route::resource('packages', PackageController::class)->middleware(['auth']);

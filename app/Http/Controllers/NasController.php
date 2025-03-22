@@ -29,10 +29,10 @@ class NasController extends Controller
         {
             // $nases = Nas::where('created_by', \Auth::user()->creatorId())->get();
             $nases = Nas::with('routers.packages.bandwidth')->where('created_by', \Auth::user()->creatorId())->get();
-            foreach ($nases as $nas) {
+            // foreach ($nases as $nas) {
                 
-                $nas->status = $this->isNasOnline($nas->nasname) ? 'Online' : 'Offline';
-            }
+            //     $nas->status = $this->isNasOnline($nas->nasname, $nas->api_port) ? 'Online' : 'Offline';
+            // }
 
             return view('nas.index', compact('nases'));
         }
@@ -41,10 +41,20 @@ class NasController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
-
-    private function isNasOnline($nasIp)
+    public function checkStatus(Request $request)
     {
-        $port = 8728; // Change to your router's service port (e.g., 8291 for MikroTik API)
+        try {
+            $ip = $request->query('ip');
+            $port = $request->query('port');
+            $online = $this->isNasOnline($ip, $port);
+            return response()->json(['status' => $online ? 'Online' : 'Offline']);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'Offline']);
+        }
+    }
+    private function isNasOnline($nasIp, $nasPort)
+    {
+        $port = $nasPort; // Change to your router's service port (e.g., 8291 for MikroTik API)
         $timeout = 5;
 
         if (is_callable('fsockopen') && false === stripos(ini_get('disable_functions'), 'fsockopen')) {
@@ -98,10 +108,11 @@ class NasController extends Controller
             'site_name' => [
                 'required',
                 'string',
-                Rule::unique('radius.nas', 'shortname')->where(function ($query) {
+                Rule::unique('nas', 'shortname')->where(function ($query) {
                     return $query->where('created_by', \Auth::user()->id);
                 })
             ],
+            'api_port' => 'nullable|numeric',
         ];
     
         $validator = \Validator::make($request->all(), $rules);
@@ -116,7 +127,7 @@ class NasController extends Controller
             $vpnCommand = "sudo -u www-data /bin/bash $vpnScriptPath $clientName";
             $vpnOutput = shell_exec($vpnCommand);
     
-            \Log::info("OpenVPN output for {$request->site_name}: " . $vpnOutput);
+            // \Log::info("OpenVPN output for {$request->site_name}: " . $vpnOutput);
     
             preg_match('/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/', $vpnOutput, $matches);
             $staticIp = $matches[0] ?? null;
@@ -133,6 +144,7 @@ class NasController extends Controller
             $nas->nasname = $staticIp;
             $nas->shortname = $request->site_name;
             $nas->secret = $nasSecret;
+            $nas->api_port = $request->api_port;
             $nas->nasapi = 0;
             $nas->type = "other";
             $nas->server = 'radius';
@@ -144,6 +156,7 @@ class NasController extends Controller
             $router = new Router();
             $router->nas_id = $nas->id;
             $router->name = $nas->shortname;
+            $router->api_port = $request->api_port;
             $router->ip_address = $staticIp;
             $router->type = 'Radius';
             $router->secret = $nasSecret;
@@ -159,11 +172,11 @@ class NasController extends Controller
     
             $ssh = new SSH2($serverIP, $serverPort);
             if (!$ssh->login($serverUser, $serverPass)) {
-                \Log::error("SSH login failed for FreeRADIUS server: $serverIP");
+                // \Log::error("SSH login failed for FreeRADIUS server: $serverIP");
                 return redirect()->route('nas.index')->with('error', __('Unable to connect to FreeRADIUS server via SSH.'));
             }
     
-            \Log::info("SSH login successful to FreeRADIUS server: $serverIP");
+            // \Log::info("SSH login successful to FreeRADIUS server: $serverIP");
     
             // Stop FreeRADIUS before making changes
             $ssh->exec("echo '$serverPass' | sudo -S service freeradius stop");
@@ -187,7 +200,7 @@ class NasController extends Controller
                 $coaConfig .= "##############################################\n";
     
                 $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$coaConfig' >> /etc/freeradius/3.0/clients.conf\"");
-                \Log::info("CoA Home Server added for IP: $staticIp");
+                // \Log::info("CoA Home Server added for IP: $staticIp");
             }
     
             // Step 6: Append new NAS entry
@@ -199,7 +212,7 @@ class NasController extends Controller
             $clientConfig .= "##############################################\n";
     
             $ssh->exec("echo '$serverPass' | sudo -S bash -c \"echo '$clientConfig' >> /etc/freeradius/3.0/clients.conf\"");
-            \Log::info("Client NAS added for IP: $staticIp");
+            // \Log::info("Client NAS added for IP: $staticIp");
     
             // Step 7: Restart FreeRADIUS and clear history
             $ssh->exec("echo '$serverPass' | sudo -S chmod -R 751 /etc/freeradius");
@@ -208,7 +221,7 @@ class NasController extends Controller
     
             return redirect()->route('nas.index')->with('success', __('Site successfully created with VPN and FreeRADIUS.'));
         } catch (\Exception $e) {
-            \Log::error("Error updating FreeRADIUS: " . $e->getMessage());
+            // \Log::error("Error updating FreeRADIUS: " . $e->getMessage());
             return redirect()->route('nas.index')->with('error', __('Error updating FreeRADIUS: ') . $e->getMessage());
         }
     }
@@ -221,14 +234,11 @@ class NasController extends Controller
             return redirect()->back()->with('error', __('Site Not Found.'));
         }
         $id = \Crypt::decrypt($ids);
-        // Retrieve NAS with linked routers and their assigned packages
+
         $nas = Nas::with('routers.packages.bandwidth')->findOrFail($id);
 
-        // Check NAS online status
-        $nas->status = $this->isNasOnline($nas->nasname) ? 'Online' : 'Offline';
+        $nas->status = $this->isNasOnline($nas->nasname, $nas->api_port) ? 'Online' : 'Offline';
         $routerIds = $nas->routers->pluck('id')->toArray();
-        // Fetch all available packages (for assignment)
-        // $packages = Package::where('created_by', \Auth::user()->creatorId())->get();;
         $packages = Package::leftJoin('router_packages', function ($join) use ($routerIds) {
             $join->on('packages.id', '=', 'router_packages.package_id')
                  ->whereIn('router_packages.router_id', $routerIds);

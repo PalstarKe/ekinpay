@@ -41,7 +41,7 @@ class CreateCustomersTable extends Migration
             $table->string('location')->nullable();
             $table->string('housenumber')->nullable();
             $table->string('expiry')->nullable();
-            $table->string('expiry_status')->nullable();
+            $table->string('status')->nullable();
             // $table->string('shipping_zip')->nullable();
             // $table->text('shipping_address')->nullable();
             $table->string('lang')->default('en');

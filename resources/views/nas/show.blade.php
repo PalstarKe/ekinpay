@@ -173,7 +173,7 @@
 								<div id="accordionCustomIcon-1" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode('configCode')">
 											Copy
 										</button>
 										<pre highlighter="hljs"  style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCode" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#VPN and Radius Config </span><span>
@@ -208,7 +208,7 @@
 								<div id="accordionCustomIcon-2" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode('configCode7')">
 											Copy
 										</button>
 										<pre highlighter="hljs"  style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCode7" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#VPN and Radius Config </span><span>
@@ -242,7 +242,7 @@
 								<div id="accordionCustomIcon-3" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode('configCodeH')">
 											Copy
 										</button>
 									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeH" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Hotspot settings (Change the Interface "EKINPAY-BRIDGE" and "address-pool" to match that of your router)</span><span>
@@ -288,7 +288,7 @@
 								<div id="accordionCustomIcon-4" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode('configCodeP')">
 											Copy
 										</button>
 									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeP" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#PPPoE Settings (Change the Interface "PPPoE-Server" and "PPPoE-Pool" to match that of your router)</span><span>
@@ -301,20 +301,21 @@
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">8</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">action</span><span>=masquerade </span><span style="color: rgb(14, 154, 0);">chain</span><span>=srcnat </span><span style="color: rgb(14, 154, 0);">src-address-list</span><span>=ALLOWED_USERS
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">9</span><span></span><span style="color: rgb(12, 154, 154);">/ip pool
 </span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">10</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=EXPIRED_POOL </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=90.90.0.2-90.90.255.254
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">11</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=PPPoE-Pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=172.16.0.2-172.16.255.254
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">12</span><span></span><span style="color: rgb(12, 154, 154);">/ppp profile
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">13</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-server</span><span>=8.8.8.8,8.8.4.4 </span><span style="color: rgb(14, 154, 0);">local-address</span><span>=172.16.0.1 </span><span style="color: rgb(14, 154, 0);">name</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">remote-address</span><span>=PPPoE-Pool
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">14</span><span></span><span style="color: rgb(12, 154, 154);">/interface </span><span>pppoe-server</span><span style="color: rgb(12, 154, 154);"> server
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">15</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">authentication</span><span>=pap </span><span style="color: rgb(14, 154, 0);">default-profile</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">disabled</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=EKINPAY-BRIDGE \
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">16</span><span>    </span><span style="color: rgb(14, 154, 0);">max-mru</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">max-mtu</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">mrru</span><span>=1600 </span><span style="color: rgb(14, 154, 0);">one-session-per-host</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span> \
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">17</span><span>    </span><span style="color: rgb(14, 154, 0);">keepalive-timeout</span><span>=60 \
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">18</span><span>    </span><span style="color: rgb(14, 154, 0);">service-name</span><span>=PPPoE-Server
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">19</span><span></span><span style="color: rgb(12, 154, 154);">/ppp aaa
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">20</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">set</span><span> </span><span style="color: rgb(14, 154, 0);">use-radius</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span>
-</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">21</span><span></span><span style="color: rgb(136, 136, 136);">#</span></code></pre>
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">11</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=DISABLED_POOL </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=64.64.0.2-64.64.255.254
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">12</span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">name</span><span>=PPPoE-Pool </span><span style="color: rgb(14, 154, 0);">ranges</span><span>=172.16.0.2-172.16.255.254
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">13</span><span></span><span style="color: rgb(12, 154, 154);">/ppp profile
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">14</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">dns-server</span><span>=8.8.8.8,8.8.4.4 </span><span style="color: rgb(14, 154, 0);">local-address</span><span>=172.16.0.1 </span><span style="color: rgb(14, 154, 0);">name</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">remote-address</span><span>=PPPoE-Pool
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">15</span><span></span><span style="color: rgb(12, 154, 154);">/interface </span><span>pppoe-server</span><span style="color: rgb(12, 154, 154);"> server
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">16</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">add</span><span> </span><span style="color: rgb(14, 154, 0);">authentication</span><span>=pap </span><span style="color: rgb(14, 154, 0);">default-profile</span><span>=ppp </span><span style="color: rgb(14, 154, 0);">disabled</span><span>=</span><span style="color: rgb(120, 169, 96);">no</span><span> </span><span style="color: rgb(14, 154, 0);">interface</span><span>=EKINPAY-BRIDGE \
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">17</span><span>    </span><span style="color: rgb(14, 154, 0);">max-mru</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">max-mtu</span><span>=1492 </span><span style="color: rgb(14, 154, 0);">mrru</span><span>=1600 </span><span style="color: rgb(14, 154, 0);">one-session-per-host</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span> \
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">18</span><span>    </span><span style="color: rgb(14, 154, 0);">keepalive-timeout</span><span>=60 \
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">19</span><span>    </span><span style="color: rgb(14, 154, 0);">service-name</span><span>=PPPoE-Server
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">20</span><span></span><span style="color: rgb(12, 154, 154);">/ppp aaa
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">21</span><span style="color: rgb(12, 154, 154);"></span><span> </span><span style="color: rgb(153, 6, 154);">set</span><span> </span><span style="color: rgb(14, 154, 0);">use-radius</span><span>=</span><span style="color: rgb(120, 169, 96);">yes</span><span>
+</span><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 2.25em; padding-right: 1em; text-align: right; user-select: none;">22</span><span></span><span style="color: rgb(136, 136, 136);">#</span></code></pre>
 									</div>
 								</div>
-				</div>
+							</div>
 							</div>
 							<div class="accordion-item previous-active">
 								<h2 class="accordion-header text-body d-flex justify-content-between" id="accordionCustomIconTwo">
@@ -326,7 +327,7 @@
 								<div id="accordionCustomIcon-5" class="accordion-collapse collapse" data-bs-parent="#accordionCustomIcon">
 									<div class="accordion-body">
 									<div class="position-relative">
-										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode()">
+										<button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode('configCodeE')">
 											Copy
 										</button>
 									<pre highlighter="hljs" style="display: block; overflow-x: auto; padding: 0.5em; background: rgb(240, 240, 240); color: rgb(68, 68, 68);"><code id="configCodeE" class="language-routeros" style="white-space: pre;"><span class="comment linenumber react-syntax-highlighter-line-number" style="display: inline-block; min-width: 3.25em; padding-right: 1em; text-align: right; user-select: none;">1</span><span style="color: rgb(136, 136, 136);">#Mikrotik Non-payment page (Dont change anything here)</span><span>
@@ -375,92 +376,20 @@
 </div>
 @endsection
 <script>
-function copyCode() {
-    var codeElement = document.getElementById("configCode7");
-    var clonedCode = codeElement.cloneNode(true); // Clone the code block
+function copyCode(codeId) {
+    var codeElement = document.getElementById(codeId);
+    if (!codeElement) return alert("Code block not found!");
 
-    // Remove line number spans
+    var clonedCode = codeElement.cloneNode(true);
+
+    // Remove line numbers if present
     var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
     lineNumbers.forEach(span => span.remove());
 
-    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
+    // Get the text content
+    var textToCopy = clonedCode.innerText.trim();
 
-    var tempTextArea = document.createElement("textarea");
-    tempTextArea.value = textToCopy;
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempTextArea);
-
-    alert("Code copied successfully!");
-}
-function copyCode() {
-    var codeElement = document.getElementById("configCode");
-    var clonedCode = codeElement.cloneNode(true); // Clone the code block
-
-    // Remove line number spans
-    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
-    lineNumbers.forEach(span => span.remove());
-
-    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
-
-    var tempTextArea = document.createElement("textarea");
-    tempTextArea.value = textToCopy;
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempTextArea);
-
-    alert("Code copied successfully!");
-}
-function copyCode() {
-    var codeElement = document.getElementById("configCodeH");
-    var clonedCode = codeElement.cloneNode(true); // Clone the code block
-
-    // Remove line number spans
-    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
-    lineNumbers.forEach(span => span.remove());
-
-    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
-
-    var tempTextArea = document.createElement("textarea");
-    tempTextArea.value = textToCopy;
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempTextArea);
-
-    alert("Code copied successfully!");
-}
-function copyCode() {
-    var codeElement = document.getElementById("configCodeP");
-    var clonedCode = codeElement.cloneNode(true); // Clone the code block
-
-    // Remove line number spans
-    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
-    lineNumbers.forEach(span => span.remove());
-
-    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
-
-    var tempTextArea = document.createElement("textarea");
-    tempTextArea.value = textToCopy;
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempTextArea);
-
-    alert("Code copied successfully!");
-}
-function copyCode() {
-    var codeElement = document.getElementById("configCodeE");
-    var clonedCode = codeElement.cloneNode(true); // Clone the code block
-
-    // Remove line number spans
-    var lineNumbers = clonedCode.querySelectorAll(".comment.linenumber");
-    lineNumbers.forEach(span => span.remove());
-
-    var textToCopy = clonedCode.innerText.trim(); // Get clean text content
-
+    // Create temporary textarea to copy from
     var tempTextArea = document.createElement("textarea");
     tempTextArea.value = textToCopy;
     document.body.appendChild(tempTextArea);

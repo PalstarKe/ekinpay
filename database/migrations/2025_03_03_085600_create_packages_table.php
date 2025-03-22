@@ -29,6 +29,7 @@ return new class extends Migration {
             $table->string('fup_down_unit');
             $table->integer('fup_up_speed');
             $table->string('fup_up_unit');
+            $table->string('fup_limit_status');
             $table->string('device')->nullable();
             $table->json('assigned_to')->nullable();
             $table->timestamps();

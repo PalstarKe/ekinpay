@@ -39,18 +39,54 @@
                                         <td>{{ $nas['secret']}}</td>
                                         <td>
                                             @if ($nas['nasapi'] == 1)
-                                                <span >{{ __('API') }}</span>
+                                                <span >{{ __('Radius') }}</span>
                                             @else
                                                 <span >{{ __('Radius') }}</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        {{--<td>
                                             @if($nas->status == 'Online')
                                                 <span class="badge bg-label-success">Online</span>
                                             @else
                                                 <span class="badge bg-label-warning">Offline</span>
                                             @endif
+                                        </td>--}}
+                                        <td id="nas-status-{{ $nas->id }}">
+                                            <span class="badge bg-label-secondary">Checking...</span>
                                         </td>
+
+                                        <script>
+                                            function updateNasStatus_{{ $nas->id }}() {
+                                                fetch(`/nas/status?ip={{ $nas->nasname }}&port={{ $nas->api_port }}`)
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        const td = document.getElementById('nas-status-{{ $nas->id }}');
+                                                        td.innerHTML = '';
+
+                                                        const badge = document.createElement('span');
+                                                        if (data.status === 'Online') {
+                                                            badge.className = 'badge bg-label-success';
+                                                            badge.textContent = 'Online';
+                                                        } else {
+                                                            badge.className = 'badge bg-label-warning';
+                                                            badge.textContent = 'Offline';
+                                                        }
+                                                        td.appendChild(badge);
+                                                    })
+                                                    .catch(() => {
+                                                        const td = document.getElementById('nas-status-{{ $nas->id }}');
+                                                        td.innerHTML = '';
+                                                        const badge = document.createElement('span');
+                                                        badge.className = 'badge bg-label-warning';
+                                                        badge.textContent = 'Offline';
+                                                        td.appendChild(badge);
+                                                    });
+                                            }
+
+                                            updateNasStatus_{{ $nas->id }}();
+                                            setInterval(updateNasStatus_{{ $nas->id }}, 30000);
+                                        </script>
+
                                         @if (Gate::check('edit nas') || Gate::check('delete nas') || Gate::check('show nas'))
                                             <td class="Action">
                                                 <span>
@@ -89,14 +125,12 @@
 @endsection
 @push('script-page')
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("td[id^='nas-status-']").forEach((td) => {
-        setTimeout(() => {
-            td.classList.add("animate-pulse"); // Add animation effect
-        }, 1000);
-    });
-});
-
-
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("td[id^='nas-status-']").forEach((td) => {
+                setTimeout(() => {
+                    td.classList.add("animate-pulse"); // Add animation effect
+                }, 1000);
+            });
+        });
     </script>
 @endpush

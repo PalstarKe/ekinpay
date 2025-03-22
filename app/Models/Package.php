@@ -31,6 +31,7 @@ class Package extends Model
         'fup_down_unit',
         'fup_up_speed',
         'fup_up_unit',
+        'fup_limit_status',
         // 'is_radius', 
         // 'enabled', 
         'device', 
